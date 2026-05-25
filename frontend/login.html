@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng nhập Admin | ADC Careers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body class="login-page">
+  <main class="login-shell">
+    <section class="login-card">
+      <img src="assets/images/sitelogo.png" alt="Asia Dragon Capital" />
+      <div>
+        <span class="eyebrow">ADC Careers Admin</span>
+        <h1>Đăng nhập quản trị</h1>
+        <p>Vui lòng đăng nhập để quản lý vị trí tuyển dụng và hồ sơ ứng viên.</p>
+      </div>
+      <form id="loginForm" class="login-form">
+        <label>
+          <span>Tài khoản</span>
+          <input id="username" name="username" type="text" autocomplete="username" required />
+        </label>
+        <label>
+          <span>Mật khẩu</span>
+          <input id="password" name="password" type="password" autocomplete="current-password" required />
+        </label>
+        <div id="loginMessage" class="form-message" role="status"></div>
+        <button class="btn btn-primary" type="submit">Đăng nhập</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/login.js"></script>
+</body>
+</html>

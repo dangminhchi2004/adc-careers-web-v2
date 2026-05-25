@@ -1,0 +1,3 @@
+npm.cmd start
+node backend/seed.js
+npm.cmd run seed

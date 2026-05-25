@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ADC Careers – Cùng ADC Kiến tạo Tương lai</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --navy:#0b1a2e;--navy-l:#112240;--gold:#FFD700;--gold-l:#FFE44D;
+    --red:#E8363A;--orange:#F57C22;--yellow:#FFB900;--green:#4CAF50;--blue:#2196F3;--indigo:#5C6BC0;--purple:#9C27B0;
+  }
+  body{background:#faf8f4;font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif}
+  a{text-decoration:none}
+ 
+  /* Rainbow bar */
+  .rainbow-bar{height:5px;background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow),var(--green),var(--blue),var(--indigo),var(--purple))}
+ 
+  /* Nav */
+  nav{background:var(--navy);padding:14px 40px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50}
+  .logo{display:flex;align-items:center;gap:12px}
+  .logo-box{width:38px;height:38px;border:2px solid var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:var(--gold)}
+  .logo-text .brand{font-size:13px;font-weight:800;color:#fff;letter-spacing:3px}
+  .logo-text .sub{font-size:8px;color:var(--gold);letter-spacing:5px}
+  .nav-links{display:flex;gap:6px}
+  .nav-links a{color:#fff;font-size:11px;font-weight:600;padding:6px 16px;border-radius:20px;transition:all .2s}
+  .nav-links a:hover{background:rgba(255,255,255,.1);color:var(--gold)}
+ 
+  /* Hero */
+  .hero{background:linear-gradient(135deg,var(--navy),#0e2845,var(--navy));padding:75px 40px 60px;text-align:center;position:relative;overflow:hidden}
+  .hero-orb{position:absolute;width:200px;height:200px;border-radius:50%;pointer-events:none}
+  .hero-inner{position:relative;z-index:2;max-width:700px;margin:0 auto}
+  .hero-eyebrow{font-size:11px;color:var(--gold);letter-spacing:6px;font-weight:600;margin-bottom:18px}
+  .hero-title{font-size:48px;font-weight:900;color:#fff;line-height:1.1;margin-bottom:12px}
+  .hero-title span{color:var(--gold)}
+  .hero-desc{font-size:15px;color:rgba(255,255,255,.6);font-weight:300;line-height:1.6;max-width:520px;margin:0 auto 28px}
+  .stats{display:flex;justify-content:center;gap:40px;margin-bottom:32px}
+  .stat-num{font-size:30px;font-weight:900;color:var(--gold)}
+  .stat-label{font-size:9px;color:rgba(255,255,255,.5);letter-spacing:2px;margin-top:4px}
+  .stat-bar{width:30px;height:3px;margin:6px auto 0;border-radius:2px}
+  .btn-gold{display:inline-block;background:linear-gradient(135deg,var(--gold),var(--gold-l));color:var(--navy);padding:14px 36px;font-size:13px;font-weight:700;letter-spacing:2px;border-radius:6px;text-transform:uppercase}
+  .core-value{margin-top:45px}
+  .core-label{font-size:8px;color:rgba(255,255,255,.3);letter-spacing:4px;margin-bottom:10px}
+  .core-words{display:flex;justify-content:center;gap:24px}
+  .core-words span{font-size:24px;font-weight:700;letter-spacing:5px}
+ 
+  /* EVP */
+  .section-center{text-align:center;margin-bottom:36px}
+  .section-eyebrow-rainbow{font-size:10px;letter-spacing:5px;font-weight:600;margin-bottom:8px;background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow),var(--green),var(--blue),var(--indigo),var(--purple));-webkit-text-fill-color:transparent}
+  .section-title{font-size:32px;font-weight:800;color:var(--navy)}-webkit-background-clip
+  .section-title-white{font-size:32px;font-weight:800;color:#fff}
+  .section-line{width:60px;height:4px;margin:8px auto 0;border-radius:2px}
+  .evp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+  .evp-card{background:#fff;border-radius:12px;padding:24px;border-top:4px solid;transition:transform .2s,box-shadow .2s;cursor:default}
+  .evp-card:hover{transform:translateY(-4px)}
+  .evp-icon{font-size:32px;margin-bottom:10px}
+  .evp-card h3{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:5px}
+  .evp-card p{font-size:12px;color:#6b6560;line-height:1.6;font-weight:300}
+ 
+  /* Positions */
+  .positions-section{background:var(--navy);padding:60px 40px}
+  .positions-inner{max-width:1000px;margin:0 auto}
+  .filter-bar{display:flex;justify-content:center;gap:8px;margin-bottom:28px;flex-wrap:wrap}
+  .filter-btn{padding:7px 18px;font-size:10px;font-weight:600;border-radius:20px;cursor:pointer;transition:all .2s;background:transparent;border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5)}
+  .filter-btn.active{border-color:var(--active-color,var(--gold));background:rgba(255,215,0,.13);color:var(--active-color,var(--gold))}
+  .job-list{display:flex;flex-direction:column;gap:10px}
+  .job-card{background:var(--navy-l);border-radius:10px;border-left:4px solid;overflow:hidden}
+  .job-header{padding:16px 22px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+  .job-meta{display:flex;align-items:center;gap:14px}
+  .urgent-badge{background:rgba(232,54,58,.2);color:var(--red);padding:3px 10px;font-size:9px;font-weight:700;border-radius:3px}
+  .job-title{font-size:15px;font-weight:700;color:#fff}
+  .job-vn{font-size:11px;font-style:italic;margin-top:2px}
+  .job-right{display:flex;align-items:center;gap:12px}
+  .job-dept-badge{font-size:10px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.05);padding:4px 12px;border-radius:20px}
+  .job-arrow{font-size:16px;transition:transform .3s;display:inline-block}
+  .job-body{padding:0 22px 18px;border-top:1px solid rgba(255,255,255,.05)}
+  .job-body.hidden{display:none}
+  .job-body-inner{padding:14px 0;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .reqs-label{font-size:9px;letter-spacing:2px;font-weight:700;margin-bottom:8px}
+  .req-item{font-size:12px;color:rgba(255,255,255,.7);padding:4px 0 4px 14px;position:relative;font-weight:300;line-height:1.6}
+  .req-item::before{content:'▸';position:absolute;left:0;font-size:10px}
+  .info-label{font-size:9px;letter-spacing:2px;font-weight:700;margin-bottom:8px}
+  .info-list{font-size:12px;color:rgba(255,255,255,.6);line-height:2.2}
+  .apply-btn{display:inline-block;color:#fff;padding:10px 26px;font-size:11px;font-weight:700;letter-spacing:2px;border-radius:5px}
+ 
+  /* Culture */
+  .culture-section{padding:60px 40px;max-width:1000px;margin:0 auto}
+  .section-eyebrow-green{font-size:10px;letter-spacing:5px;font-weight:600;margin-bottom:8px;background:linear-gradient(90deg,var(--green),var(--blue));-webkit-text-fill-color:transparent}
+  .culture-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .culture-card{border-radius:14px;padding:28px;min-height:150px}
+  .culture-card h3{font-size:18px;font-weight:700;color:#fff;margin-bottom:8px}
+  .culture-card p{font-size:13px;color:rgba(255,255,255,.8);line-height:1.7;font-weight:300}
+ 
+  /* Process */
+  .process-section{background:#f0ece4;padding:50px 40px}
+  .process-inner{max-width:1000px;margin:0 auto}
+  .process-eyebrow{font-size:10px;color:var(--gold);letter-spacing:5px;font-weight:600;margin-bottom:8px}
+  .steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .step-card{text-align:center;padding:20px;background:#fff;border-radius:12px;border-bottom:4px solid}
+  .step-num{font-size:38px;font-weight:900;opacity:.13}
+  .step-title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:5px}
+  .step-desc{font-size:11px;color:#6b6560;font-weight:300}
+ 
+  /* CTA */
+  .cta-section{background:linear-gradient(135deg,var(--gold),var(--gold-l));padding:50px 40px;text-align:center}
+  .cta-section h2{font-size:28px;font-weight:800;color:var(--navy);margin-bottom:6px}
+  .cta-section p{font-size:14px;color:var(--navy);opacity:.7;margin-bottom:22px}
+  .cta-links{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;align-items:center}
+  .cta-email{background:var(--navy);color:var(--gold);padding:12px 28px;font-size:13px;font-weight:700;border-radius:6px}
+  .cta-info{font-size:13px;color:var(--navy);font-weight:600}
+ 
+  /* Footer */
+  footer{background:var(--navy);padding:28px 40px;text-align:center}
+  .footer-badges{display:flex;justify-content:center;gap:14px;margin-bottom:12px}
+  .footer-badge{padding:4px 12px;border:1px solid rgba(255,215,0,.3);border-radius:3px;font-size:9px;color:var(--gold)}
+  .footer-copy{font-size:11px;color:rgba(255,255,255,.3);margin-bottom:4px}
+  .footer-motto{font-size:10px;background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow),var(--green),var(--blue),var(--indigo),var(--purple));-webkit-text-fill-color:transparent;font-weight:600;letter-spacing:2px}
+  .footer-bar{height:4px;background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow),var(--green),var(--blue),var(--indigo),var(--purple));margin-top:20px;border-radius:2px}
+ 
+  @media(max-width:700px){
+    .evp-grid,.culture-grid,.steps-grid{grid-template-columns:1fr}
+    .steps-grid{grid-template-columns:1fr 1fr}
+    .hero-title{font-size:32px}
+    .stats{gap:20px}
+    nav{padding:12px 16px}
+    .nav-links a{padding:5px 10px;font-size:10px}
+    .hero,.positions-section,.evp-section,.process-section,.cta-section{padding-left:16px;padding-right:16px}
+    .job-body-inner{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+ 
+<div class="rainbow-bar"></div>
+ 
+<!-- Nav -->
+<nav>
+<div class="logo">
+<div class="logo-box">A</div>
+<div class="logo-text">
+<div class="brand">ASIA DRAGON</div>
+<div class="sub">CAPITAL</div>
+</div>
+</div>
+<div class="nav-links">
+<a href="#ve-adc">Về ADC</a>
+<a href="#co-hoi">Cơ hội</a>
+<a href="#doi-song">Đời sống</a>
+<a href="#lien-he">Liên hệ</a>
+</div>
+</nav>
+ 
+<!-- Hero -->
+<section class="hero">
+<div class="hero-orb" style="background:radial-gradient(circle,rgba(232,54,58,.08),transparent 70%);top:10%;left:5%"></div>
+<div class="hero-orb" style="background:radial-gradient(circle,rgba(245,124,34,.08),transparent 70%);top:22%;left:19%"></div>
+<div class="hero-orb" style="background:radial-gradient(circle,rgba(255,185,0,.08),transparent 70%);top:34%;left:33%"></div>
+<div class="hero-orb" style="background:radial-gradient(circle,rgba(76,175,80,.08),transparent 70%);top:46%;left:47%"></div>
+<div class="hero-orb" style="background:radial-gradient(circle,rgba(33,150,243,.08),transparent 70%);top:58%;left:61%"></div>
+<div class="hero-orb" style="background:radial-gradient(circle,rgba(92,107,192,.08),transparent 70%);top:10%;left:75%"></div>
+<div class="hero-inner">
+<div class="hero-eyebrow">GIA NHẬP ĐỘI NGŨ</div>
+<h1 class="hero-title">Cùng ADC<br/><span>Kiến tạo Tương lai</span></h1>
+<p class="hero-desc">Nhà sản xuất dây sợi &amp; dây thừng hàng đầu châu Á. Top 5 tại Mỹ &amp; Úc. 20+ quốc gia xuất khẩu. Máy móc công nghệ hàng đầu từ châu Âu.</p>
+<div class="stats">
+<div><div class="stat-num">4</div><div class="stat-label">Nhà máy</div><div class="stat-bar" style="background:var(--red)"></div></div>
+<div><div class="stat-num">500+</div><div class="stat-label">Nhân sự</div><div class="stat-bar" style="background:var(--green)"></div></div>
+<div><div class="stat-num">20+</div><div class="stat-label">Quốc gia</div><div class="stat-bar" style="background:var(--blue)"></div></div>
+<div><div class="stat-num">Top 5</div><div class="stat-label">Mỹ &amp; Úc</div><div class="stat-bar" style="background:var(--purple)"></div></div>
+</div>
+<a href="#co-hoi" class="btn-gold">Xem vị trí đang tuyển →</a>
+<div class="core-value">
+<div class="core-label">CORE VALUE</div>
+<div class="core-words">
+<span style="color:var(--gold)">ĐẸP</span>
+<span style="color:var(--blue)">MẠNH</span>
+<span style="color:var(--green)">GIÀU</span>
+</div>
+</div>
+</div>
+</section>
+ 
+<!-- EVP -->
+<section id="ve-adc" style="padding:60px 40px;max-width:1000px;margin:0 auto">
+<div class="section-center">
+<div class="section-eyebrow-rainbow">EMPLOYEE VALUE PROPOSITION</div>
+<h2 class="section-title">Tại sao chọn ADC?</h2>
+<div class="section-line" style="background:linear-gradient(90deg,var(--red),var(--purple))"></div>
+</div>
+<div class="evp-grid">
+<div class="evp-card" style="border-top-color:var(--red)">
+<div class="evp-icon">🏭</div>
+<h3>Nhà máy đẹp &amp; hiện đại nhất VN</h3>
+<p>4 nhà máy tại KCN Tân Tạo với máy móc công nghệ hàng đầu từ Đức, Áo, Ý, Đan Mạch, Hàn Quốc, Đài Loan</p>
+</div>
+<div class="evp-card" style="border-top-color:var(--orange)">
+<div class="evp-icon">🌏</div>
+<h3>Top 5 tại Mỹ &amp; Úc</h3>
+<p>Sản phẩm xuất khẩu đến 20+ quốc gia. Bạn sẽ làm việc với đối tác toàn cầu</p>
+</div>
+<div class="evp-card" style="border-top-color:var(--yellow)">
+<div class="evp-icon">✈️</div>
+<h3>Đào tạo quốc tế</h3>
+<p>Cơ hội được đào tạo trực tiếp tại nhà cung cấp máy móc châu Âu</p>
+</div>
+<div class="evp-card" style="border-top-color:var(--green)">
+<div class="evp-icon">📈</div>
+<h3>Chuyển đổi số mạnh mẽ</h3>
+<p>SAP HANA, Salesforce CRM, Office 365, Power BI, Automation — công nghệ hiện đại</p>
+</div>
+<div class="evp-card" style="border-top-color:var(--blue)">
+<div class="evp-icon">💰</div>
+<h3>Đãi ngộ cạnh tranh</h3>
+<p>Lương top thị trường, KPI bonus, bảo hiểm premium, cơm trưa miễn phí, xe đưa đón</p>
+</div>
+<div class="evp-card" style="border-top-color:var(--purple)">
+<div class="evp-icon">⚡</div>
+<h3>Năng động, trẻ trung, hiện đại</h3>
+<p>Friendly Working Environment — nơi bạn được tôn trọng, phát triển và cống hiến</p>
+</div>
+</div>
+</section>
+ 
+<!-- Positions -->
+<section id="co-hoi" class="positions-section">
+<div class="positions-inner">
+<div class="section-center">
+<div style="font-size:10px;color:var(--gold);letter-spacing:5px;font-weight:600;margin-bottom:8px">OPEN POSITIONS</div>
+<h2 class="section-title-white">Vị trí đang tuyển</h2>
+<div class="section-line" style="background:linear-gradient(90deg,var(--gold),var(--orange))"></div>
+</div>
+<div class="filter-bar" id="filterBar"></div>
+<div class="job-list" id="jobList"></div>
+</div>
+</section>
+ 
+<!-- Culture -->
+<section id="doi-song" class="culture-section">
+<div class="section-center">
+<div class="section-eyebrow-green">LIFE AT ADC</div>
+<h2 class="section-title">Đời sống tại ADC</h2>
+<div class="section-line" style="background:linear-gradient(90deg,var(--green),var(--blue))"></div>
+</div>
+<div class="culture-grid">
+<div class="culture-card" style="background:var(--red)">
+<h3>Nhà máy hiện đại nhất Việt Nam</h3>
+<p>4 nhà máy với máy móc công nghệ hàng đầu trong ngành từ Đức, Áo, Ý, Đan Mạch, Hàn Quốc, Đài Loan. Tiêu chuẩn ISO 9001:2015, ANSI S315.4.</p>
+</div>
+<div class="culture-card" style="background:var(--blue)">
+<h3>Môi trường làm việc</h3>
+<p>Năng động, trẻ trung, hiện đại. Friendly Working Environment — nơi mọi người được tôn trọng, lắng nghe và phát triển.</p>
+</div>
+<div class="culture-card" style="background:var(--green)">
+<h3>Hệ thống quản trị tiên tiến</h3>
+<p>SAP HANA, Salesforce CRM, Office 365, chuẩn bị Power BI &amp; Automation. Bạn sẽ làm việc với công nghệ, không phải giấy tờ.</p>
+</div>
+<div class="culture-card" style="background:var(--purple)">
+<h3>Core Value: Đẹp · Mạnh · Giàu</h3>
+<p>Đẹp từ con người đến sản phẩm. Mạnh từ sự đoàn kết. Giàu về nhân văn, tài chính cho toàn bộ nhân viên và đối tác.</p>
+</div>
+</div>
+</section>
+ 
+<!-- Process -->
+<section class="process-section">
+<div class="process-inner">
+<div class="section-center">
+<div class="process-eyebrow">HOW TO APPLY</div>
+<h2 class="section-title">Quy trình ứng tuyển</h2>
+</div>
+<div class="steps-grid">
+<div class="step-card" style="border-bottom-color:var(--red)">
+<div class="step-num" style="color:var(--red)">01</div>
+<div class="step-title">Gửi CV</div>
+<div class="step-desc">Email CV tiếng Anh + mức lương kỳ vọng</div>
+</div>
+<div class="step-card" style="border-bottom-color:var(--green)">
+<div class="step-num" style="color:var(--green)">02</div>
+<div class="step-title">Sàng lọc</div>
+<div class="step-desc">P&amp;O review hồ sơ trong 3-5 ngày</div>
+</div>
+<div class="step-card" style="border-bottom-color:var(--blue)">
+<div class="step-num" style="color:var(--blue)">03</div>
+<div class="step-title">Phỏng vấn</div>
+<div class="step-desc">2-3 vòng: HR → Hiring Manager → CEO</div>
+</div>
+<div class="step-card" style="border-bottom-color:var(--purple)">
+<div class="step-num" style="color:var(--purple)">04</div>
+<div class="step-title">Offer</div>
+<div class="step-desc">Nhận offer &amp; bắt đầu hành trình mới</div>
+</div>
+</div>
+</div>
+</section>
+ 
+<!-- CTA -->
+<section id="lien-he" class="cta-section">
+<h2>Sẵn sàng cho thử thách mới?</h2>
+<p>Gửi CV tiếng Anh + mức lương kỳ vọng</p>
+<div class="cta-links">
+<a href="mailto:hr@asiadragoncordage.com" class="cta-email">📧 hr@asiadragoncordage.com</a>
+<span class="cta-info">📞 0908 022 098</span>
+<span class="cta-info">📍 KCN Tân Tạo, Bình Tân, TP.HCM</span>
+</div>
+</section>
+ 
+<!-- Footer -->
+<footer>
+<div class="footer-badges">
+<span class="footer-badge">ISO 9001:2015</span>
+<span class="footer-badge">ANSI S315.4</span>
+<span class="footer-badge">SAP HANA</span>
+</div>
+<div class="footer-copy">© 2026 Asia Dragon Capital (ADC) | Leading Manufacturer Since 2006</div>
+<div class="footer-motto">Beauty · Strength · Wealth</div>
+<div class="footer-bar"></div>
+</footer>
+ 
+<script>
+const COLORS = { red:"#E8363A", orange:"#F57C22", yellow:"#FFB900", green:"#4CAF50", blue:"#2196F3", indigo:"#5C6BC0", purple:"#9C27B0" };
+const rainbow = [COLORS.red,COLORS.orange,COLORS.yellow,COLORS.green,COLORS.blue,COLORS.indigo,COLORS.purple];
+ 
+const positions = [
+  { id:1, title:"Head of Production", vn:"Giám đốc Sản xuất", dept:"Khối Vận hành", level:"Senior Leadership", report:"P.TGĐ Vận hành", urgent:true, color:COLORS.red, reqs:["10+ năm quản lý sản xuất quy mô lớn (>300 CN)","Kinh nghiệm quản lý đa nhà máy (multi-site)","Ngành nhựa / polymer / extrusion là lợi thế lớn","Thành thạo SAP, Lean, 5S, Kaizen","Tiếng Anh giao tiếp tốt"] },
+  { id:2, title:"Head of P&O", vn:"Giám đốc Nhân sự & Tổ chức", dept:"People & Organization", level:"Senior Leadership", report:"CEO", urgent:true, color:COLORS.orange, reqs:["7+ năm kinh nghiệm HR management, ưu tiên ngành sản xuất","Kinh nghiệm xây dựng hệ thống HR từ đầu","Hiểu biết về Employer Branding, OD, C&B, L&D","Tiếng Anh tốt (IELTS 6.5+)"] },
+  { id:3, title:"International Sales Manager", vn:"Trưởng phòng KD Quốc tế", dept:"Kinh doanh", level:"Management", report:"CEO", urgent:true, color:COLORS.yellow, reqs:["7+ năm B2B sales trong sản xuất/xuất khẩu","Có network khách hàng tại Mỹ, Úc, EU","Tiếng Anh thành thạo (IELTS 7.0+)","Kinh nghiệm Salesforce CRM"] },
+  { id:4, title:"Head of Production Planning", vn:"Trưởng phòng Kế hoạch SX", dept:"Khối Vận hành", level:"Management", report:"P.TGĐ Vận hành", urgent:false, color:COLORS.green, reqs:["7+ năm kinh nghiệm planning trong sản xuất","Thành thạo SAP PP/MM module, MRP, S&OP","Kinh nghiệm Power BI là lợi thế lớn"] },
+  { id:5, title:"Automation Engineer", vn:"Kỹ sư Tự động hóa", dept:"Kỹ thuật", level:"Specialist", report:"Head of Production", urgent:false, color:COLORS.blue, reqs:["3+ năm kinh nghiệm PLC, SCADA, HMI","Kinh nghiệm máy châu Âu là lợi thế","Cơ hội đào tạo tại nhà cung cấp châu Âu"] },
+  { id:6, title:"Senior Sales Executive", vn:"Chuyên viên KD Cấp cao", dept:"Kinh doanh", level:"Senior", report:"Sales Manager", urgent:false, color:COLORS.purple, reqs:["3-5 năm sales B2B (export/manufacturing)","Tiếng Anh tốt (IELTS 6.5+)","Kinh nghiệm làm việc với khách hàng quốc tế"] },
+];
+ 
+const depts = ["all", ...new Set(positions.map(p => p.dept))];
+let selectedDept = "all";
+let expandedJob = null;
+ 
+function renderFilters() {
+  const bar = document.getElementById("filterBar");
+  bar.innerHTML = depts.map((d, i) => {
+    const label = d === "all" ? "Tất cả" : d;
+    const color = rainbow[i % 7];
+    const isActive = selectedDept === d;
+    return `<button class="filter-btn${isActive?' active':''}" data-dept="${d}" style="${isActive?`--active-color:${color};border-color:${color};color:${color};background:${color}20`:''}" onclick="setDept('${d}')">${label}</button>`;
+  }).join("");
+}
+ 
+function renderJobs() {
+  const filtered = selectedDept === "all" ? positions : positions.filter(p => p.dept === selectedDept);
+  const list = document.getElementById("jobList");
+  list.innerHTML = filtered.map(job => {
+    const isOpen = expandedJob === job.id;
+    return `
+<div class="job-card" style="border-left-color:${job.color}">
+<div class="job-header" onclick="toggleJob(${job.id})">
+<div class="job-meta">
+          ${job.urgent ? `<span class="urgent-badge">URGENT</span>` : ''}
+<div>
+<div class="job-title">${job.title}</div>
+<div class="job-vn" style="color:${job.color}">${job.vn}</div>
+</div>
+</div>
+<div class="job-right">
+<span class="job-dept-badge">${job.dept}</span>
+<span class="job-arrow" style="color:${job.color};transform:${isOpen?'rotate(180deg)':'rotate(0)'}">▾</span>
+</div>
+</div>
+<div class="job-body${isOpen?'':' hidden'}" style="border-top-color:${job.color}18">
+<div class="job-body-inner">
+<div>
+<div class="reqs-label" style="color:${job.color}">YÊU CẦU CHÍNH</div>
+            ${job.reqs.map(r => `<div class="req-item" style="color:rgba(255,255,255,.7)"><style>.req-item::before{color:${job.color}}</style>${r}</div>`).join("")}
+</div>
+<div>
+<div class="info-label" style="color:${job.color}">THÔNG TIN</div>
+<div class="info-list">
+<div>📍 KCN Tân Tạo, Q. Bình Tân, TP.HCM</div>
+<div>👤 Báo cáo: ${job.report}</div>
+<div>⏰ Full-time</div>
+<div>💰 Cạnh tranh, thỏa thuận theo năng lực</div>
+</div>
+</div>
+</div>
+<a href="mailto:hr@asiadragoncordage.com" class="apply-btn" style="background:${job.color}">ỨNG TUYỂN NGAY →</a>
+</div>
+</div>`;
+  }).join("");
+}
+ 
+function setDept(dept) {
+  selectedDept = dept;
+  expandedJob = null;
+  renderFilters();
+  renderJobs();
+}
+ 
+function toggleJob(id) {
+  expandedJob = expandedJob === id ? null : id;
+  renderJobs();
+}
+ 
+renderFilters();
+renderJobs();
+</script>
+</body>
+</html>
