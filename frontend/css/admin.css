@@ -74,6 +74,7 @@ button {
 }
 
 .admin-nav a,
+.nav-tab,
 .nav-logout {
   background: transparent;
   border: 0;
@@ -87,6 +88,8 @@ button {
 }
 
 .admin-nav a:hover,
+.nav-tab:hover,
+.nav-tab.active,
 .nav-logout:hover {
   background: rgba(216, 163, 41, .16);
   color: #f4c95d;
@@ -140,6 +143,35 @@ button {
   max-width: 1280px;
 }
 
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 0 auto 18px;
+  max-width: 1280px;
+}
+
+.tab-btn {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--heading);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 850;
+  min-height: 42px;
+  padding: 10px 16px;
+}
+
+.tab-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.tab-panel[hidden] {
+  display: none;
+}
+
 .metric-card,
 .panel {
   background: var(--surface);
@@ -186,6 +218,12 @@ button {
   font-size: 26px;
 }
 
+.panel-summary {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
 .job-form {
   border-bottom: 1px solid var(--border);
   padding: 24px;
@@ -195,6 +233,18 @@ button {
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.filter-panel {
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 18px 24px 22px;
+}
+
+.filter-panel .full {
+  grid-column: 1 / -1;
 }
 
 label {
@@ -414,7 +464,8 @@ tr:last-child td {
   }
 
   .metrics,
-  .form-grid {
+  .form-grid,
+  .filter-panel {
     grid-template-columns: 1fr;
   }
 

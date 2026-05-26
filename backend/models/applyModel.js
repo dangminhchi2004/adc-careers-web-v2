@@ -1,7 +1,7 @@
 const db = require("../config/db");
 
 const Application = {
-  create: async ({ jobId, fullName, email, phone, expectedSalary, note, cvFile }) => {
+  create: async ({ jobId, fullName, email, phone, expectedSalary, note, cvFile, cvStorage }) => {
     const [result] = await db.query(
       `INSERT INTO applications
         (
@@ -15,9 +15,18 @@ const Application = {
           cv_file_name,
           cv_file_path,
           cv_mime_type,
-          cv_size
+          cv_size,
+          cv_storage_provider,
+          cv_drive_id,
+          cv_drive_item_id,
+          cv_web_url,
+          cv_onedrive_path,
+          cv_external_id,
+          cv_external_parent_id,
+          cv_external_url,
+          cv_storage_path
         )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         jobId,
         fullName,
@@ -26,10 +35,19 @@ const Application = {
         expectedSalary || null,
         note || null,
         cvFile ? cvFile.originalname : null,
-        cvFile ? cvFile.filename : null,
-        cvFile ? `/uploads/cvs/${cvFile.filename}` : null,
-        cvFile ? cvFile.mimetype : null,
-        cvFile ? cvFile.size : null
+        cvStorage ? cvStorage.fileName : null,
+        cvStorage ? cvStorage.filePath : null,
+        cvStorage ? cvStorage.mimeType : cvFile ? cvFile.mimetype : null,
+        cvStorage ? cvStorage.size : cvFile ? cvFile.size : null,
+        cvStorage ? cvStorage.provider : "local",
+        cvStorage ? cvStorage.driveId : null,
+        cvStorage ? cvStorage.driveItemId : null,
+        cvStorage ? cvStorage.webUrl : null,
+        cvStorage ? cvStorage.oneDrivePath : null,
+        cvStorage ? cvStorage.externalId : null,
+        cvStorage ? cvStorage.externalParentId : null,
+        cvStorage ? cvStorage.externalUrl : null,
+        cvStorage ? cvStorage.storagePath : null
       ]
     );
 
@@ -62,6 +80,15 @@ function applicationSelectSql(tailSql) {
       a.cv_file_path AS cvFilePath,
       a.cv_mime_type AS cvMimeType,
       a.cv_size AS cvSize,
+      a.cv_storage_provider AS cvStorageProvider,
+      a.cv_drive_id AS cvDriveId,
+      a.cv_drive_item_id AS cvDriveItemId,
+      a.cv_web_url AS cvWebUrl,
+      a.cv_onedrive_path AS cvOneDrivePath,
+      a.cv_external_id AS cvExternalId,
+      a.cv_external_parent_id AS cvExternalParentId,
+      a.cv_external_url AS cvExternalUrl,
+      a.cv_storage_path AS cvStoragePath,
       a.status,
       a.applied_at AS appliedAt,
       j.title AS jobTitle,

@@ -1,5 +1,6 @@
 const Application = require("../models/applyModel");
 const Job = require("../models/jobModel");
+const { loadCv } = require("../services/cvStorageService");
 
 async function getJobs(req, res) {
   try {
@@ -69,6 +70,28 @@ async function getApplications(req, res) {
   }
 }
 
+async function downloadApplicationCv(req, res) {
+  try {
+    const application = await Application.getById(req.params.id);
+    if (!application) {
+      return res.status(404).json({ success: false, message: "Khong tim thay ho so ung vien." });
+    }
+
+    const cv = await loadCv(application);
+    res.setHeader("Content-Type", cv.mimeType);
+    res.setHeader("Content-Length", cv.buffer.length);
+    res.setHeader("Content-Disposition", buildContentDisposition(cv.fileName, cv.mimeType));
+    return res.send(cv.buffer);
+  } catch (error) {
+    console.error("GET /api/admin/applications/:id/cv failed:", error);
+    const statusCode = error.statusCode === 404 ? 404 : 500;
+    const message = statusCode === 404
+      ? "Khong tim thay file CV."
+      : "Khong the tai CV luc nay.";
+    return res.status(statusCode).json({ success: false, message });
+  }
+}
+
 function validateJob(job) {
   const requiredFields = ["title", "vn", "dept", "level", "report"];
   const missingField = requiredFields.find((field) => !job[field] || !String(job[field]).trim());
@@ -88,7 +111,16 @@ function validateJob(job) {
 module.exports = {
   createJob,
   deleteJob,
+  downloadApplicationCv,
   getApplications,
   getJobs,
   updateJob
 };
+
+function buildContentDisposition(fileName, mimeType) {
+  const fallback = String(fileName || "cv")
+    .replace(/[^\x20-\x7E]/g, "_")
+    .replace(/["\\]/g, "_");
+  const disposition = mimeType === "application/pdf" ? "inline" : "attachment";
+  return `${disposition}; filename="${fallback}"; filename*=UTF-8''${encodeURIComponent(fileName || "cv")}`;
+}

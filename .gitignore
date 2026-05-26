@@ -3,6 +3,8 @@ node_modules/
 
 backend/uploads/
 backend/logs/
+php-backend/api/uploads/cvs/*
+!php-backend/api/uploads/cvs/.gitkeep
 
 *.log
 *.tmp

@@ -4,21 +4,9 @@ const path = require("path");
 const { submitApplication } = require("../controllers/applyController");
 
 const router = express.Router();
-const uploadDir = path.join(__dirname, "..", "uploads", "cvs");
-
-const storage = multer.diskStorage({
-  destination: uploadDir,
-  filename: (req, file, callback) => {
-    const safeName = file.originalname
-      .toLowerCase()
-      .replace(/[^a-z0-9.]+/g, "-")
-      .replace(/-+/g, "-");
-    callback(null, `${Date.now()}-${safeName}`);
-  }
-});
 
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: {
     fileSize: 5 * 1024 * 1024
   },

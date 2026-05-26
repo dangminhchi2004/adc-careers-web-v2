@@ -31,6 +31,15 @@ async function ensureSchema() {
       cv_file_path VARCHAR(500),
       cv_mime_type VARCHAR(120),
       cv_size INT,
+      cv_storage_provider VARCHAR(40) DEFAULT 'local',
+      cv_drive_id VARCHAR(255),
+      cv_drive_item_id VARCHAR(255),
+      cv_web_url VARCHAR(1000),
+      cv_onedrive_path VARCHAR(1000),
+      cv_external_id VARCHAR(255),
+      cv_external_parent_id VARCHAR(255),
+      cv_external_url VARCHAR(1000),
+      cv_storage_path VARCHAR(1000),
       status VARCHAR(40) DEFAULT 'new',
       applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
@@ -43,6 +52,15 @@ async function ensureSchema() {
   await addColumnIfMissing("applications", "cv_file_path", "VARCHAR(500)");
   await addColumnIfMissing("applications", "cv_mime_type", "VARCHAR(120)");
   await addColumnIfMissing("applications", "cv_size", "INT");
+  await addColumnIfMissing("applications", "cv_storage_provider", "VARCHAR(40) DEFAULT 'local'");
+  await addColumnIfMissing("applications", "cv_drive_id", "VARCHAR(255)");
+  await addColumnIfMissing("applications", "cv_drive_item_id", "VARCHAR(255)");
+  await addColumnIfMissing("applications", "cv_web_url", "VARCHAR(1000)");
+  await addColumnIfMissing("applications", "cv_onedrive_path", "VARCHAR(1000)");
+  await addColumnIfMissing("applications", "cv_external_id", "VARCHAR(255)");
+  await addColumnIfMissing("applications", "cv_external_parent_id", "VARCHAR(255)");
+  await addColumnIfMissing("applications", "cv_external_url", "VARCHAR(1000)");
+  await addColumnIfMissing("applications", "cv_storage_path", "VARCHAR(1000)");
   await addColumnIfMissing("applications", "status", "VARCHAR(40) DEFAULT 'new'");
 }
 

@@ -1,4 +1,5 @@
 const Application = require("../models/applyModel");
+const { deleteStoredCv, storeCv } = require("../services/cvStorageService");
 
 const ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx"];
 
@@ -15,15 +16,24 @@ async function submitApplication(req, res) {
       });
     }
 
-    const application = await Application.create({
-      jobId: Number(jobId),
-      fullName: fullName.trim(),
-      email: email.trim(),
-      phone: phone.trim(),
-      expectedSalary: expectedSalary ? expectedSalary.trim() : null,
-      note: note ? note.trim() : null,
-      cvFile
-    });
+    const cvStorage = await storeCv(cvFile);
+    let application;
+
+    try {
+      application = await Application.create({
+        jobId: Number(jobId),
+        fullName: fullName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        expectedSalary: expectedSalary ? expectedSalary.trim() : null,
+        note: note ? note.trim() : null,
+        cvFile,
+        cvStorage
+      });
+    } catch (error) {
+      await deleteStoredCv(cvStorage);
+      throw error;
+    }
 
     res.status(201).json({
       success: true,

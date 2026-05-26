@@ -11,7 +11,7 @@
 
     const rainbow = [COLORS.red, COLORS.orange, COLORS.yellow, COLORS.green, COLORS.blue, COLORS.indigo, COLORS.purple];
 
-    const API_BASE = window.location.protocol === "file:" ? "http://localhost:5000" : "";
+    const API_BASE = window.ADC_API_BASE ?? (window.location.protocol === "file:" ? "http://localhost:5000" : "");
 
     let positions = [
       {
