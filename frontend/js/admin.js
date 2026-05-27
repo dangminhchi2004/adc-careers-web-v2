@@ -125,14 +125,14 @@ function renderJobs() {
 
   jobsTable.innerHTML = jobs.map((job) => `
     <tr>
-      <td>
+      <td data-label="Vị trí">
         <div class="table-title">${escapeHtml(job.title)}</div>
         <div class="table-sub">${escapeHtml(job.vn)}</div>
       </td>
-      <td>${escapeHtml(job.dept)}</td>
-      <td>${escapeHtml(job.level)}</td>
-      <td><span class="pill ${escapeAttribute(job.status)}">${escapeHtml(job.status)}</span></td>
-      <td>
+      <td data-label="Phòng ban">${escapeHtml(job.dept)}</td>
+      <td data-label="Cấp bậc">${escapeHtml(job.level)}</td>
+      <td data-label="Trạng thái"><span class="pill ${escapeAttribute(job.status)}">${escapeHtml(job.status)}</span></td>
+      <td data-label="Thao tác">
         <div class="row-actions">
           <button class="btn btn-secondary" type="button" onclick="editJob(${job.id})">Sửa</button>
           <button class="btn btn-danger" type="button" onclick="deleteJob(${job.id})">Xóa</button>
@@ -158,21 +158,21 @@ function renderApplications() {
 
   applicationsTable.innerHTML = filteredApplications.map((application) => `
     <tr>
-      <td>
+      <td data-label="Ứng viên">
         <div class="table-title">${escapeHtml(application.fullName)}</div>
         <div class="table-sub">${escapeHtml(application.note || "Không có ghi chú")}</div>
       </td>
-      <td>
+      <td data-label="Liên hệ">
         <div>${escapeHtml(application.email)}</div>
         <div class="table-sub">${escapeHtml(application.phone)}</div>
       </td>
-      <td>
+      <td data-label="Vị trí">
         <div>${escapeHtml(application.jobTitle || "Vị trí đã xóa")}</div>
         <div class="table-sub">${escapeHtml(application.jobTitleVn || "")}</div>
       </td>
-      <td>${escapeHtml(application.expectedSalary || "Chưa cung cấp")}</td>
-      <td>${renderCvLink(application)}</td>
-      <td>${formatDate(application.appliedAt)}</td>
+      <td data-label="Lương kỳ vọng">${escapeHtml(application.expectedSalary || "Chưa cung cấp")}</td>
+      <td data-label="CV">${renderCvLink(application)}</td>
+      <td data-label="Ngày gửi">${formatDate(application.appliedAt)}</td>
     </tr>
   `).join("");
 }

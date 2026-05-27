@@ -474,6 +474,192 @@ tr:last-child td {
   }
 }
 
+@media (max-width: 720px) {
+  body {
+    background: #f8f5ee;
+  }
+
+  .admin-sidebar {
+    padding: 14px 14px 12px;
+  }
+
+  .admin-logo img {
+    height: 42px;
+  }
+
+  .admin-nav {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 14px;
+  }
+
+  .admin-nav a,
+  .nav-tab,
+  .nav-logout {
+    align-items: center;
+    display: flex;
+    font-size: 12px;
+    justify-content: center;
+    min-height: 38px;
+    padding: 8px 10px;
+    text-align: center;
+  }
+
+  .admin-main {
+    padding: 18px 12px 32px;
+  }
+
+  .admin-hero {
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .admin-hero h1 {
+    font-size: 28px;
+  }
+
+  .admin-hero p {
+    font-size: 14px;
+    margin-top: 8px;
+  }
+
+  .admin-hero .btn,
+  .panel-head .btn {
+    width: 100%;
+  }
+
+  .metrics {
+    gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-bottom: 16px;
+  }
+
+  .metric-card {
+    padding: 12px 10px;
+  }
+
+  .metric-card span {
+    font-size: 11px;
+    line-height: 1.25;
+  }
+
+  .metric-card strong {
+    font-size: 24px;
+    margin-top: 4px;
+  }
+
+  .admin-tabs {
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .tab-btn {
+    flex: 1 0 max-content;
+    font-size: 13px;
+    min-height: 40px;
+    padding: 9px 12px;
+  }
+
+  .panel {
+    margin-bottom: 18px;
+  }
+
+  .panel-head,
+  .job-form,
+  .filter-panel {
+    padding: 16px;
+  }
+
+  .panel h2 {
+    font-size: 22px;
+  }
+
+  .form-actions,
+  .row-actions {
+    justify-content: stretch;
+  }
+
+  .form-actions .btn,
+  .row-actions .btn {
+    flex: 1 1 0;
+  }
+
+  .table-wrap {
+    overflow: visible;
+    padding: 0 12px 12px;
+  }
+
+  table,
+  thead,
+  tbody,
+  tr,
+  td {
+    display: block;
+    min-width: 0;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tr {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 30px rgba(16, 45, 102, .08);
+    margin-top: 12px;
+    overflow: hidden;
+  }
+
+  td {
+    align-items: flex-start;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(92px, 34%) minmax(0, 1fr);
+    padding: 12px;
+  }
+
+  td:last-child {
+    border-bottom: 0;
+  }
+
+  td::before {
+    color: var(--muted);
+    content: attr(data-label);
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+  }
+
+  .empty-row {
+    display: block;
+    margin-top: 12px;
+  }
+
+  .empty-row::before {
+    content: "";
+  }
+}
+
+@media (max-width: 420px) {
+  .admin-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  td {
+    grid-template-columns: 1fr;
+  }
+}
+
 .login-page {
   background:
     linear-gradient(135deg, rgba(8, 20, 45, .9), rgba(16, 45, 102, .84)),
@@ -485,7 +671,9 @@ tr:last-child td {
   display: flex;
   justify-content: center;
   min-height: 100vh;
-  padding: 24px;
+  min-height: 100dvh;
+  padding: clamp(16px, 5vw, 24px);
+  width: 100%;
 }
 
 .login-card {
@@ -496,14 +684,16 @@ tr:last-child td {
   display: grid;
   gap: 24px;
   max-width: 460px;
-  padding: 32px;
-  width: 100%;
+  min-width: 0;
+  padding: clamp(22px, 6vw, 32px);
+  width: min(100%, 460px);
 }
 
 .login-card img {
   height: 58px;
   object-fit: contain;
-  width: max-content;
+  max-width: min(220px, 100%);
+  width: auto;
 }
 
 .login-card h1 {
@@ -521,8 +711,32 @@ tr:last-child td {
 .login-form {
   display: grid;
   gap: 16px;
+  min-width: 0;
 }
 
+.login-form label,
+.login-form input,
+.login-form .form-message,
 .login-form .btn {
+  min-width: 0;
   width: 100%;
+}
+
+@media (max-width: 420px) {
+  .login-card {
+    gap: 18px;
+  }
+
+  .login-card h1 {
+    font-size: 26px;
+  }
+
+  .login-card p {
+    font-size: 14px;
+  }
+
+  .login-card img {
+    height: 48px;
+    justify-self: center;
+  }
 }
