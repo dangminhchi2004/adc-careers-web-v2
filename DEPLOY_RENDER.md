@@ -24,6 +24,9 @@ Set these on Render:
 
 ```env
 DB_HOST=
+DB_PORT=
+DB_SSL=true
+DB_SSL_REJECT_UNAUTHORIZED=false
 DB_USER=
 DB_PASSWORD=
 DB_NAME=
@@ -43,6 +46,8 @@ Optional Microsoft storage variables can also be set if switching `CV_STORAGE` t
 
 ## MySQL Notes
 
+For Aiven MySQL, copy the host, port, user, password, and database from the Aiven service's connection details. Keep `DB_SSL=true`.
+
 If using cPanel MySQL, enable Remote MySQL access. Some cPanel hosts require allowlisting the app server IP; Render free services may not have a stable outbound IP, so a cloud MySQL provider is more reliable for demos.
 
 ## Test URLs
@@ -54,4 +59,3 @@ https://your-service.onrender.com/api/jobs
 https://your-service.onrender.com/login
 https://your-service.onrender.com/admin
 ```
-

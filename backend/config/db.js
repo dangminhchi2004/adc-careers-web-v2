@@ -1,28 +1,33 @@
-const mysql = require('mysql2');
-require('dotenv').config();
+const mysql = require("mysql2");
+require("dotenv").config();
 
-// Tạo một pool kết nối
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
+const dbConfig = {
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+};
 
-// Chuyển pool sang dạng promise để dùng được async/await
+if (String(process.env.DB_SSL || "").toLowerCase() === "true") {
+  dbConfig.ssl = {
+    rejectUnauthorized: String(process.env.DB_SSL_REJECT_UNAUTHORIZED || "false").toLowerCase() === "true"
+  };
+}
+
+const pool = mysql.createPool(dbConfig);
 const db = pool.promise();
 
-// Test kết nối khi khởi động server
 db.getConnection()
-    .then(connection => {
-        console.log('✅ Kết nối MySQL Localhost thành công!');
-        connection.release();
-    })
-    .catch(err => {
-        console.error('❌ Lỗi kết nối MySQL:', err.message);
-    });
+  .then((connection) => {
+    console.log("MySQL connection successful.");
+    connection.release();
+  })
+  .catch((error) => {
+    console.error("MySQL connection failed:", error.message);
+  });
 
 module.exports = db;
