@@ -50,6 +50,7 @@ function ensure_schema(): void
         )
     ");
 
+    add_column_if_missing('jobs', 'status', "VARCHAR(20) DEFAULT 'active'");
     add_column_if_missing('applications', 'note', 'TEXT');
     add_column_if_missing('applications', 'cv_original_name', 'VARCHAR(255)');
     add_column_if_missing('applications', 'cv_file_name', 'VARCHAR(255)');
@@ -83,4 +84,3 @@ function add_column_if_missing(string $table, string $column, string $definition
         db()->exec("ALTER TABLE {$table} ADD COLUMN {$column} {$definition}");
     }
 }
-

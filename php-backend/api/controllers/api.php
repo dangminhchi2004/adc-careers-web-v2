@@ -7,7 +7,8 @@ require_once __DIR__ . '/../lib/storage.php';
 
 function get_active_jobs(): void
 {
-    $stmt = db()->query('SELECT * FROM jobs WHERE status = "active" ORDER BY created_at DESC');
+    $stmt = db()->prepare('SELECT * FROM jobs WHERE status = ? ORDER BY created_at DESC');
+    $stmt->execute(['active']);
     json_response(['success' => true, 'data' => array_map('normalize_job', $stmt->fetchAll())]);
 }
 
@@ -317,4 +318,3 @@ function application_select_sql(string $tailSql): string
         {$tailSql}
     ";
 }
-

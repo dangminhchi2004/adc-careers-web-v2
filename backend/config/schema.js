@@ -46,6 +46,7 @@ async function ensureSchema() {
     )
   `);
 
+  await addColumnIfMissing("jobs", "status", "VARCHAR(20) DEFAULT 'active'");
   await addColumnIfMissing("applications", "note", "TEXT");
   await addColumnIfMissing("applications", "cv_original_name", "VARCHAR(255)");
   await addColumnIfMissing("applications", "cv_file_name", "VARCHAR(255)");

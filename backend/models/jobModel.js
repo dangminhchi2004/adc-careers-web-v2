@@ -7,7 +7,7 @@ const Job = {
   },
 
   getAllActive: async () => {
-    const [rows] = await db.query('SELECT * FROM jobs WHERE status = "active" ORDER BY created_at DESC');
+    const [rows] = await db.query("SELECT * FROM jobs WHERE status = ? ORDER BY created_at DESC", ["active"]);
     return rows.map(normalizeJob);
   },
 
