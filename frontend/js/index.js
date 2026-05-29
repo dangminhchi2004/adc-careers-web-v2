@@ -123,6 +123,7 @@
     let selectedJob = null;
 
     const filterBar = document.getElementById("filterBar");
+    const jobResults = document.getElementById("jobResults");
     const jobList = document.getElementById("jobList");
     const jobCount = document.getElementById("jobCount");
     const emptyState = document.getElementById("emptyState");
@@ -130,6 +131,8 @@
     const applyForm = document.getElementById("applyForm");
     const formMessage = document.getElementById("formMessage");
     const modalJobName = document.getElementById("modalJobName");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let jobResultsAnimation = 0;
 
     function loadOptionalBackgrounds() {
       document.querySelectorAll("[data-bg-image]").forEach((element) => {
@@ -221,18 +224,19 @@
       }).join("");
     }
 
-    function renderJobs() {
+    function renderJobs(options = {}) {
       const filtered = selectedDept === "all"
         ? activePositions()
         : activePositions().filter((job) => job.dept === selectedDept);
 
-      jobCount.textContent = `${filtered.length} vị trí`;
-      emptyState.classList.toggle("visible", filtered.length === 0);
+      const updateContent = () => {
+        jobCount.textContent = `${filtered.length} vị trí`;
+        emptyState.classList.toggle("visible", filtered.length === 0);
 
-      jobList.innerHTML = filtered.map((job) => {
-        const isOpen = expandedJob === job.id;
-        return `
-          <article class="job-card${isOpen ? " open" : ""}" style="--job-color:${job.color}">
+        jobList.innerHTML = filtered.map((job, index) => {
+          const isOpen = expandedJob === job.id;
+          return `
+          <article class="job-card${isOpen ? " open" : ""}" style="--job-color:${job.color}; --item-index:${index}">
             <button class="job-header" type="button" aria-expanded="${isOpen}" onclick="toggleJob(${job.id})">
               <span class="job-main">
                 ${job.urgent ? '<span class="urgent-badge">Urgent</span>' : ""}
@@ -273,14 +277,63 @@
             </div>
           </article>
         `;
-      }).join("");
+        }).join("");
+      };
+
+      if (options.animate && jobResults && !reduceMotion.matches) {
+        animateJobResults(updateContent);
+        return;
+      }
+
+      updateContent();
+    }
+
+    function animateJobResults(updateContent) {
+      const animationId = ++jobResultsAnimation;
+      const startHeight = jobResults.getBoundingClientRect().height;
+
+      jobResults.style.height = `${startHeight}px`;
+      jobResults.classList.add("is-animating");
+      jobList.classList.remove("is-entering");
+
+      updateContent();
+
+      const endHeight = jobResults.scrollHeight;
+      jobResults.getBoundingClientRect();
+
+      window.requestAnimationFrame(() => {
+        if (animationId !== jobResultsAnimation) return;
+
+        jobList.classList.add("is-entering");
+        jobResults.style.height = `${endHeight}px`;
+      });
+
+      const cleanup = () => {
+        if (animationId !== jobResultsAnimation) return;
+
+        jobResults.style.height = "";
+        jobResults.classList.remove("is-animating");
+        jobList.classList.remove("is-entering");
+      };
+
+      const onTransitionEnd = (event) => {
+        if (event.target !== jobResults || event.propertyName !== "height") return;
+        jobResults.removeEventListener("transitionend", onTransitionEnd);
+        cleanup();
+      };
+
+      jobResults.addEventListener("transitionend", onTransitionEnd);
+      window.setTimeout(() => {
+        jobResults.removeEventListener("transitionend", onTransitionEnd);
+        cleanup();
+      }, 520);
     }
 
     function setDept(dept) {
       selectedDept = dept;
       expandedJob = null;
       renderFilters();
-      renderJobs();
+      renderJobs({ animate: true });
     }
 
     function toggleJob(id) {

@@ -1,20 +1,25 @@
 const mysql = require("mysql2");
 require("dotenv").config();
 
+function envValue(key) {
+  const value = process.env[key];
+  return typeof value === "string" ? value.trim() : value;
+}
+
 const dbConfig = {
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: envValue("DB_HOST"),
+  port: envValue("DB_PORT") ? Number(envValue("DB_PORT")) : 3306,
+  user: envValue("DB_USER"),
+  password: envValue("DB_PASSWORD"),
+  database: envValue("DB_NAME"),
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
 };
 
-if (String(process.env.DB_SSL || "").toLowerCase() === "true") {
+if (String(envValue("DB_SSL") || "").toLowerCase() === "true") {
   dbConfig.ssl = {
-    rejectUnauthorized: String(process.env.DB_SSL_REJECT_UNAUTHORIZED || "false").toLowerCase() === "true"
+    rejectUnauthorized: String(envValue("DB_SSL_REJECT_UNAUTHORIZED") || "false").toLowerCase() === "true"
   };
 }
 

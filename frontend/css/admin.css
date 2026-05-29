@@ -51,7 +51,7 @@ button {
 }
 
 .admin-sidebar {
-  background: linear-gradient(180deg, #102d66, #081b40);
+  background: linear-gradient(180deg, #1E3C5A, #1E3C5A);
   border-right: 1px solid rgba(255, 255, 255, .08);
   color: #fff;
   padding: 28px 22px;
@@ -163,7 +163,7 @@ button {
 }
 
 .tab-btn.active {
-  background: var(--primary);
+  background: #1E3C5A;
   border-color: var(--primary);
   color: #fff;
 }
@@ -663,7 +663,7 @@ tr:last-child td {
 
 .login-page {
   background:
-    linear-gradient(135deg, rgba(8, 20, 45, .9), rgba(16, 45, 102, .84)),
+    linear-gradient(135deg, rgba(30, 60, 90, .9), rgba(30, 60, 90, .84)),
     url("../assets/images/bg-hero.png") center / cover no-repeat;
 }
 

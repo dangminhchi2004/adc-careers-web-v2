@@ -71,7 +71,7 @@ svg {
 }
 
 .tech-bar {
-  background: linear-gradient(90deg, #102d66, #d8a329, #fff4d4, #d8a329, #102d66);
+  background: linear-gradient(90deg, #1E3C5A, #d8a329, #fff4d4, #d8a329, #1E3C5A);
   height: 4px;
   position: sticky;
   top: 0;
@@ -80,7 +80,7 @@ svg {
 
 .site-nav {
   align-items: center;
-  background: rgba(13, 30, 68, .88);
+  background: #1E3C5A;
   backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(255, 255, 255, .12);
   display: flex;
@@ -133,7 +133,7 @@ svg {
   align-items: center;
   background:
     radial-gradient(circle at 78% 18%, rgba(216, 163, 41, .24), transparent 30%),
-    linear-gradient(135deg, #102d66, #081b40);
+    linear-gradient(135deg, #1E3C5A, #1E3C5A);
   background-position: center;
   background-size: cover;
   display: flex;
@@ -152,7 +152,7 @@ svg {
 
 .hero-overlay {
   background:
-    linear-gradient(90deg, rgba(11, 21, 44, .92) 0%, rgba(16, 45, 102, .78) 48%, rgba(19, 35, 66, .5) 100%),
+    linear-gradient(90deg, rgba(30, 60, 90, .92) 0%, rgba(30, 60, 90, .78) 48%, rgba(30, 60, 90, .5) 100%),
     radial-gradient(circle at 72% 18%, rgba(216, 163, 41, .32), transparent 34%);
   inset: 0;
   position: absolute;
@@ -246,7 +246,7 @@ svg {
 }
 
 .btn-outline {
-  background: rgba(16, 45, 102, .18);
+  background: rgba(30, 60, 90, .18);
   border: 1px solid rgba(244, 201, 93, .38);
   color: #fff;
 }
@@ -319,7 +319,7 @@ footer {
 .life-section.custom-bg-loaded::before {
   background:
     linear-gradient(180deg, rgba(255, 250, 240, .86), rgba(255, 250, 240, .78)),
-    radial-gradient(circle at 78% 12%, rgba(16, 45, 102, .18), transparent 34%);
+    radial-gradient(circle at 78% 12%, rgba(30, 60, 90, .18), transparent 34%);
   content: "";
   inset: 0;
   pointer-events: none;
@@ -408,8 +408,8 @@ footer {
 
 .positions {
   background:
-    linear-gradient(135deg, rgba(16, 45, 102, .98), rgba(28, 41, 33, .94)),
-    var(--primary-dark);
+    linear-gradient(135deg, rgba(30, 60, 90, .98), rgba(28, 41, 33, .94)),
+    #1E3C5A;
   color: #fff;
   overflow: hidden;
   position: relative;
@@ -424,7 +424,7 @@ footer {
 
 .positions::before {
   background:
-    linear-gradient(135deg, rgba(8, 20, 45, .86), rgba(16, 45, 102, .72)),
+    linear-gradient(135deg, rgba(30, 60, 90, .86), rgba(30, 60, 90, .72)),
     radial-gradient(circle at 84% 12%, rgba(216, 163, 41, .16), transparent 32%);
   content: "";
   inset: 0;
@@ -492,15 +492,40 @@ footer {
   white-space: nowrap;
 }
 
+.job-results {
+  transition: height .34s cubic-bezier(.4, 0, .2, 1);
+}
+
+.job-results.is-animating {
+  overflow: hidden;
+}
+
 .job-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
+.job-list.is-entering .job-card {
+  animation: job-card-enter .28s cubic-bezier(.4, 0, .2, 1) both;
+  animation-delay: calc(var(--item-index, 0) * 35ms);
+}
+
+@keyframes job-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .job-card {
   backdrop-filter: blur(10px);
-  background: rgba(10, 26, 62, .76);
+  background: rgba(30, 60, 90, .76);
   border: 1px solid rgba(255, 255, 255, .1);
   border-radius: var(--radius);
   box-shadow: 0 18px 42px rgba(3, 13, 32, .22);
@@ -690,15 +715,30 @@ footer {
   display: block;
 }
 
+.job-results.is-animating .empty-state.visible {
+  animation: job-card-enter .24s cubic-bezier(.4, 0, .2, 1) both;
+}
+
 .culture-grid {
   display: grid;
   gap: 24px;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .job-results {
+    transition: none;
+  }
+
+  .job-list.is-entering .job-card,
+  .job-results.is-animating .empty-state.visible {
+    animation: none;
+  }
+}
+
 .culture-card {
   align-items: flex-end;
-  background-color: var(--primary-dark);
+  background-color: #1E3C5A;
   background-position: center;
   background-size: cover;
   border: 1px solid rgba(255, 255, 255, .72);
@@ -718,19 +758,19 @@ footer {
 }
 
 .card-img-1 {
-  background-image: linear-gradient(135deg, #1f3f86, #7b6427);
+  background-image: linear-gradient(135deg, #1E3C5A, #7b6427);
 }
 
 .card-img-2 {
-  background-image: linear-gradient(135deg, #102d66, #31559a);
+  background-image: linear-gradient(135deg, #1E3C5A, #1E3C5A);
 }
 
 .card-img-3 {
-  background-image: linear-gradient(135deg, #263760, #d8a329);
+  background-image: linear-gradient(135deg, #1E3C5A, #d8a329);
 }
 
 .card-img-4 {
-  background-image: linear-gradient(135deg, #102d66, #59481a);
+  background-image: linear-gradient(135deg, #1E3C5A, #59481a);
 }
 
 .culture-card.custom-bg-loaded {
@@ -747,7 +787,7 @@ footer {
 
 .carousel-btn {
   align-items: center;
-  background: rgba(16, 45, 102, .94);
+  background: rgba(30, 60, 90, .94);
   border: 1px solid rgba(216, 163, 41, .36);
   border-radius: 50%;
   box-shadow: var(--shadow-sm);
@@ -774,14 +814,14 @@ footer {
 }
 
 .card-overlay {
-  background: linear-gradient(180deg, rgba(16, 45, 102, .08), rgba(25, 34, 26, .9));
+  background: linear-gradient(180deg, rgba(30, 60, 90, .08), rgba(25, 34, 26, .9));
   inset: 0;
   position: absolute;
 }
 
 .card-content {
   backdrop-filter: blur(10px);
-  background: linear-gradient(180deg, rgba(8, 20, 45, .12), rgba(8, 20, 45, .66));
+  background: linear-gradient(180deg, rgba(30, 60, 90, .12), rgba(30, 60, 90, .66));
   color: #fff;
   padding: 24px;
   position: relative;
@@ -803,8 +843,8 @@ footer {
 
 .process {
   background:
-    linear-gradient(135deg, rgba(16, 45, 102, .98), rgba(28, 41, 33, .94)),
-    var(--primary-dark);
+    linear-gradient(135deg, rgba(30, 60, 90, .98), rgba(28, 41, 33, .94)),
+    #1E3C5A;
   color: #fff;
   overflow: hidden;
   position: relative;
@@ -812,7 +852,7 @@ footer {
 
 .process::before {
   background:
-    linear-gradient(135deg, rgba(8, 20, 45, .74), rgba(16, 45, 102, .62)),
+    linear-gradient(135deg, rgba(30, 60, 90, .74), rgba(30, 60, 90, .62)),
     radial-gradient(circle at 88% 8%, rgba(216, 163, 41, .2), transparent 28%);
   content: "";
   inset: 0;
@@ -922,7 +962,7 @@ footer {
 
 .cta {
   background:
-    linear-gradient(135deg, #102d66, #3c3316);
+    linear-gradient(135deg, #1E3C5A, #3c3316);
   background-position: center;
   background-size: cover;
   display: flex;
@@ -939,7 +979,7 @@ footer {
 .cta-overlay {
   backdrop-filter: blur(2px);
   background:
-    linear-gradient(90deg, rgba(8, 20, 45, .88) 0%, rgba(16, 45, 102, .74) 48%, rgba(37, 31, 15, .68) 100%),
+    linear-gradient(90deg, rgba(30, 60, 90, .88) 0%, rgba(30, 60, 90, .74) 48%, rgba(37, 31, 15, .68) 100%),
     radial-gradient(circle at 80% 18%, rgba(216, 163, 41, .18), transparent 32%);
   inset: 0;
   position: absolute;
@@ -1010,7 +1050,7 @@ footer {
 footer {
   background:
     radial-gradient(circle at 18% 0%, rgba(216, 163, 41, .2), transparent 24%),
-    linear-gradient(135deg, #102d66, #081b40);
+    linear-gradient(135deg, #1E3C5A, #1E3C5A);
   border-top: 1px solid rgba(255, 255, 255, .06);
   color: rgba(255, 255, 255, .72);
   padding: 48px 24px;
@@ -1026,7 +1066,7 @@ footer.custom-bg-loaded {
 }
 
 footer.custom-bg-loaded::before {
-  background: linear-gradient(180deg, rgba(8, 20, 45, .66), rgba(8, 20, 45, .82));
+  background: linear-gradient(180deg, rgba(30, 60, 90, .66), rgba(30, 60, 90, .82));
   content: "";
   inset: 0;
   pointer-events: none;
@@ -1066,7 +1106,7 @@ footer > * {
 
 .modal {
   align-items: center;
-  background: rgba(8, 27, 64, .72);
+  background: rgba(30, 60, 90, .72);
   display: none;
   inset: 0;
   justify-content: center;
@@ -1091,7 +1131,7 @@ footer > * {
 
 .modal-head {
   align-items: flex-start;
-  background: linear-gradient(135deg, #102d66, #081b40);
+  background: linear-gradient(135deg, #1E3C5A, #1E3C5A);
   color: #fff;
   display: flex;
   gap: 16px;
