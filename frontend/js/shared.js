@@ -1,0 +1,195 @@
+
+    const COLORS = {
+      red: "#E8363A",
+      orange: "#F57C22",
+      yellow: "#FFB900",
+      green: "#4CAF50",
+      blue: "#2196F3",
+      indigo: "#5C6BC0",
+      purple: "#9C27B0"
+    };
+
+    const RAINBOW = [COLORS.red, COLORS.orange, COLORS.yellow, COLORS.green, COLORS.blue, COLORS.indigo, COLORS.purple];
+
+    const API_BASE = window.ADC_API_BASE ?? (window.location.protocol === "file:" ? "http://localhost:5000" : "");
+
+    const MOCK_POSITIONS = [
+      {
+        id: 1,
+        title: "Head of Production",
+        vn: "Giám đốc Sản xuất",
+        dept: "Khối Vận hành",
+        level: "Senior Leadership",
+        report: "P.TGĐ Vận hành",
+        urgent: true,
+        color: COLORS.red,
+        status: "active",
+        reqs: [
+          "10+ năm quản lý sản xuất quy mô lớn, ưu tiên môi trường trên 300 công nhân.",
+          "Kinh nghiệm quản lý đa nhà máy, thiết lập KPI và cải tiến năng suất.",
+          "Ngành nhựa, polymer hoặc extrusion là lợi thế lớn.",
+          "Thành thạo SAP, Lean, 5S, Kaizen và tiếng Anh giao tiếp tốt."
+        ]
+      },
+      {
+        id: 2,
+        title: "Head of P&O",
+        vn: "Giám đốc Nhân sự & Tổ chức",
+        dept: "People & Organization",
+        level: "Senior Leadership",
+        report: "CEO",
+        urgent: true,
+        color: COLORS.orange,
+        status: "active",
+        reqs: [
+          "7+ năm kinh nghiệm HR management, ưu tiên ngành sản xuất.",
+          "Có kinh nghiệm xây dựng hệ thống HR từ nền tảng đến vận hành.",
+          "Hiểu Employer Branding, Organization Development, C&B và L&D.",
+          "Tiếng Anh tốt, tư duy hệ thống và khả năng đồng hành với business."
+        ]
+      },
+      {
+        id: 3,
+        title: "International Sales Manager",
+        vn: "Trưởng phòng Kinh doanh Quốc tế",
+        dept: "Kinh doanh",
+        level: "Management",
+        report: "CEO",
+        urgent: true,
+        color: COLORS.yellow,
+        status: "active",
+        reqs: [
+          "7+ năm B2B sales trong sản xuất hoặc xuất khẩu.",
+          "Có network khách hàng tại Mỹ, Úc hoặc EU là lợi thế.",
+          "Tiếng Anh thành thạo, đàm phán tốt và quen làm việc theo mục tiêu doanh số.",
+          "Kinh nghiệm Salesforce CRM hoặc quy trình sales pipeline chuyên nghiệp."
+        ]
+      },
+      {
+        id: 4,
+        title: "Head of Production Planning",
+        vn: "Trưởng phòng Kế hoạch Sản xuất",
+        dept: "Khối Vận hành",
+        level: "Management",
+        report: "P.TGĐ Vận hành",
+        urgent: false,
+        color: COLORS.green,
+        status: "active",
+        reqs: [
+          "7+ năm kinh nghiệm planning trong môi trường sản xuất.",
+          "Thành thạo SAP PP/MM, MRP, S&OP và phối hợp liên phòng ban.",
+          "Có tư duy dữ liệu, Power BI là lợi thế.",
+          "Khả năng cân bằng năng lực sản xuất, tồn kho và cam kết giao hàng."
+        ]
+      },
+      {
+        id: 5,
+        title: "Automation Engineer",
+        vn: "Kỹ sư Tự động hóa",
+        dept: "Kỹ thuật",
+        level: "Specialist",
+        report: "Head of Production",
+        urgent: false,
+        color: COLORS.blue,
+        status: "active",
+        reqs: [
+          "3+ năm kinh nghiệm PLC, SCADA, HMI hoặc hệ thống điều khiển công nghiệp.",
+          "Từng làm việc với máy móc châu Âu là lợi thế.",
+          "Có khả năng phân tích lỗi, cải tiến thiết bị và phối hợp với sản xuất.",
+          "Sẵn sàng học hỏi từ nhà cung cấp máy móc quốc tế."
+        ]
+      },
+      {
+        id: 6,
+        title: "Senior Sales Executive",
+        vn: "Chuyên viên Kinh doanh Cấp cao",
+        dept: "Kinh doanh",
+        level: "Senior",
+        report: "Sales Manager",
+        urgent: false,
+        color: COLORS.purple,
+        status: "active",
+        reqs: [
+          "3-5 năm sales B2B, ưu tiên export hoặc manufacturing.",
+          "Tiếng Anh tốt, có khả năng chăm sóc khách hàng quốc tế.",
+          "Theo sát pipeline, báo cáo rõ ràng và chủ động mở rộng cơ hội.",
+          "Tinh thần bền bỉ, chịu trách nhiệm với mục tiêu doanh số."
+        ]
+      }
+    ];
+
+    function normalizeJob(job) {
+      return {
+        ...job,
+        id: Number(job.id),
+        urgent: Boolean(job.urgent),
+        color: job.color || COLORS.blue,
+        status: job.status || "active",
+        reqs: normalizeRequirements(job.reqs)
+      };
+    }
+
+    function normalizeRequirements(reqs) {
+      if (Array.isArray(reqs)) return reqs;
+      if (!reqs) return [];
+
+      try {
+        const parsed = JSON.parse(reqs);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return String(reqs)
+          .split(/\r?\n/)
+          .map((item) => item.trim())
+          .filter(Boolean);
+      }
+    }
+
+    async function fetchJobs() {
+      try {
+        const response = await fetch(`${API_BASE}/api/jobs`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const result = await response.json();
+        const apiJobs = Array.isArray(result) ? result : result.data;
+
+        if (Array.isArray(apiJobs) && apiJobs.length > 0) {
+          return apiJobs.map(normalizeJob);
+        }
+      } catch (error) {
+        console.warn("Using mock jobs because /api/jobs is unavailable:", error);
+      }
+
+      return MOCK_POSITIONS.map(normalizeJob);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function escapeAttribute(value) {
+      return String(value).replaceAll("'", "\\'");
+    }
+
+    function loadOptionalBackgrounds() {
+      document.querySelectorAll("[data-bg-image]").forEach((element) => {
+        const imagePath = element.getAttribute("data-bg-image");
+        if (!imagePath) return;
+
+        const imageUrl = new URL(imagePath, document.baseURI).href;
+        const image = new Image();
+        image.onload = () => {
+          element.style.backgroundImage = `url("${imageUrl}")`;
+          element.classList.add("custom-bg-loaded");
+        };
+        image.onerror = () => {
+          element.classList.remove("custom-bg-loaded");
+          element.style.removeProperty("background-image");
+        };
+        image.src = imageUrl;
+      });
+    }

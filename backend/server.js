@@ -41,6 +41,10 @@ app.get("/login", (req, res) => {
   res.sendFile(path.join(frontendDir, "login.html"));
 });
 
+app.get(["/job", "/job.html"], (req, res) => {
+  res.sendFile(path.join(frontendDir, "job.html"));
+});
+
 app.use((req, res) => {
   if (req.path.startsWith("/api/")) {
     return res.status(404).json({

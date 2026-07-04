@@ -4,27 +4,31 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ADC Careers – Cùng ADC Kiến tạo Tương lai</title>
+<link rel="icon" type="image/png" href="frontend/assets/images/sitelogomini.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   :root{
     --navy:#0b1a2e;--navy-l:#112240;--gold:#FFD700;--gold-l:#FFE44D;
     --red:#E8363A;--orange:#F57C22;--yellow:#FFB900;--green:#4CAF50;--blue:#2196F3;--indigo:#5C6BC0;--purple:#9C27B0;
   }
-  body{background:#faf8f4;font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif}
+  html{scroll-behavior:smooth}
+  body{background:#faf8f4;font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
   a{text-decoration:none}
+  section{scroll-margin-top:92px}
  
   /* Rainbow bar */
   .rainbow-bar{height:5px;background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow),var(--green),var(--blue),var(--indigo),var(--purple))}
  
   /* Nav */
-  nav{background:var(--navy);padding:14px 40px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50}
-  .logo{display:flex;align-items:center;gap:12px}
-  .logo-box{width:38px;height:38px;border:2px solid var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:var(--gold)}
-  .logo-text .brand{font-size:13px;font-weight:800;color:#fff;letter-spacing:3px}
-  .logo-text .sub{font-size:8px;color:var(--gold);letter-spacing:5px}
-  .nav-links{display:flex;gap:6px}
-  .nav-links a{color:#fff;font-size:11px;font-weight:600;padding:6px 16px;border-radius:20px;transition:all .2s}
-  .nav-links a:hover{background:rgba(255,255,255,.1);color:var(--gold)}
+  nav{background:#1E3C5A;backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.12);padding:16px clamp(20px,5vw,64px);display:flex;gap:24px;justify-content:space-between;align-items:center;position:sticky;top:5px;z-index:50}
+  .logo{display:flex;align-items:center;min-width:max-content}
+  .logo-mark{display:block;height:48px;width:auto;object-fit:contain}
+  .nav-links{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px}
+  .nav-links a{color:rgba(255,255,255,.78);font-size:13px;font-weight:650;padding:8px 14px;border-radius:6px;transition:all .25s cubic-bezier(.4,0,.2,1)}
+  .nav-links a:hover,.nav-links a:focus-visible{background:rgba(216,163,41,.13);color:var(--gold);outline:none}
  
   /* Hero */
   .hero{background:linear-gradient(135deg,var(--navy),#0e2845,var(--navy));padding:75px 40px 60px;text-align:center;position:relative;overflow:hidden}
@@ -78,10 +82,41 @@
   .job-body-inner{padding:14px 0;display:grid;grid-template-columns:1fr 1fr;gap:20px}
   .reqs-label{font-size:9px;letter-spacing:2px;font-weight:700;margin-bottom:8px}
   .req-item{font-size:12px;color:rgba(255,255,255,.7);padding:4px 0 4px 14px;position:relative;font-weight:300;line-height:1.6}
-  .req-item::before{content:'▸';position:absolute;left:0;font-size:10px}
+  .req-item::before{content:'▸';position:absolute;left:0;font-size:10px;color:var(--job-color,var(--gold))}
   .info-label{font-size:9px;letter-spacing:2px;font-weight:700;margin-bottom:8px}
   .info-list{font-size:12px;color:rgba(255,255,255,.6);line-height:2.2}
+  .job-actions{display:flex;gap:10px;flex-wrap:wrap}
   .apply-btn{display:inline-block;color:#fff;padding:10px 26px;font-size:11px;font-weight:700;letter-spacing:2px;border-radius:5px}
+  .detail-btn{display:inline-block;color:#fff;padding:9px 22px;font-size:11px;font-weight:700;letter-spacing:2px;border-radius:5px;border:1px solid rgba(255,255,255,.22)}
+  .jobs-state{background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.16);border-radius:10px;color:rgba(255,255,255,.68);font-size:13px;padding:18px;text-align:center}
+
+  /* Detail */
+  body.detail-mode > section:not(#jobDetailSection){display:none}
+  .detail-section{background:linear-gradient(135deg,var(--navy),#0e2845,var(--navy));color:#fff;min-height:calc(100vh - 135px);overflow:hidden;padding:58px 40px 70px;position:relative}
+  .detail-section::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 8%,rgba(232,54,58,.12),transparent 28%),radial-gradient(circle at 84% 16%,rgba(255,215,0,.14),transparent 30%),radial-gradient(circle at 50% 100%,rgba(33,150,243,.12),transparent 34%);pointer-events:none}
+  .detail-inner{max-width:1000px;margin:0 auto;position:relative;z-index:1}
+  .back-link{align-items:center;color:rgba(255,255,255,.68);display:inline-flex;font-size:12px;font-weight:700;gap:8px;letter-spacing:1.2px;margin-bottom:24px;text-transform:uppercase;transition:all .2s}
+  .back-link:hover{color:var(--gold);transform:translateX(-2px)}
+  .detail-card{background:rgba(17,34,64,.88);border:1px solid rgba(255,255,255,.1);border-left:5px solid var(--detail-color,var(--gold));border-radius:14px;box-shadow:0 22px 70px rgba(0,0,0,.24);overflow:hidden}
+  .detail-head{display:flex;gap:20px;justify-content:space-between;padding:30px 32px 24px}
+  .detail-kicker{color:var(--detail-color,var(--gold));font-size:10px;font-weight:800;letter-spacing:4px;margin-bottom:10px;text-transform:uppercase}
+  .detail-title{font-size:34px;font-weight:900;line-height:1.12;margin-bottom:7px}
+  .detail-vn{color:rgba(255,255,255,.66);font-size:15px;font-style:italic}
+  .detail-tags{align-items:flex-start;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+  .detail-tag{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:20px;color:rgba(255,255,255,.78);font-size:11px;font-weight:700;padding:6px 12px}
+  .detail-tag.urgent{background:rgba(232,54,58,.18);border-color:rgba(232,54,58,.3);color:#ff9ca0}
+  .detail-grid{border-top:1px solid rgba(255,255,255,.08);display:grid;grid-template-columns:1.15fr .85fr;gap:26px;padding:28px 32px 32px}
+  .detail-block-title{font-size:10px;font-weight:800;letter-spacing:2.4px;margin-bottom:14px;text-transform:uppercase}
+  .detail-reqs{display:grid;gap:10px}
+  .detail-req{color:rgba(255,255,255,.72);font-size:13px;line-height:1.65;padding-left:18px;position:relative}
+  .detail-req::before{background:var(--detail-color,var(--gold));border-radius:50%;content:"";height:6px;left:0;position:absolute;top:9px;width:6px}
+  .detail-info{display:grid;gap:10px}
+  .detail-info-row{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:8px;color:rgba(255,255,255,.68);font-size:13px;padding:12px 14px}
+  .detail-info-row strong{color:#fff;display:block;font-size:10px;letter-spacing:1.8px;margin-bottom:3px;text-transform:uppercase}
+  .detail-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+  .detail-primary{background:linear-gradient(135deg,var(--detail-color,var(--gold)),var(--gold-l));color:var(--navy);display:inline-flex;font-size:12px;font-weight:900;letter-spacing:2px;padding:12px 24px;border-radius:6px;text-transform:uppercase}
+  .detail-secondary{border:1px solid rgba(255,255,255,.2);color:#fff;display:inline-flex;font-size:12px;font-weight:800;letter-spacing:2px;padding:11px 22px;border-radius:6px;text-transform:uppercase}
+  .detail-state{background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.16);border-radius:12px;color:rgba(255,255,255,.72);padding:26px;text-align:center}
  
   /* Culture */
   .culture-section{padding:60px 40px;max-width:1000px;margin:0 auto}
@@ -122,10 +157,18 @@
     .steps-grid{grid-template-columns:1fr 1fr}
     .hero-title{font-size:32px}
     .stats{gap:20px}
-    nav{padding:12px 16px}
-    .nav-links a{padding:5px 10px;font-size:10px}
+    section{scroll-margin-top:116px}
+    nav{align-items:flex-start;flex-direction:column;gap:12px;padding:12px 20px}
+    .nav-links{flex-wrap:nowrap;justify-content:flex-start;max-width:100%;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;width:100%;-webkit-overflow-scrolling:touch}
+    .nav-links::-webkit-scrollbar{display:none}
+    .nav-links a{flex:0 0 auto;padding:7px 11px;font-size:12px}
     .hero,.positions-section,.evp-section,.process-section,.cta-section{padding-left:16px;padding-right:16px}
     .job-body-inner{grid-template-columns:1fr}
+    .detail-section{padding-left:16px;padding-right:16px}
+    .detail-head,.detail-grid{grid-template-columns:1fr;padding-left:20px;padding-right:20px}
+    .detail-head{flex-direction:column}
+    .detail-tags{justify-content:flex-start}
+    .detail-title{font-size:28px}
   }
 </style>
 </head>
@@ -134,14 +177,10 @@
 <div class="rainbow-bar"></div>
  
 <!-- Nav -->
-<nav>
-<div class="logo">
-<div class="logo-box">A</div>
-<div class="logo-text">
-<div class="brand">ASIA DRAGON</div>
-<div class="sub">CAPITAL</div>
-</div>
-</div>
+<nav aria-label="Điều hướng chính">
+<a href="#top" class="logo" aria-label="ADC Careers">
+<img class="logo-mark" src="frontend/assets/images/sitelogo.png" alt="Asia Dragon Capital"/>
+</a>
 <div class="nav-links">
 <a href="#ve-adc">Về ADC</a>
 <a href="#co-hoi">Cơ hội</a>
@@ -149,9 +188,54 @@
 <a href="#lien-he">Liên hệ</a>
 </div>
 </nav>
+
+<section id="jobDetailSection" class="detail-section" hidden>
+<div class="detail-inner">
+<a class="back-link" href="htmldemo.html#co-hoi">← Quay lại danh sách vị trí</a>
+<div id="detailLoading" class="detail-state">Đang tải thông tin vị trí...</div>
+<div id="detailNotFound" class="detail-state" hidden>
+Không tìm thấy vị trí này hoặc vị trí đã ngừng tuyển.
+<br/>
+<a href="htmldemo.html#co-hoi" style="color:var(--gold);font-weight:800">Xem tất cả vị trí đang tuyển</a>
+</div>
+<article id="detailCard" class="detail-card" hidden>
+<div class="detail-head">
+<div>
+<div class="detail-kicker">Chi tiết vị trí</div>
+<h1 id="detailTitle" class="detail-title"></h1>
+<div id="detailVn" class="detail-vn"></div>
+</div>
+<div class="detail-tags">
+<span id="detailUrgent" class="detail-tag urgent" hidden>URGENT</span>
+<span id="detailDept" class="detail-tag"></span>
+<span id="detailLevel" class="detail-tag"></span>
+</div>
+</div>
+<div class="detail-grid">
+<div>
+<div class="detail-block-title" id="detailReqTitle">Yêu cầu chính</div>
+<div id="detailReqs" class="detail-reqs"></div>
+</div>
+<div>
+<div class="detail-block-title" id="detailInfoTitle">Thông tin</div>
+<div class="detail-info">
+<div class="detail-info-row"><strong>Địa điểm</strong>KCN Tân Tạo, Q. Bình Tân, TP.HCM</div>
+<div class="detail-info-row"><strong>Báo cáo</strong><span id="detailReport"></span></div>
+<div class="detail-info-row"><strong>Hình thức</strong>Full-time</div>
+<div class="detail-info-row"><strong>Đãi ngộ</strong>Cạnh tranh, thỏa thuận theo năng lực</div>
+</div>
+<div class="detail-actions">
+<a id="detailApply" class="detail-primary" href="mailto:hr@asiadragoncordage.com">Ứng tuyển ngay</a>
+<a class="detail-secondary" href="htmldemo.html#co-hoi">Vị trí khác</a>
+</div>
+</div>
+</div>
+</article>
+</div>
+</section>
  
 <!-- Hero -->
-<section class="hero">
+<section id="top" class="hero">
 <div class="hero-orb" style="background:radial-gradient(circle,rgba(232,54,58,.08),transparent 70%);top:10%;left:5%"></div>
 <div class="hero-orb" style="background:radial-gradient(circle,rgba(245,124,34,.08),transparent 70%);top:22%;left:19%"></div>
 <div class="hero-orb" style="background:radial-gradient(circle,rgba(255,185,0,.08),transparent 70%);top:34%;left:33%"></div>
@@ -319,8 +403,12 @@
 <script>
 const COLORS = { red:"#E8363A", orange:"#F57C22", yellow:"#FFB900", green:"#4CAF50", blue:"#2196F3", indigo:"#5C6BC0", purple:"#9C27B0" };
 const rainbow = [COLORS.red,COLORS.orange,COLORS.yellow,COLORS.green,COLORS.blue,COLORS.indigo,COLORS.purple];
+const API_BASE = window.location.protocol === "file:" ? "http://localhost:5000" : "";
+const PAGE_PATH = window.location.pathname.replaceAll("\\", "/");
+const DEMO_PAGE = PAGE_PATH.split("/").pop() || "htmldemo.html";
+const detailJobId = Number(new URLSearchParams(window.location.search).get("id"));
  
-const positions = [
+let positions = [
   { id:1, title:"Head of Production", vn:"Giám đốc Sản xuất", dept:"Khối Vận hành", level:"Senior Leadership", report:"P.TGĐ Vận hành", urgent:true, color:COLORS.red, reqs:["10+ năm quản lý sản xuất quy mô lớn (>300 CN)","Kinh nghiệm quản lý đa nhà máy (multi-site)","Ngành nhựa / polymer / extrusion là lợi thế lớn","Thành thạo SAP, Lean, 5S, Kaizen","Tiếng Anh giao tiếp tốt"] },
   { id:2, title:"Head of P&O", vn:"Giám đốc Nhân sự & Tổ chức", dept:"People & Organization", level:"Senior Leadership", report:"CEO", urgent:true, color:COLORS.orange, reqs:["7+ năm kinh nghiệm HR management, ưu tiên ngành sản xuất","Kinh nghiệm xây dựng hệ thống HR từ đầu","Hiểu biết về Employer Branding, OD, C&B, L&D","Tiếng Anh tốt (IELTS 6.5+)"] },
   { id:3, title:"International Sales Manager", vn:"Trưởng phòng KD Quốc tế", dept:"Kinh doanh", level:"Management", report:"CEO", urgent:true, color:COLORS.yellow, reqs:["7+ năm B2B sales trong sản xuất/xuất khẩu","Có network khách hàng tại Mỹ, Úc, EU","Tiếng Anh thành thạo (IELTS 7.0+)","Kinh nghiệm Salesforce CRM"] },
@@ -329,37 +417,167 @@ const positions = [
   { id:6, title:"Senior Sales Executive", vn:"Chuyên viên KD Cấp cao", dept:"Kinh doanh", level:"Senior", report:"Sales Manager", urgent:false, color:COLORS.purple, reqs:["3-5 năm sales B2B (export/manufacturing)","Tiếng Anh tốt (IELTS 6.5+)","Kinh nghiệm làm việc với khách hàng quốc tế"] },
 ];
  
-const depts = ["all", ...new Set(positions.map(p => p.dept))];
 let selectedDept = "all";
 let expandedJob = null;
+
+function normalizeRequirements(reqs) {
+  if (Array.isArray(reqs)) return reqs;
+  if (!reqs) return [];
+
+  try {
+    const parsed = JSON.parse(reqs);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return String(reqs).split(/\r?\n/).map(item => item.trim()).filter(Boolean);
+  }
+}
+
+function normalizeJob(job, index = 0) {
+  return {
+    ...job,
+    id: Number(job.id),
+    urgent: Boolean(job.urgent),
+    color: job.color || rainbow[index % rainbow.length],
+    status: job.status || "active",
+    reqs: normalizeRequirements(job.reqs)
+  };
+}
+
+function activePositions() {
+  return positions.filter(job => job.status === "active");
+}
+
+function departments() {
+  return ["all", ...new Set(activePositions().map(job => job.dept))];
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value).replaceAll("`", "&#096;");
+}
+
+function showJobsState(message) {
+  document.getElementById("jobList").innerHTML = `<div class="jobs-state">${escapeHtml(message)}</div>`;
+}
+
+async function loadPositionsFromDatabase() {
+  if (detailJobId) {
+    document.body.classList.add("detail-mode");
+    document.getElementById("jobDetailSection").hidden = false;
+  } else {
+    showJobsState("Dang tai du lieu tuyen dung...");
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/api/jobs`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const result = await response.json();
+    const data = Array.isArray(result) ? result : result.data;
+
+    if (Array.isArray(data)) {
+      positions = data.map(normalizeJob);
+    }
+  } catch (error) {
+    console.warn("Using fallback jobs because /api/jobs is unavailable:", error);
+    positions = positions.map(normalizeJob);
+  }
+
+  selectedDept = "all";
+  expandedJob = null;
+
+  if (detailJobId) {
+    renderDetailPage();
+    return;
+  }
+
+  renderFilters();
+  renderJobs();
+}
+
+function renderDetailPage() {
+  document.body.classList.add("detail-mode");
+  document.getElementById("jobDetailSection").hidden = false;
+
+  document.querySelectorAll('nav a[href^="#"]').forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      window.location.href = `${DEMO_PAGE}${link.getAttribute("href")}`;
+    });
+  });
+
+  const loading = document.getElementById("detailLoading");
+  const notFound = document.getElementById("detailNotFound");
+  const card = document.getElementById("detailCard");
+  const job = activePositions().find(item => item.id === detailJobId);
+
+  loading.hidden = true;
+
+  if (!job) {
+    notFound.hidden = false;
+    document.title = "ADC Careers | Khong tim thay vi tri";
+    return;
+  }
+
+  document.title = `ADC Careers | ${job.title}`;
+  card.style.setProperty("--detail-color", job.color || COLORS.blue);
+  document.getElementById("detailTitle").textContent = job.title;
+  document.getElementById("detailVn").textContent = job.vn || "";
+  document.getElementById("detailUrgent").hidden = !job.urgent;
+  document.getElementById("detailDept").textContent = job.dept || "ADC";
+  document.getElementById("detailLevel").textContent = job.level || "Full-time";
+  document.getElementById("detailReport").textContent = job.report || "P&O";
+  document.getElementById("detailReqs").innerHTML = job.reqs.length
+    ? job.reqs.map(req => `<div class="detail-req">${escapeHtml(req)}</div>`).join("")
+    : '<div class="detail-req">Thong tin yeu cau se duoc cap nhat trong qua trinh trao doi.</div>';
+  document.getElementById("detailApply").href = `mailto:hr@asiadragoncordage.com?subject=${encodeURIComponent(`Ung tuyen - ${job.title}`)}`;
+
+  card.hidden = false;
+}
  
 function renderFilters() {
   const bar = document.getElementById("filterBar");
-  bar.innerHTML = depts.map((d, i) => {
+  bar.innerHTML = departments().map((d, i) => {
     const label = d === "all" ? "Tất cả" : d;
     const color = rainbow[i % 7];
     const isActive = selectedDept === d;
-    return `<button class="filter-btn${isActive?' active':''}" data-dept="${d}" style="${isActive?`--active-color:${color};border-color:${color};color:${color};background:${color}20`:''}" onclick="setDept('${d}')">${label}</button>`;
+    return `<button class="filter-btn${isActive?' active':''}" data-dept="${escapeAttribute(d)}" style="${isActive?`--active-color:${color};border-color:${color};color:${color};background:${color}20`:''}" onclick="setDept(this.dataset.dept)">${escapeHtml(label)}</button>`;
   }).join("");
 }
  
 function renderJobs() {
-  const filtered = selectedDept === "all" ? positions : positions.filter(p => p.dept === selectedDept);
+  const filtered = selectedDept === "all" ? activePositions() : activePositions().filter(p => p.dept === selectedDept);
   const list = document.getElementById("jobList");
+
+  if (!filtered.length) {
+    showJobsState("Chua co vi tri phu hop voi bo loc hien tai.");
+    return;
+  }
+
   list.innerHTML = filtered.map(job => {
     const isOpen = expandedJob === job.id;
+    const applySubject = encodeURIComponent(`Ung tuyen - ${job.title}`);
+    const detailUrl = `${DEMO_PAGE}?id=${encodeURIComponent(job.id)}`;
     return `
-<div class="job-card" style="border-left-color:${job.color}">
+<div class="job-card" style="--job-color:${job.color};border-left-color:${job.color}">
 <div class="job-header" onclick="toggleJob(${job.id})">
 <div class="job-meta">
           ${job.urgent ? `<span class="urgent-badge">URGENT</span>` : ''}
 <div>
-<div class="job-title">${job.title}</div>
-<div class="job-vn" style="color:${job.color}">${job.vn}</div>
+<div class="job-title">${escapeHtml(job.title)}</div>
+<div class="job-vn" style="color:${job.color}">${escapeHtml(job.vn)}</div>
 </div>
 </div>
 <div class="job-right">
-<span class="job-dept-badge">${job.dept}</span>
+<span class="job-dept-badge">${escapeHtml(job.dept)}</span>
 <span class="job-arrow" style="color:${job.color};transform:${isOpen?'rotate(180deg)':'rotate(0)'}">▾</span>
 </div>
 </div>
@@ -367,19 +585,22 @@ function renderJobs() {
 <div class="job-body-inner">
 <div>
 <div class="reqs-label" style="color:${job.color}">YÊU CẦU CHÍNH</div>
-            ${job.reqs.map(r => `<div class="req-item" style="color:rgba(255,255,255,.7)"><style>.req-item::before{color:${job.color}}</style>${r}</div>`).join("")}
+            ${job.reqs.map(r => `<div class="req-item">${escapeHtml(r)}</div>`).join("")}
 </div>
 <div>
 <div class="info-label" style="color:${job.color}">THÔNG TIN</div>
 <div class="info-list">
 <div>📍 KCN Tân Tạo, Q. Bình Tân, TP.HCM</div>
-<div>👤 Báo cáo: ${job.report}</div>
-<div>⏰ Full-time</div>
+<div>👤 Báo cáo: ${escapeHtml(job.report || "P&O")}</div>
+<div>⏰ ${escapeHtml(job.level || "Full-time")}</div>
 <div>💰 Cạnh tranh, thỏa thuận theo năng lực</div>
 </div>
 </div>
 </div>
-<a href="mailto:hr@asiadragoncordage.com" class="apply-btn" style="background:${job.color}">ỨNG TUYỂN NGAY →</a>
+<div class="job-actions">
+<a href="${detailUrl}" class="detail-btn">XEM CHI TIẾT</a>
+<a href="mailto:hr@asiadragoncordage.com?subject=${applySubject}" class="apply-btn" style="background:${job.color}">ỨNG TUYỂN NGAY →</a>
+</div>
 </div>
 </div>`;
   }).join("");
@@ -398,7 +619,7 @@ function toggleJob(id) {
 }
  
 renderFilters();
-renderJobs();
+loadPositionsFromDatabase();
 </script>
 </body>
 </html>
