@@ -147,13 +147,17 @@ svg {
 }
 
 .hero.custom-bg-loaded .hero-overlay {
-  display: none;
+  display: block;
 }
 
 .hero-overlay {
-  background:
-    linear-gradient(90deg, rgba(30, 60, 90, .92) 0%, rgba(30, 60, 90, .78) 48%, rgba(30, 60, 90, .5) 100%),
-    radial-gradient(circle at 72% 18%, rgba(216, 163, 41, .32), transparent 34%);
+  background: linear-gradient(
+    90deg,
+    rgba(3, 14, 28, 0.92) 0%,
+    rgba(5, 21, 42, 0.84) 38%,
+    rgba(7, 29, 52, 0.55) 68%,
+    rgba(7, 29, 52, 0.32) 100%
+  );
   inset: 0;
   position: absolute;
   z-index: 1;
