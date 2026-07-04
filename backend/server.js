@@ -13,6 +13,7 @@ const { ensureSchema } = require("./config/schema");
 const app = express();
 const port = process.env.PORT || 5000;
 const frontendDir = path.join(__dirname, "..", "frontend");
+const htmlDemoFile = path.join(__dirname, "..", "htmldemo.html");
 const uploadsDir = path.join(__dirname, "uploads", "cvs");
 
 fs.mkdirSync(uploadsDir, { recursive: true });
@@ -28,6 +29,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 
 app.use(express.static(frontendDir));
+app.use("/frontend", express.static(frontendDir));
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(frontendDir, "index.html"));
@@ -43,6 +45,10 @@ app.get("/login", (req, res) => {
 
 app.get(["/job", "/job.html"], (req, res) => {
   res.sendFile(path.join(frontendDir, "job.html"));
+});
+
+app.get(["/demo", "/htmldemo", "/htmldemo.html"], (req, res) => {
+  res.sendFile(htmlDemoFile);
 });
 
 app.use((req, res) => {
