@@ -240,10 +240,27 @@ function editJob(id) {
   document.getElementById("dept").value = job.dept || "";
   document.getElementById("level").value = job.level || "";
   document.getElementById("report").value = job.report || "";
+  document.getElementById("slug").value = job.slug || "";
+  document.getElementById("summary").value = job.summary || "";
+  document.getElementById("employmentType").value = job.employmentType || "";
+  document.getElementById("workLocation").value = job.workLocation || "";
+  document.getElementById("locationShort").value = job.locationShort || "";
+  document.getElementById("salaryText").value = job.salaryText || "";
+  document.getElementById("deadline").value = toDateInputValue(job.deadline);
+  document.getElementById("quantity").value = job.quantity || 1;
+  document.getElementById("ageRange").value = job.ageRange || "";
+  document.getElementById("gender").value = job.gender || "";
+  document.getElementById("experienceText").value = job.experienceText || "";
+  document.getElementById("industry").value = job.industry || "";
+  document.getElementById("publishedAt").value = toDateInputValue(job.publishedAt);
   document.getElementById("color").value = job.color || "#2196F3";
   document.getElementById("status").value = job.status || "active";
   document.getElementById("urgent").checked = Boolean(job.urgent);
   document.getElementById("reqs").value = Array.isArray(job.reqs) ? job.reqs.join("\n") : "";
+  document.getElementById("responsibilities").value = arrayToLines(job.responsibilities);
+  document.getElementById("requirementsDetail").value = arrayToLines(job.requirementsDetail);
+  document.getElementById("benefits").value = benefitsToLines(job.benefits);
+  document.getElementById("environmentSections").value = environmentSectionsToLines(job.environmentSections);
   showJobMessage("success", "Đang chỉnh sửa vị trí. Bấm Lưu để cập nhật.");
   setActiveTab("jobs");
   document.getElementById("jobs").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -270,13 +287,30 @@ function getJobPayload() {
     dept: document.getElementById("dept").value.trim(),
     level: document.getElementById("level").value.trim(),
     report: document.getElementById("report").value.trim(),
+    slug: document.getElementById("slug").value.trim(),
+    summary: document.getElementById("summary").value.trim(),
+    employmentType: document.getElementById("employmentType").value.trim(),
+    workLocation: document.getElementById("workLocation").value.trim(),
+    locationShort: document.getElementById("locationShort").value.trim(),
+    salaryText: document.getElementById("salaryText").value.trim(),
+    deadline: document.getElementById("deadline").value,
+    quantity: Number(document.getElementById("quantity").value || 1),
+    ageRange: document.getElementById("ageRange").value.trim(),
+    gender: document.getElementById("gender").value.trim(),
+    experienceText: document.getElementById("experienceText").value.trim(),
+    industry: document.getElementById("industry").value.trim(),
+    publishedAt: document.getElementById("publishedAt").value,
     urgent: document.getElementById("urgent").checked,
     color: document.getElementById("color").value,
     status: document.getElementById("status").value,
     reqs: document.getElementById("reqs").value
       .split(/\r?\n/)
       .map((item) => item.trim())
-      .filter(Boolean)
+      .filter(Boolean),
+    responsibilities: linesToArray(document.getElementById("responsibilities").value),
+    requirementsDetail: linesToArray(document.getElementById("requirementsDetail").value),
+    benefits: linesToBenefits(document.getElementById("benefits").value),
+    environmentSections: linesToEnvironmentSections(document.getElementById("environmentSections").value)
   };
 }
 
@@ -285,8 +319,74 @@ function resetJobForm() {
   document.getElementById("jobId").value = "";
   document.getElementById("color").value = "#2196F3";
   document.getElementById("status").value = "active";
+  document.getElementById("employmentType").value = "Full-time";
+  document.getElementById("workLocation").value = "KCN Tan Tao, Binh Tan, TP.HCM";
+  document.getElementById("locationShort").value = "TP.HCM";
+  document.getElementById("salaryText").value = "Thoa thuan theo nang luc";
+  document.getElementById("quantity").value = "1";
   jobFormMessage.className = "form-message";
   jobFormMessage.textContent = "";
+}
+
+function linesToArray(value) {
+  return String(value || "")
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function arrayToLines(value) {
+  return Array.isArray(value) ? value.join("\n") : "";
+}
+
+function linesToBenefits(value) {
+  return linesToArray(value).map((line) => {
+    const parts = line.split("|");
+    if (parts.length === 1) {
+      return { icon: "*", text: parts[0].trim() };
+    }
+
+    return {
+      icon: parts.shift().trim() || "*",
+      text: parts.join("|").trim()
+    };
+  }).filter((item) => item.text);
+}
+
+function benefitsToLines(value) {
+  if (!Array.isArray(value)) return "";
+  return value
+    .map((item) => `${item.icon || "*"} | ${item.text || ""}`.trim())
+    .filter((line) => line && !line.endsWith("|"))
+    .join("\n");
+}
+
+function linesToEnvironmentSections(value) {
+  return linesToArray(value).map((line) => {
+    const parts = line.split("|");
+    return {
+      title: (parts.shift() || "").trim(),
+      content: parts.join("|").trim()
+    };
+  }).filter((item) => item.title && item.content);
+}
+
+function environmentSectionsToLines(value) {
+  if (!Array.isArray(value)) return "";
+  return value
+    .map((item) => `${item.title || ""} | ${item.content || ""}`.trim())
+    .filter((line) => line && !line.startsWith("|") && !line.endsWith("|"))
+    .join("\n");
+}
+
+function toDateInputValue(value) {
+  if (!value) return "";
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+    return value.slice(0, 10);
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
 }
 
 function showJobMessage(type, message) {

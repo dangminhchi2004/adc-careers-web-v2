@@ -119,13 +119,28 @@
     ];
 
     function normalizeJob(job) {
+      const reqs = normalizeRequirements(job.reqs);
+      const requirementsDetail = normalizeRequirements(job.requirementsDetail || job.requirements_detail);
+
       return {
         ...job,
         id: Number(job.id),
         urgent: Boolean(job.urgent),
         color: job.color || COLORS.blue,
         status: job.status || "active",
-        reqs: normalizeRequirements(job.reqs)
+        employmentType: job.employmentType || job.employment_type || "Full-time",
+        workLocation: job.workLocation || job.work_location || "KCN Tân Tạo, Bình Tân, TP.HCM",
+        locationShort: job.locationShort || job.location_short || "TP.HCM",
+        salaryText: job.salaryText || job.salary_text || "Thỏa thuận theo năng lực",
+        ageRange: job.ageRange || job.age_range || "",
+        experienceText: job.experienceText || job.experience_text || "",
+        publishedAt: job.publishedAt || job.published_at || job.created_at || "",
+        quantity: Number(job.quantity || 1),
+        reqs,
+        responsibilities: normalizeRequirements(job.responsibilities),
+        requirementsDetail: requirementsDetail.length > 0 ? requirementsDetail : reqs,
+        benefits: normalizeBenefits(job.benefits),
+        environmentSections: normalizeEnvironmentSections(job.environmentSections || job.environment_sections)
       };
     }
 
@@ -141,6 +156,43 @@
           .split(/\r?\n/)
           .map((item) => item.trim())
           .filter(Boolean);
+      }
+    }
+
+    function normalizeBenefits(benefits) {
+      const items = normalizeStructuredList(benefits);
+      return items.map((item) => {
+        if (typeof item === "object" && item !== null) {
+          return {
+            icon: item.icon || "*",
+            text: item.text || ""
+          };
+        }
+
+        return {
+          icon: "*",
+          text: String(item || "")
+        };
+      }).filter((item) => item.text);
+    }
+
+    function normalizeEnvironmentSections(sections) {
+      const items = normalizeStructuredList(sections);
+      return items.map((item) => ({
+        title: item && typeof item === "object" ? item.title || "" : "",
+        content: item && typeof item === "object" ? item.content || "" : ""
+      })).filter((item) => item.title && item.content);
+    }
+
+    function normalizeStructuredList(value) {
+      if (Array.isArray(value)) return value;
+      if (!value) return [];
+
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
       }
     }
 

@@ -96,6 +96,58 @@ INSERT INTO `jobs` VALUES (1,'Head of Production','Giám đốc Sản xuất','K
 /*!40000 ALTER TABLE `jobs` ENABLE KEYS */;
 UNLOCK TABLES;
 
+ALTER TABLE `jobs`
+  ADD COLUMN `slug` varchar(180) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  ADD COLUMN `summary` text COLLATE utf8mb4_unicode_ci,
+  ADD COLUMN `employment_type` varchar(80) COLLATE utf8mb4_unicode_ci DEFAULT 'Full-time',
+  ADD COLUMN `work_location` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT 'KCN Tan Tao, Binh Tan, TP.HCM',
+  ADD COLUMN `location_short` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT 'TP.HCM',
+  ADD COLUMN `salary_text` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT 'Thoa thuan theo nang luc',
+  ADD COLUMN `deadline` date DEFAULT NULL,
+  ADD COLUMN `quantity` int DEFAULT '1',
+  ADD COLUMN `age_range` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  ADD COLUMN `gender` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  ADD COLUMN `experience_text` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  ADD COLUMN `industry` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  ADD COLUMN `published_at` date DEFAULT NULL,
+  ADD COLUMN `responsibilities` json DEFAULT NULL,
+  ADD COLUMN `requirements_detail` json DEFAULT NULL,
+  ADD COLUMN `benefits` json DEFAULT NULL,
+  ADD COLUMN `environment_sections` json DEFAULT NULL,
+  ADD UNIQUE KEY `slug` (`slug`);
+
+UPDATE `jobs`
+SET
+  `slug` = LOWER(REPLACE(REPLACE(REPLACE(`title`, '&', 'and'), ' ', '-'), '/', '-')),
+  `summary` = CONCAT('Co hoi dong hanh cung ADC trong vai tro ', `vn`, ', tap trung vao ket qua, nang luc chuyen mon va tinh than cai tien lien tuc.'),
+  `employment_type` = 'Full-time',
+  `work_location` = 'KCN Tan Tao, Binh Tan, TP.HCM',
+  `location_short` = 'TP.HCM',
+  `salary_text` = 'Thoa thuan theo nang luc',
+  `quantity` = 1,
+  `experience_text` = JSON_UNQUOTE(JSON_EXTRACT(`reqs`, '$[0]')),
+  `industry` = `dept`,
+  `responsibilities` = JSON_ARRAY(
+    CONCAT('Dam nhan cac nhiem vu chuyen mon cua vi tri ', `title`, '.'),
+    'Phoi hop voi cac phong ban lien quan de dam bao tien do va chat luong cong viec.',
+    'Theo doi chi so, bao cao ket qua va de xuat giai phap cai tien.',
+    'Chuan hoa tai lieu, quy trinh va chia se tri thuc trong pham vi phu trach.'
+  ),
+  `requirements_detail` = `reqs`,
+  `benefits` = JSON_ARRAY(
+    JSON_OBJECT('icon', '*', 'text', 'Dao tao va phat trien chuyen mon'),
+    JSON_OBJECT('icon', '*', 'text', 'Luong canh tranh theo nang luc'),
+    JSON_OBJECT('icon', '*', 'text', 'Bao hiem va phuc loi theo quy dinh'),
+    JSON_OBJECT('icon', '*', 'text', 'Com trua va cac chinh sach cham soc nhan vien'),
+    JSON_OBJECT('icon', '*', 'text', 'Co hoi tham gia du an cai tien va chuyen doi so'),
+    JSON_OBJECT('icon', '*', 'text', 'Moi truong san xuat hien dai, thuc chien')
+  ),
+  `environment_sections` = JSON_ARRAY(
+    JSON_OBJECT('title', 'Nha may hien dai', 'content', 'ADC van hanh he thong nha may tai KCN Tan Tao voi may moc cong nghe tu nhieu quoc gia.'),
+    JSON_OBJECT('title', 'Chuyen doi so manh me', 'content', 'Moi truong ung dung SAP HANA, Salesforce CRM, Office 365, Power BI va Automation.'),
+    JSON_OBJECT('title', 'Van hoa cai tien', 'content', 'ADC khuyen khich su chu dong, tinh than hoc hoi va nang luc tao gia tri ben vung.')
+  );
+
 --
 -- Table structure for table `users`
 --

@@ -120,6 +120,25 @@
   .detail-primary{background:linear-gradient(135deg,var(--detail-color,var(--gold)),var(--gold-l));color:var(--navy);display:inline-flex;font-size:12px;font-weight:900;letter-spacing:2px;padding:12px 24px;border-radius:6px;text-transform:uppercase}
   .detail-secondary{border:1px solid rgba(255,255,255,.2);color:#fff;display:inline-flex;font-size:12px;font-weight:800;letter-spacing:2px;padding:11px 22px;border-radius:6px;text-transform:uppercase}
   .detail-state{background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.16);border-radius:12px;color:rgba(255,255,255,.72);padding:26px;text-align:center}
+  .detail-summary{color:rgba(255,255,255,.68);font-size:14px;line-height:1.7;margin-top:14px;max-width:680px}
+  .detail-overview{border-top:1px solid rgba(255,255,255,.08);display:grid;gap:12px;grid-template-columns:repeat(4,1fr);padding:24px 32px}
+  .detail-overview-item{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px}
+  .detail-overview-item span{color:rgba(255,255,255,.46);display:block;font-size:9px;font-weight:800;letter-spacing:1.8px;margin-bottom:5px;text-transform:uppercase}
+  .detail-overview-item strong{color:#fff;display:block;font-size:12px;line-height:1.45}
+  .detail-content{border-top:1px solid rgba(255,255,255,.08);display:grid;gap:18px;padding:28px 32px 32px}
+  .detail-content.two-col{grid-template-columns:1fr 1fr}
+  .detail-section-card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:22px}
+  .detail-section-title{color:#fff;font-size:20px;font-weight:900;line-height:1.25;margin-bottom:14px}
+  .detail-benefits{display:grid;gap:10px;grid-template-columns:repeat(3,1fr)}
+  .detail-benefit{align-items:center;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:rgba(255,255,255,.78);display:flex;font-size:12px;font-weight:650;gap:10px;line-height:1.45;padding:13px}
+  .detail-benefit span{align-items:center;background:rgba(255,215,0,.14);border-radius:8px;color:var(--detail-color,var(--gold));display:inline-flex;flex:0 0 30px;font-size:16px;height:30px;justify-content:center}
+  .detail-accordion{display:grid;gap:10px}
+  .detail-accordion details{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:rgba(255,255,255,.72);font-size:13px;line-height:1.65;padding:14px 16px}
+  .detail-accordion summary{color:#fff;cursor:pointer;font-weight:800}
+  .detail-related{display:grid;gap:12px;grid-template-columns:repeat(3,1fr)}
+  .detail-related-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-top:4px solid var(--related-color,var(--gold));border-radius:12px;color:#fff;display:grid;gap:7px;padding:16px}
+  .detail-related-card span,.detail-related-card small{color:rgba(255,255,255,.56);font-size:11px;font-weight:650}
+  .detail-related-card strong{font-size:14px;line-height:1.35}
  
   /* Culture */
   .culture-section{padding:60px 40px;max-width:1000px;margin:0 auto}
@@ -167,6 +186,8 @@
     .job-body-inner{grid-template-columns:1fr}
     .detail-section{padding-left:16px;padding-right:16px}
     .detail-head,.detail-grid{grid-template-columns:1fr;padding-left:20px;padding-right:20px}
+    .detail-overview,.detail-content{padding-left:20px;padding-right:20px}
+    .detail-overview,.detail-content.two-col,.detail-benefits,.detail-related{grid-template-columns:1fr}
     .detail-head{flex-direction:column}
     .detail-tags{justify-content:flex-start}
     .detail-title{font-size:28px}
@@ -432,14 +453,61 @@ function normalizeRequirements(reqs) {
   }
 }
 
+function normalizeStructuredList(value) {
+  if (Array.isArray(value)) return value;
+  if (!value) return [];
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function normalizeBenefits(value) {
+  return normalizeStructuredList(value)
+    .map(item => {
+      if (item && typeof item === "object") {
+        return { icon: item.icon || "•", text: item.text || "" };
+      }
+      return { icon: "•", text: String(item || "") };
+    })
+    .filter(item => item.text);
+}
+
+function normalizeEnvironmentSections(value) {
+  return normalizeStructuredList(value)
+    .map(item => ({
+      title: item && typeof item === "object" ? item.title || "" : "",
+      content: item && typeof item === "object" ? item.content || "" : ""
+    }))
+    .filter(item => item.title && item.content);
+}
+
 function normalizeJob(job, index = 0) {
+  const reqs = normalizeRequirements(job.reqs);
+  const requirementsDetail = normalizeRequirements(job.requirementsDetail || job.requirements_detail);
+
   return {
     ...job,
     id: Number(job.id),
     urgent: Boolean(job.urgent),
     color: job.color || rainbow[index % rainbow.length],
     status: job.status || "active",
-    reqs: normalizeRequirements(job.reqs)
+    employmentType: job.employmentType || job.employment_type || "Full-time",
+    workLocation: job.workLocation || job.work_location || "KCN Tân Tạo, Bình Tân, TP.HCM",
+    locationShort: job.locationShort || job.location_short || "TP.HCM",
+    salaryText: job.salaryText || job.salary_text || "Thỏa thuận theo năng lực",
+    ageRange: job.ageRange || job.age_range || "",
+    experienceText: job.experienceText || job.experience_text || "",
+    publishedAt: job.publishedAt || job.published_at || job.created_at || "",
+    quantity: Number(job.quantity || 1),
+    reqs,
+    responsibilities: normalizeRequirements(job.responsibilities),
+    requirementsDetail: requirementsDetail.length ? requirementsDetail : reqs,
+    benefits: normalizeBenefits(job.benefits),
+    environmentSections: normalizeEnvironmentSections(job.environmentSections || job.environment_sections)
   };
 }
 
@@ -529,18 +597,153 @@ function renderDetailPage() {
 
   document.title = `ADC Careers | ${job.title}`;
   card.style.setProperty("--detail-color", job.color || COLORS.blue);
-  document.getElementById("detailTitle").textContent = job.title;
-  document.getElementById("detailVn").textContent = job.vn || "";
-  document.getElementById("detailUrgent").hidden = !job.urgent;
-  document.getElementById("detailDept").textContent = job.dept || "ADC";
-  document.getElementById("detailLevel").textContent = job.level || "Full-time";
-  document.getElementById("detailReport").textContent = job.report || "P&O";
-  document.getElementById("detailReqs").innerHTML = job.reqs.length
-    ? job.reqs.map(req => `<div class="detail-req">${escapeHtml(req)}</div>`).join("")
-    : '<div class="detail-req">Thong tin yeu cau se duoc cap nhat trong qua trinh trao doi.</div>';
-  document.getElementById("detailApply").href = `mailto:hr@asiadragoncordage.com?subject=${encodeURIComponent(`Ung tuyen - ${job.title}`)}`;
+  card.innerHTML = buildDetailCard(job);
 
   card.hidden = false;
+}
+
+function buildDetailCard(job) {
+  const related = activePositions()
+    .filter(item => item.id !== job.id)
+    .filter(item => item.dept === job.dept || (job.industry && item.industry === job.industry))
+    .slice(0, 3);
+
+  return `
+<div class="detail-head">
+<div>
+<div class="detail-kicker">Chi tiết vị trí ứng tuyển</div>
+<h1 class="detail-title">${escapeHtml(job.vn || job.title)}</h1>
+<div class="detail-vn">${escapeHtml(job.title)} · ${escapeHtml(job.dept || "ADC")}</div>
+<p class="detail-summary">${escapeHtml(job.summary || defaultSummary(job))}</p>
+</div>
+<div class="detail-tags">
+${job.urgent ? '<span class="detail-tag urgent">URGENT</span>' : ""}
+<span class="detail-tag">${escapeHtml(job.locationShort || "TP.HCM")}</span>
+<span class="detail-tag">${escapeHtml(job.employmentType || "Full-time")}</span>
+<span class="detail-tag">${escapeHtml(job.level || "Specialist")}</span>
+</div>
+</div>
+
+<div class="detail-overview">
+${renderOverview("Độ tuổi", job.ageRange || "Không yêu cầu")}
+${renderOverview("Kinh nghiệm", job.experienceText || experienceFallback(job))}
+${renderOverview("Ngành nghề", job.industry || job.dept)}
+${renderOverview("Ngày đăng", formatDate(job.publishedAt))}
+${renderOverview("Số lượng", `${job.quantity || 1} người`)}
+${renderOverview("Báo cáo", job.report || "P&O")}
+${renderOverview("Đãi ngộ", job.salaryText)}
+${renderOverview("Địa điểm", job.workLocation)}
+</div>
+
+<div class="detail-content two-col">
+${renderListSection("Nhiệm vụ chính", job.responsibilities.length ? job.responsibilities : job.reqs)}
+${renderListSection("Tiêu chí tuyển dụng", job.requirementsDetail.length ? job.requirementsDetail : job.reqs)}
+</div>
+
+<div class="detail-content">
+<div class="detail-section-card">
+<div class="detail-block-title">Benefits</div>
+<h2 class="detail-section-title">Quyền lợi</h2>
+<div class="detail-benefits">
+${(job.benefits.length ? job.benefits : defaultBenefits()).map(benefit => `
+<div class="detail-benefit"><span>${escapeHtml(benefit.icon || "•")}</span>${escapeHtml(benefit.text)}</div>
+`).join("")}
+</div>
+</div>
+
+<div class="detail-section-card">
+<div class="detail-block-title">ADC Working Environment</div>
+<h2 class="detail-section-title">Môi trường làm việc tại ADC</h2>
+<div class="detail-accordion">
+${(job.environmentSections.length ? job.environmentSections : defaultEnvironmentSections()).map((section, index) => `
+<details ${index === 0 ? "open" : ""}>
+<summary>${escapeHtml(section.title)}</summary>
+<p>${escapeHtml(section.content)}</p>
+</details>
+`).join("")}
+</div>
+</div>
+
+${related.length ? `
+<div class="detail-section-card">
+<div class="detail-block-title">Open Positions</div>
+<h2 class="detail-section-title">Vị trí tương tự</h2>
+<div class="detail-related">
+${related.map(item => `
+<a class="detail-related-card" href="${DEMO_PAGE}?id=${encodeURIComponent(item.id)}" style="--related-color:${escapeAttribute(item.color || COLORS.blue)}">
+<span>ADC · ${escapeHtml(item.dept)}</span>
+<strong>${escapeHtml(item.title)}</strong>
+<small>${escapeHtml(item.vn)}</small>
+</a>
+`).join("")}
+</div>
+</div>` : ""}
+
+<div class="detail-actions">
+<a class="detail-primary" href="mailto:hr@asiadragoncordage.com?subject=${encodeURIComponent(`Ứng tuyển - ${job.title}`)}">Ứng tuyển ngay</a>
+<a class="detail-secondary" href="${DEMO_PAGE}#co-hoi">Xem vị trí khác</a>
+</div>
+</div>
+`;
+}
+
+function renderOverview(label, value) {
+  return `<div class="detail-overview-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value || "Đang cập nhật")}</strong></div>`;
+}
+
+function renderListSection(title, items) {
+  const list = items.length ? items : ["Thông tin chi tiết sẽ được cập nhật trong quá trình trao đổi."];
+  return `
+<div class="detail-section-card">
+<div class="detail-block-title">${escapeHtml(title)}</div>
+<h2 class="detail-section-title">${escapeHtml(title)}</h2>
+<div class="detail-reqs">
+${list.map(item => `<div class="detail-req">${escapeHtml(item)}</div>`).join("")}
+</div>
+</div>`;
+}
+
+function defaultSummary(job) {
+  return `Cơ hội đồng hành cùng ADC trong vai trò ${job.vn || job.title}, tập trung vào kết quả, năng lực chuyên môn và tinh thần cải tiến liên tục.`;
+}
+
+function experienceFallback(job) {
+  return job.reqs.find(item => /\d|năm|year/i.test(item)) || "Theo mô tả công việc";
+}
+
+function defaultBenefits() {
+  return [
+    { icon: "🎓", text: "Đào tạo và phát triển chuyên môn" },
+    { icon: "💰", text: "Lương cạnh tranh theo năng lực" },
+    { icon: "🛡️", text: "Bảo hiểm và phúc lợi theo quy định" },
+    { icon: "🏭", text: "Môi trường sản xuất hiện đại" },
+    { icon: "📈", text: "Cơ hội tham gia các dự án cải tiến" },
+    { icon: "🤝", text: "Đồng hành cùng đội ngũ quản lý giàu kinh nghiệm" }
+  ];
+}
+
+function defaultEnvironmentSections() {
+  return [
+    {
+      title: "Nhà máy hiện đại",
+      content: "ADC vận hành hệ thống nhà máy tại KCN Tân Tạo với máy móc, quy trình và tiêu chuẩn quản lý hướng đến hiệu suất ổn định."
+    },
+    {
+      title: "Chuyển đổi số trong vận hành",
+      content: "Môi trường ứng dụng SAP HANA, Salesforce CRM, Office 365, Power BI và các giải pháp tự động hóa."
+    },
+    {
+      title: "Văn hóa cải tiến liên tục",
+      content: "ADC khuyến khích tinh thần chủ động, học hỏi, phối hợp liên phòng ban và đề xuất giải pháp tạo giá trị bền vững."
+    }
+  ];
+}
+
+function formatDate(value) {
+  if (!value) return "Đang cập nhật";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Đang cập nhật";
+  return new Intl.DateTimeFormat("vi-VN", { dateStyle: "short" }).format(date);
 }
  
 function renderFilters() {

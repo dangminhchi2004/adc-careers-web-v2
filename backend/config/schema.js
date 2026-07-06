@@ -12,6 +12,23 @@ async function ensureSchema() {
       urgent TINYINT(1) DEFAULT 0,
       color VARCHAR(7) DEFAULT '#2196F3',
       reqs JSON NOT NULL,
+      slug VARCHAR(180) UNIQUE,
+      summary TEXT,
+      employment_type VARCHAR(80) DEFAULT 'Full-time',
+      work_location VARCHAR(255) DEFAULT 'KCN Tân Tạo, Bình Tân, TP.HCM',
+      location_short VARCHAR(100) DEFAULT 'TP.HCM',
+      salary_text VARCHAR(255) DEFAULT 'Thỏa thuận theo năng lực',
+      deadline DATE,
+      quantity INT DEFAULT 1,
+      age_range VARCHAR(50),
+      gender VARCHAR(50),
+      experience_text VARCHAR(255),
+      industry VARCHAR(255),
+      published_at DATE,
+      responsibilities JSON,
+      requirements_detail JSON,
+      benefits JSON,
+      environment_sections JSON,
       status VARCHAR(20) DEFAULT 'active',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
@@ -47,6 +64,23 @@ async function ensureSchema() {
   `);
 
   await addColumnIfMissing("jobs", "status", "VARCHAR(20) DEFAULT 'active'");
+  await addColumnIfMissing("jobs", "slug", "VARCHAR(180) UNIQUE");
+  await addColumnIfMissing("jobs", "summary", "TEXT");
+  await addColumnIfMissing("jobs", "employment_type", "VARCHAR(80) DEFAULT 'Full-time'");
+  await addColumnIfMissing("jobs", "work_location", "VARCHAR(255) DEFAULT 'KCN Tân Tạo, Bình Tân, TP.HCM'");
+  await addColumnIfMissing("jobs", "location_short", "VARCHAR(100) DEFAULT 'TP.HCM'");
+  await addColumnIfMissing("jobs", "salary_text", "VARCHAR(255) DEFAULT 'Thỏa thuận theo năng lực'");
+  await addColumnIfMissing("jobs", "deadline", "DATE");
+  await addColumnIfMissing("jobs", "quantity", "INT DEFAULT 1");
+  await addColumnIfMissing("jobs", "age_range", "VARCHAR(50)");
+  await addColumnIfMissing("jobs", "gender", "VARCHAR(50)");
+  await addColumnIfMissing("jobs", "experience_text", "VARCHAR(255)");
+  await addColumnIfMissing("jobs", "industry", "VARCHAR(255)");
+  await addColumnIfMissing("jobs", "published_at", "DATE");
+  await addColumnIfMissing("jobs", "responsibilities", "JSON");
+  await addColumnIfMissing("jobs", "requirements_detail", "JSON");
+  await addColumnIfMissing("jobs", "benefits", "JSON");
+  await addColumnIfMissing("jobs", "environment_sections", "JSON");
   await addColumnIfMissing("applications", "note", "TEXT");
   await addColumnIfMissing("applications", "cv_original_name", "VARCHAR(255)");
   await addColumnIfMissing("applications", "cv_file_name", "VARCHAR(255)");
