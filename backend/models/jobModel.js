@@ -167,7 +167,7 @@ function normalizeJobPayload(job) {
     urgent: job.urgent ? 1 : 0,
     color: job.color || "#2196F3",
     reqs: parseList(job.reqs),
-    slug: emptyToNull(job.slug),
+    slug: emptyToNull(job.slug) || slugify(job.vn || job.title),
     summary: emptyToNull(job.summary),
     employmentType: String(job.employmentType || job.employment_type || "Full-time").trim(),
     workLocation: String(job.workLocation || job.work_location || "KCN Tân Tạo, Bình Tân, TP.HCM").trim(),
@@ -267,6 +267,20 @@ function emptyToNull(value) {
 function normalizeDate(value) {
   const text = String(value || "").trim();
   return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : null;
+}
+
+function slugify(value) {
+  const slug = String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 180);
+
+  return slug || null;
 }
 
 module.exports = Job;

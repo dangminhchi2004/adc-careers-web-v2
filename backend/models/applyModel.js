@@ -62,6 +62,11 @@ const Application = {
   getAll: async () => {
     const [rows] = await db.query(applicationSelectSql("ORDER BY a.applied_at DESC"));
     return rows;
+  },
+
+  updateStatus: async (id, status) => {
+    await db.query("UPDATE applications SET status = ? WHERE id = ?", [status, id]);
+    return Application.getById(id);
   }
 };
 

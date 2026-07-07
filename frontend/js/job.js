@@ -1,5 +1,8 @@
 
-    const jobId = Number(new URLSearchParams(window.location.search).get("id"));
+    const params = new URLSearchParams(window.location.search);
+    const jobId = Number(params.get("id"));
+    const pathParts = window.location.pathname.split("/").filter(Boolean);
+    const jobSlug = params.get("slug") || (pathParts[0] === "jobs" ? decodeURIComponent(pathParts[1] || "") : "");
     let job = null;
 
     const loadingState = document.getElementById("jobDetailLoading");
@@ -13,7 +16,11 @@
 
     async function init() {
       allJobs = await fetchJobs();
-      job = allJobs.find((item) => item.id === jobId && item.status === "active") || null;
+      job = allJobs.find((item) => {
+        if (item.status !== "active") return false;
+        if (jobSlug) return item.slug === jobSlug;
+        return item.id === jobId;
+      }) || null;
 
       loadingState.hidden = true;
 
@@ -23,6 +30,7 @@
       }
 
       renderJob();
+      updateSeo();
       detailCard.hidden = false;
     }
 
@@ -31,24 +39,34 @@
       document.getElementById("pageTitle").textContent = `ADC Careers | ${job.title}`;
 
       detailCard.innerHTML = `
+        <a class="back-link back-link-inline" href="index.html#co-hoi">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+          Quay lại danh sách vị trí
+        </a>
+
         <div class="job-detail-hero">
-          <div>
+          <div class="job-detail-hero-copy">
             <div class="eyebrow">Chi tiết vị trí</div>
             <h1>${escapeHtml(job.vn || job.title)}</h1>
             <p class="job-detail-sub">${escapeHtml(job.title)} · ${escapeHtml(job.dept)}</p>
             <p class="job-detail-summary">${escapeHtml(job.summary || defaultSummary())}</p>
+            <div class="job-detail-actions">
+              <button class="btn apply-btn" type="button" data-apply-trigger>Ứng tuyển ngay</button>
+              <a class="btn btn-outline detail-mail-btn" href="${mailToHref()}">Gửi email CV</a>
+            </div>
           </div>
-          <div class="job-detail-company">
-            <strong>ADC</strong>
-            <span>ASIA DRAGON CAPITAL</span>
-            <small>Leading Manufacturer Since 2006</small>
+          <div class="job-detail-hero-card">
+            <span class="hero-card-label">ADC Careers</span>
+            <strong>${escapeHtml(job.locationShort || "TP.HCM")}</strong>
+            <span>${escapeHtml(job.employmentType || "Full-time")}</span>
+            <small>${escapeHtml(formatDate(job.deadline) ? `Hạn nộp: ${formatDate(job.deadline)}` : "Hạn nộp: Đang cập nhật")}</small>
           </div>
         </div>
 
         <div class="job-detail-badges">
           ${job.urgent ? '<span class="urgent-badge">Urgent</span>' : ""}
-          <span class="job-pill">${escapeHtml(job.locationShort)}</span>
-          <span class="job-pill">${escapeHtml(job.employmentType)}</span>
+          <span class="job-pill">${escapeHtml(job.locationShort || job.workLocation || "TP.HCM")}</span>
+          <span class="job-pill">${escapeHtml(job.employmentType || "Full-time")}</span>
           <span class="job-pill">${escapeHtml(job.level)}</span>
           <span class="job-pill">Báo cáo: ${escapeHtml(job.report)}</span>
         </div>
@@ -59,14 +77,12 @@
               <div class="detail-label">Tổng quan</div>
               <h2>Thông tin tổng quan</h2>
               <div class="overview-grid">
-                ${renderOverviewItem("Độ tuổi", job.ageRange || "Không yêu cầu")}
-                ${renderOverviewItem("Kinh nghiệm", job.experienceText || experienceFallback())}
-                ${renderOverviewItem("Ngành nghề", job.industry || job.dept)}
-                ${renderOverviewItem("Ngày đăng", formatDate(job.publishedAt || job.created_at))}
-                ${renderOverviewItem("Chức vụ", job.level)}
-                ${renderOverviewItem("Bộ phận", job.dept)}
-                ${renderOverviewItem("Đãi ngộ", job.salaryText)}
-                ${renderOverviewItem("Địa điểm", job.workLocation)}
+                ${renderOverviewItem("Địa điểm", job.workLocation || "KCN Tân Tạo, Bình Tân, TP.HCM", "pin")}
+                ${renderOverviewItem("Kinh nghiệm", job.experienceText || experienceFallback(), "briefcase")}
+                ${renderOverviewItem("Bộ phận", job.dept, "team")}
+                ${renderOverviewItem("Đãi ngộ", job.salaryText || "Thỏa thuận theo năng lực", "salary")}
+                ${renderOverviewItem("Hạn nộp", formatDate(job.deadline) || "Đang cập nhật", "calendar")}
+                ${renderOverviewItem("Số lượng", `${Number(job.quantity || 1)} vị trí`, "users")}
               </div>
             </section>
 
@@ -80,16 +96,17 @@
           <aside class="detail-sidebar">
             <section class="detail-panel apply-panel">
               <h2>Ứng tuyển vị trí này</h2>
-              <p>Gửi CV kèm mức lương kỳ vọng. Đội ngũ P&O sẽ phản hồi sau khi sàng lọc hồ sơ.</p>
+              <p>Gửi CV kèm mức lương kỳ vọng. Đội ngũ P&O sẽ liên hệ sau khi sàng lọc hồ sơ phù hợp.</p>
               <div class="deadline-box">
                 <span>Hạn nhận hồ sơ</span>
                 <strong>${escapeHtml(formatDate(job.deadline) || "Đang cập nhật")}</strong>
               </div>
-              <button class="btn apply-btn" type="button" id="jdApplyBtn">Ứng tuyển ngay</button>
-              <a class="btn btn-outline detail-mail-btn" href="mailto:hr@asiadragoncordage.com?subject=${encodeURIComponent(`Ứng tuyển - ${job.title}`)}">Gửi email CV</a>
+              <button class="btn apply-btn" type="button" data-apply-trigger>Ứng tuyển ngay</button>
+              <a class="btn btn-outline detail-mail-btn" href="${mailToHref()}">Gửi email CV</a>
+              <div class="apply-note">Không mất quá 2 phút để gửi hồ sơ trực tuyến.</div>
             </section>
 
-            <section class="detail-panel">
+            <section class="detail-panel contact-panel">
               <div class="detail-label">Contact</div>
               <h2>Liên hệ tuyển dụng</h2>
               <div class="info-list">
@@ -102,16 +119,71 @@
         </div>
       `;
 
-      document.getElementById("jdApplyBtn").addEventListener("click", openApplyModal);
+      detailCard.querySelectorAll("[data-apply-trigger]").forEach((button) => {
+        button.addEventListener("click", openApplyModal);
+      });
     }
 
-    function renderOverviewItem(label, value) {
+    function updateSeo() {
+      const title = `ADC Careers | ${job.vn || job.title}`;
+      const description = job.summary || `Ứng tuyển vị trí ${job.vn || job.title} tại ADC. Địa điểm ${job.workLocation}, hình thức ${job.employmentType}.`;
+      const canonicalUrl = new URL(jobUrl(job), window.location.origin).href;
+
+      document.title = title;
+      document.getElementById("pageTitle").textContent = title;
+      document.getElementById("metaDescription").setAttribute("content", description);
+      document.getElementById("ogTitle").setAttribute("content", title);
+      document.getElementById("ogDescription").setAttribute("content", description);
+      document.getElementById("canonicalLink").setAttribute("href", canonicalUrl);
+      document.getElementById("jobPostingJsonLd").textContent = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "JobPosting",
+        title: job.vn || job.title,
+        description,
+        datePosted: toIsoDate(job.publishedAt || job.created_at),
+        validThrough: toIsoDate(job.deadline),
+        employmentType: job.employmentType || "FULL_TIME",
+        hiringOrganization: {
+          "@type": "Organization",
+          name: "Asia Dragon Capital (ADC)",
+          sameAs: window.location.origin
+        },
+        jobLocation: {
+          "@type": "Place",
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: job.locationShort || "TP.HCM",
+            addressCountry: "VN",
+            streetAddress: job.workLocation || "KCN Tân Tạo, Bình Tân, TP.HCM"
+          }
+        }
+      });
+    }
+
+    function mailToHref() {
+      return `mailto:hr@asiadragoncordage.com?subject=${encodeURIComponent(`Ứng tuyển - ${job.title}`)}`;
+    }
+
+    function renderOverviewItem(label, value, iconName) {
       return `
         <div class="overview-item">
-          <span>${escapeHtml(label)}</span>
+          <span class="overview-icon" aria-hidden="true">${overviewIcon(iconName)}</span>
+          <span class="overview-label">${escapeHtml(label)}</span>
           <strong>${escapeHtml(value || "Đang cập nhật")}</strong>
         </div>
       `;
+    }
+
+    function overviewIcon(name) {
+      const icons = {
+        pin: '<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 1 1 18 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>',
+        briefcase: '<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path></svg>',
+        team: '<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
+        salary: '<svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"></rect><circle cx="12" cy="12" r="3"></circle><path d="M6 12h.01M18 12h.01"></path></svg>',
+        calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>',
+        users: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path></svg>'
+      };
+      return icons[name] || icons.briefcase;
     }
 
     function renderListPanel(kicker, title, items) {
@@ -121,7 +193,7 @@
           <div class="detail-label">${escapeHtml(kicker)}</div>
           <h2>${escapeHtml(title)}</h2>
           <div class="req-list">
-            ${list.map((item) => `<div class="req-item">${escapeHtml(item)}</div>`).join("")}
+            ${list.map((item) => `<div class="req-item"><span aria-hidden="true"></span><p>${escapeHtml(item)}</p></div>`).join("")}
           </div>
         </section>
       `;
@@ -137,7 +209,7 @@
             ${benefits.map((benefit) => `
               <div class="benefit-item">
                 <span>${escapeHtml(benefit.icon || "*")}</span>
-                ${escapeHtml(benefit.text)}
+                <p>${escapeHtml(benefit.text)}</p>
               </div>
             `).join("")}
           </div>
@@ -177,7 +249,7 @@
           <h2>Vị trí tương tự</h2>
           <div class="related-grid">
             ${related.map((item) => `
-              <a class="related-card" href="job.html?id=${item.id}" style="--job-color:${escapeAttribute(item.color)}">
+              <a class="related-card" href="${jobUrl(item)}" style="--job-color:${escapeAttribute(item.color)}">
                 <span>ADC · ${escapeHtml(item.dept)}</span>
                 <strong>${escapeHtml(item.title)}</strong>
                 <small>${escapeHtml(item.vn)}</small>
@@ -199,12 +271,12 @@
 
     function defaultBenefits() {
       return [
-        { icon: "🎓", text: "Đào tạo và phát triển chuyên môn" },
-        { icon: "💰", text: "Lương cạnh tranh theo năng lực" },
-        { icon: "🛡️", text: "Bảo hiểm và phúc lợi theo quy định" },
-        { icon: "🏭", text: "Môi trường sản xuất hiện đại" },
-        { icon: "📈", text: "Cơ hội tham gia các dự án cải tiến" },
-        { icon: "🤝", text: "Đồng hành cùng đội ngũ quản lý giàu kinh nghiệm" }
+        { icon: "+", text: "Đào tạo và phát triển chuyên môn" },
+        { icon: "$", text: "Lương cạnh tranh theo năng lực" },
+        { icon: "✓", text: "Bảo hiểm và phúc lợi theo quy định" },
+        { icon: "A", text: "Môi trường sản xuất hiện đại" },
+        { icon: "↗", text: "Cơ hội tham gia các dự án cải tiến" },
+        { icon: "P", text: "Đồng hành cùng đội ngũ quản lý giàu kinh nghiệm" }
       ];
     }
 
@@ -230,6 +302,13 @@
       const date = new Date(value);
       if (Number.isNaN(date.getTime())) return "";
       return new Intl.DateTimeFormat("vi-VN", { dateStyle: "short" }).format(date);
+    }
+
+    function toIsoDate(value) {
+      if (!value) return undefined;
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return undefined;
+      return date.toISOString().slice(0, 10);
     }
 
     function openApplyModal() {
@@ -378,6 +457,10 @@
 
         showFormMessage("success", "Hồ sơ đã được ghi nhận. Đội ngũ P&O sẽ liên hệ khi có cập nhật phù hợp.");
         applyForm.reset();
+        const thankYouUrl = new URL("/thank-you.html", window.location.origin);
+        thankYouUrl.searchParams.set("job", job.vn || job.title);
+        thankYouUrl.searchParams.set("slug", job.slug || "");
+        window.location.href = thankYouUrl.href;
       } catch (error) {
         const message = error instanceof TypeError
           ? "Không kết nối được server. Vui lòng kiểm tra backend đang chạy ở http://localhost:5000."

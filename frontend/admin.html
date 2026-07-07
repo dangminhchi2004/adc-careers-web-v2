@@ -91,51 +91,51 @@
               <input id="slug" name="slug" type="text" placeholder="automation-engineer" />
             </label>
             <label>
-              <span>Hinh thuc lam viec</span>
+              <span>Hình thức làm việc</span>
               <input id="employmentType" name="employmentType" type="text" placeholder="Full-time" />
             </label>
             <label class="full">
-              <span>Mo ta ngan</span>
-              <textarea id="summary" name="summary" placeholder="Mo ta ngan hien thi o hero trang chi tiet"></textarea>
+              <span>Mô tả ngắn</span>
+              <textarea id="summary" name="summary" placeholder="Mô tả ngắn hiển thị ở đầu trang chi tiết"></textarea>
             </label>
             <label>
-              <span>Dia diem day du</span>
-              <input id="workLocation" name="workLocation" type="text" placeholder="KCN Tan Tao, Binh Tan, TP.HCM" />
+              <span>Địa điểm đầy đủ</span>
+              <input id="workLocation" name="workLocation" type="text" placeholder="KCN Tân Tạo, Bình Tân, TP.HCM" />
             </label>
             <label>
-              <span>Dia diem ngan</span>
+              <span>Địa điểm ngắn</span>
               <input id="locationShort" name="locationShort" type="text" placeholder="TP.HCM" />
             </label>
             <label>
-              <span>Dai ngo / Luong</span>
-              <input id="salaryText" name="salaryText" type="text" placeholder="Thoa thuan theo nang luc" />
+              <span>Đãi ngộ / Lương</span>
+              <input id="salaryText" name="salaryText" type="text" placeholder="Thỏa thuận theo năng lực" />
             </label>
             <label>
-              <span>Han nhan ho so</span>
+              <span>Hạn nhận hồ sơ</span>
               <input id="deadline" name="deadline" type="date" />
             </label>
             <label>
-              <span>So luong tuyen</span>
+              <span>Số lượng tuyển</span>
               <input id="quantity" name="quantity" type="number" min="1" value="1" />
             </label>
             <label>
-              <span>Do tuoi</span>
+              <span>Độ tuổi</span>
               <input id="ageRange" name="ageRange" type="text" placeholder="25 - 35" />
             </label>
             <label>
-              <span>Gioi tinh</span>
-              <input id="gender" name="gender" type="text" placeholder="Nam/Nu/Khong yeu cau" />
+              <span>Giới tính</span>
+              <input id="gender" name="gender" type="text" placeholder="Nam/Nữ/Không yêu cầu" />
             </label>
             <label>
-              <span>Kinh nghiem</span>
-              <input id="experienceText" name="experienceText" type="text" placeholder="3+ nam PLC / SCADA / HMI" />
+              <span>Kinh nghiệm</span>
+              <input id="experienceText" name="experienceText" type="text" placeholder="3+ năm PLC / SCADA / HMI" />
             </label>
             <label>
-              <span>Nganh nghe</span>
-              <input id="industry" name="industry" type="text" placeholder="Ky thuat - Tu dong hoa" />
+              <span>Ngành nghề</span>
+              <input id="industry" name="industry" type="text" placeholder="Kỹ thuật - Tự động hóa" />
             </label>
             <label>
-              <span>Ngay dang hien thi</span>
+              <span>Ngày đăng hiển thị</span>
               <input id="publishedAt" name="publishedAt" type="date" />
             </label>
             <label>
@@ -145,8 +145,8 @@
             <label>
               <span>Trạng thái</span>
               <select id="status" name="status">
-                <option value="active">Active</option>
-                <option value="closed">Closed</option>
+                <option value="active">Đang tuyển</option>
+                <option value="closed">Đã đóng</option>
               </select>
             </label>
             <label class="check-row">
@@ -158,20 +158,20 @@
               <textarea id="reqs" name="reqs" required placeholder="Mỗi dòng là một yêu cầu"></textarea>
             </label>
             <label class="full">
-              <span>Nhiem vu chinh</span>
-              <textarea id="responsibilities" name="responsibilities" placeholder="Moi dong la mot nhiem vu"></textarea>
+              <span>Nhiệm vụ chính</span>
+              <textarea id="responsibilities" name="responsibilities" placeholder="Mỗi dòng là một nhiệm vụ"></textarea>
             </label>
             <label class="full">
-              <span>Tieu chi / tieu chuan chi tiet</span>
-              <textarea id="requirementsDetail" name="requirementsDetail" placeholder="Moi dong la mot tieu chi"></textarea>
+              <span>Tiêu chí / tiêu chuẩn chi tiết</span>
+              <textarea id="requirementsDetail" name="requirementsDetail" placeholder="Mỗi dòng là một tiêu chí"></textarea>
             </label>
             <label class="full">
-              <span>Quyen loi</span>
-              <textarea id="benefits" name="benefits" placeholder="Moi dong: icon | noi dung. Vi du: * | Luong canh tranh"></textarea>
+              <span>Quyền lợi</span>
+              <textarea id="benefits" name="benefits" placeholder="Mỗi dòng: icon | nội dung. Ví dụ: * | Lương cạnh tranh"></textarea>
             </label>
             <label class="full">
-              <span>Moi truong ADC</span>
-              <textarea id="environmentSections" name="environmentSections" placeholder="Moi dong: Tieu de | Noi dung"></textarea>
+              <span>Môi trường ADC</span>
+              <textarea id="environmentSections" name="environmentSections" placeholder="Mỗi dòng: Tiêu đề | Nội dung"></textarea>
             </label>
           </div>
           <div id="jobFormMessage" class="form-message" role="status"></div>
@@ -203,7 +203,10 @@
             <h2>Hồ sơ ứng viên</h2>
             <p id="applicationFilterSummary" class="panel-summary">Hiển thị tất cả hồ sơ.</p>
           </div>
-          <button id="resetApplicationFiltersBtn" class="btn btn-secondary" type="button">Xóa lọc</button>
+          <div class="panel-actions">
+            <button id="exportApplicationsBtn" class="btn btn-primary" type="button">Xuất CSV</button>
+            <button id="resetApplicationFiltersBtn" class="btn btn-secondary" type="button">Xóa lọc</button>
+          </div>
         </div>
 
         <form id="applicationFilters" class="filter-panel">
@@ -227,7 +230,12 @@
             <span>Trạng thái hồ sơ</span>
             <select id="applicationStatusFilter">
               <option value="all">Tất cả trạng thái</option>
-              <option value="new">New</option>
+              <option value="new">Mới</option>
+              <option value="screening">Sàng lọc</option>
+              <option value="interview">Phỏng vấn</option>
+              <option value="offer">Đề nghị</option>
+              <option value="hired">Đã nhận</option>
+              <option value="rejected">Từ chối</option>
             </select>
           </label>
           <label>
@@ -265,6 +273,7 @@
                 <th>Liên hệ</th>
                 <th>Vị trí</th>
                 <th>Lương kỳ vọng</th>
+                <th>Trạng thái</th>
                 <th>CV</th>
                 <th>Ngày gửi</th>
               </tr>

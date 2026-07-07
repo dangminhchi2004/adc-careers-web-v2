@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title id="pageTitle">ADC Careers | Chi tiết vị trí</title>
+  <base href="/" />
+  <meta id="metaDescription" name="description" content="Xem chi tiết vị trí tuyển dụng tại ADC và gửi hồ sơ ứng tuyển trực tuyến." />
+  <meta id="ogTitle" property="og:title" content="ADC Careers | Chi tiết vị trí" />
+  <meta id="ogDescription" property="og:description" content="Xem chi tiết vị trí tuyển dụng tại ADC và gửi hồ sơ ứng tuyển trực tuyến." />
+  <meta property="og:type" content="article" />
+  <link id="canonicalLink" rel="canonical" href="" />
   <link rel="icon" type="image/png" href="assets/images/sitelogomini.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -29,11 +35,6 @@
   <main id="top">
     <section class="section positions job-detail" data-bg-image="assets/images/bg-co-hoi.png">
       <div class="section-inner">
-        <a class="back-link" href="index.html#co-hoi">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
-          Quay lại danh sách vị trí
-        </a>
-
         <div id="jobDetailLoading" class="job-detail-state">Đang tải thông tin vị trí...</div>
 
         <div id="jobDetailNotFound" class="job-detail-state" hidden>
@@ -42,39 +43,7 @@
           <a href="index.html#co-hoi">Xem tất cả vị trí đang tuyển</a>
         </div>
 
-        <article id="jobDetail" class="job-detail-card rich-job-detail" hidden>
-          <div class="job-detail-head">
-            <span class="job-main">
-              <span id="jdUrgent" class="urgent-badge" hidden>Urgent</span>
-              <span>
-                <span id="jdTitle" class="job-title"></span>
-                <span id="jdVn" class="job-vn"></span>
-              </span>
-            </span>
-            <span class="job-side">
-              <span id="jdDept" class="job-pill"></span>
-              <span id="jdLevel" class="job-pill"></span>
-            </span>
-          </div>
-
-          <div class="job-body-inner">
-            <div>
-              <div class="detail-label">Yêu cầu chính</div>
-              <div id="jdReqs" class="req-list"></div>
-            </div>
-            <div>
-              <div class="detail-label">Thông tin</div>
-              <div class="info-list">
-                <div><strong>Địa điểm:</strong> KCN Tân Tạo, Bình Tân, TP.HCM</div>
-                <div><strong>Báo cáo:</strong> <span id="jdReport"></span></div>
-                <div><strong>Hình thức:</strong> Full-time</div>
-                <div><strong>Đãi ngộ:</strong> Cạnh tranh, thỏa thuận theo năng lực</div>
-              </div>
-            </div>
-          </div>
-
-          <button class="btn apply-btn" type="button" id="jdApplyBtn">Ứng tuyển ngay</button>
-        </article>
+        <article id="jobDetail" class="job-detail-card rich-job-detail" hidden></article>
       </div>
     </section>
   </main>
@@ -144,6 +113,7 @@
 
   <script src="js/config.js"></script>
   <script src="js/shared.js"></script>
+  <script id="jobPostingJsonLd" type="application/ld+json"></script>
   <script src="js/job.js"></script>
 </body>
 </html>

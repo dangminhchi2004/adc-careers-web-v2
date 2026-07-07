@@ -8,6 +8,20 @@ if (!token) {
 let jobs = [];
 let applications = [];
 
+const APPLICATION_STATUSES = [
+  { value: "new", label: "Mới" },
+  { value: "screening", label: "Sàng lọc" },
+  { value: "interview", label: "Phỏng vấn" },
+  { value: "offer", label: "Đề nghị" },
+  { value: "hired", label: "Đã nhận" },
+  { value: "rejected", label: "Từ chối" }
+];
+
+const JOB_STATUS_LABELS = {
+  active: "Đang tuyển",
+  closed: "Đã đóng"
+};
+
 const jobForm = document.getElementById("jobForm");
 const jobFormMessage = document.getElementById("jobFormMessage");
 const jobsTable = document.getElementById("jobsTable");
@@ -25,11 +39,13 @@ const applicationCvTypeFilter = document.getElementById("applicationCvTypeFilter
 const applicationSalaryFilter = document.getElementById("applicationSalaryFilter");
 const applicationDateFrom = document.getElementById("applicationDateFrom");
 const applicationDateTo = document.getElementById("applicationDateTo");
+const exportApplicationsBtn = document.getElementById("exportApplicationsBtn");
 
 document.getElementById("refreshBtn").addEventListener("click", loadDashboard);
 document.getElementById("resetJobFormBtn").addEventListener("click", resetJobForm);
 document.getElementById("logoutBtn").addEventListener("click", logout);
 document.getElementById("resetApplicationFiltersBtn").addEventListener("click", resetApplicationFilters);
+exportApplicationsBtn.addEventListener("click", exportFilteredApplications);
 document.querySelectorAll("[data-tab-target]").forEach((button) => {
   button.addEventListener("click", () => setActiveTab(button.dataset.tabTarget));
 });
@@ -131,7 +147,7 @@ function renderJobs() {
       </td>
       <td data-label="Phòng ban">${escapeHtml(job.dept)}</td>
       <td data-label="Cấp bậc">${escapeHtml(job.level)}</td>
-      <td data-label="Trạng thái"><span class="pill ${escapeAttribute(job.status)}">${escapeHtml(job.status)}</span></td>
+      <td data-label="Trạng thái"><span class="pill ${escapeAttribute(job.status)}">${escapeHtml(formatJobStatus(job.status))}</span></td>
       <td data-label="Thao tác">
         <div class="row-actions">
           <button class="btn btn-secondary" type="button" onclick="editJob(${job.id})">Sửa</button>
@@ -147,12 +163,12 @@ function renderApplications() {
   updateApplicationFilterSummary(filteredApplications.length);
 
   if (applications.length === 0) {
-    applicationsTable.innerHTML = emptyRow("Chưa có hồ sơ ứng viên.", 6);
+    applicationsTable.innerHTML = emptyRow("Chưa có hồ sơ ứng viên.", 7);
     return;
   }
 
   if (filteredApplications.length === 0) {
-    applicationsTable.innerHTML = emptyRow("Không có hồ sơ phù hợp với bộ lọc.", 6);
+    applicationsTable.innerHTML = emptyRow("Không có hồ sơ phù hợp với bộ lọc.", 7);
     return;
   }
 
@@ -171,10 +187,33 @@ function renderApplications() {
         <div class="table-sub">${escapeHtml(application.jobTitleVn || "")}</div>
       </td>
       <td data-label="Lương kỳ vọng">${escapeHtml(application.expectedSalary || "Chưa cung cấp")}</td>
+      <td data-label="Trạng thái">${renderApplicationStatus(application)}</td>
       <td data-label="CV">${renderCvLink(application)}</td>
       <td data-label="Ngày gửi">${formatDate(application.appliedAt)}</td>
     </tr>
   `).join("");
+}
+
+function renderApplicationStatus(application) {
+  const currentStatus = application.status || "new";
+  const options = APPLICATION_STATUSES.map((status) => `
+    <option value="${status.value}" ${status.value === currentStatus ? "selected" : ""}>${status.label}</option>
+  `).join("");
+
+  return `
+    <select class="status-select pill ${escapeAttribute(currentStatus)}" onchange="updateApplicationStatus(${application.id}, this.value)">
+      ${options}
+    </select>
+  `;
+}
+
+function formatApplicationStatus(status) {
+  const foundStatus = APPLICATION_STATUSES.find((item) => item.value === status);
+  return foundStatus ? foundStatus.label : status;
+}
+
+function formatJobStatus(status) {
+  return JOB_STATUS_LABELS[status] || status;
 }
 
 function renderCvLink(application) {
@@ -228,6 +267,76 @@ async function downloadCv(event, applicationId) {
   } catch (error) {
     window.alert(error.message || "Không thể tải CV.");
   }
+}
+
+async function updateApplicationStatus(applicationId, status) {
+  const application = applications.find((item) => item.id === applicationId);
+  const previousStatus = application ? application.status || "new" : "new";
+
+  try {
+    const result = await requestJson(`${API_BASE}/api/admin/applications/${applicationId}/status`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status })
+    });
+
+    if (!result.success) throw new Error(result.message || "Không thể cập nhật trạng thái hồ sơ.");
+    applications = applications.map((item) => item.id === applicationId ? result.data : item);
+    renderMetrics();
+    renderApplicationFilterOptions();
+    renderApplications();
+  } catch (error) {
+    if (application) application.status = previousStatus;
+    renderApplications();
+    window.alert(error.message || "Không thể cập nhật trạng thái hồ sơ.");
+  }
+}
+
+function exportFilteredApplications() {
+  const filteredApplications = getFilteredApplications();
+  if (filteredApplications.length === 0) {
+    window.alert("Không có hồ sơ phù hợp để xuất.");
+    return;
+  }
+
+  const headers = [
+    "ID",
+    "Họ tên",
+    "Email",
+    "Điện thoại",
+    "Vị trí",
+    "Phòng ban",
+    "Lương kỳ vọng",
+    "Trạng thái",
+    "CV",
+    "Ngày gửi",
+    "Ghi chú"
+  ];
+  const rows = filteredApplications.map((application) => [
+    application.id,
+    application.fullName,
+    application.email,
+    application.phone,
+    application.jobTitle || application.jobTitleVn || "",
+    application.jobDept || "",
+    application.expectedSalary || "",
+      formatApplicationStatus(application.status || "new"),
+    application.cvOriginalName || application.cvFileName || "",
+    application.appliedAt ? new Date(application.appliedAt).toISOString() : "",
+    application.note || ""
+  ]);
+  const csv = [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
+  const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const date = new Date().toISOString().slice(0, 10);
+
+  link.href = url;
+  link.download = `adc-careers-applications-${date}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 function editJob(id) {
@@ -320,9 +429,9 @@ function resetJobForm() {
   document.getElementById("color").value = "#2196F3";
   document.getElementById("status").value = "active";
   document.getElementById("employmentType").value = "Full-time";
-  document.getElementById("workLocation").value = "KCN Tan Tao, Binh Tan, TP.HCM";
+  document.getElementById("workLocation").value = "KCN Tân Tạo, Bình Tân, TP.HCM";
   document.getElementById("locationShort").value = "TP.HCM";
-  document.getElementById("salaryText").value = "Thoa thuan theo nang luc";
+  document.getElementById("salaryText").value = "Thỏa thuận theo năng lực";
   document.getElementById("quantity").value = "1";
   jobFormMessage.className = "form-message";
   jobFormMessage.textContent = "";
@@ -423,12 +532,7 @@ function renderApplicationFilterOptions() {
     "Tất cả phòng ban",
     uniqueSorted(applications.map((application) => application.jobDept).filter(Boolean))
   );
-  renderSelectOptions(
-    applicationStatusFilter,
-    "all",
-    "Tất cả trạng thái",
-    uniqueSorted(applications.map((application) => application.status).filter(Boolean))
-  );
+  renderStatusFilterOptions();
 }
 
 function renderSelectOptions(selectElement, allValue, allLabel, values) {
@@ -438,6 +542,15 @@ function renderSelectOptions(selectElement, allValue, allLabel, values) {
     ...values.map((value) => `<option value="${escapeAttribute(value)}">${escapeHtml(value)}</option>`)
   ].join("");
   selectElement.value = values.includes(currentValue) || currentValue === allValue ? currentValue : allValue;
+}
+
+function renderStatusFilterOptions() {
+  const currentValue = applicationStatusFilter.value || "all";
+  applicationStatusFilter.innerHTML = [
+    '<option value="all">Tất cả trạng thái</option>',
+    ...APPLICATION_STATUSES.map((status) => `<option value="${status.value}">${escapeHtml(status.label)}</option>`)
+  ].join("");
+  applicationStatusFilter.value = APPLICATION_STATUSES.some((status) => status.value === currentValue) ? currentValue : "all";
 }
 
 function getFilteredApplications() {
@@ -534,6 +647,10 @@ function formatDate(value) {
   }).format(new Date(value));
 }
 
+function csvCell(value) {
+  return `"${String(value ?? "").replaceAll('"', '""')}"`;
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -550,5 +667,6 @@ function escapeAttribute(value) {
 window.editJob = editJob;
 window.deleteJob = deleteJob;
 window.downloadCv = downloadCv;
+window.updateApplicationStatus = updateApplicationStatus;
 
 loadDashboard();

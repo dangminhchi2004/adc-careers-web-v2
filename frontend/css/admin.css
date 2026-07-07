@@ -214,6 +214,13 @@ button {
   padding: 24px;
 }
 
+.panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .panel h2 {
   font-size: 26px;
 }
@@ -423,6 +430,27 @@ tr:last-child td {
   color: #4b5563;
 }
 
+.pill.screening,
+.pill.interview {
+  background: rgba(31, 63, 134, .12);
+  color: var(--primary);
+}
+
+.pill.offer,
+.pill.hired {
+  background: rgba(21, 128, 61, .1);
+  color: var(--success);
+}
+
+.pill.rejected {
+  background: rgba(220, 38, 38, .1);
+  color: var(--danger);
+}
+
+.status-select {
+  min-width: 142px;
+}
+
 .row-actions {
   display: flex;
   flex-wrap: wrap;
@@ -534,6 +562,10 @@ tr:last-child td {
 
   .admin-hero .btn,
   .panel-head .btn {
+    width: 100%;
+  }
+
+  .panel-actions {
     width: 100%;
   }
 

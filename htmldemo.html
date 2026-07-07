@@ -424,10 +424,12 @@ Không tìm thấy vị trí này hoặc vị trí đã ngừng tuyển.
 <script>
 const COLORS = { red:"#E8363A", orange:"#F57C22", yellow:"#FFB900", green:"#4CAF50", blue:"#2196F3", indigo:"#5C6BC0", purple:"#9C27B0" };
 const rainbow = [COLORS.red,COLORS.orange,COLORS.yellow,COLORS.green,COLORS.blue,COLORS.indigo,COLORS.purple];
-const API_BASE = window.location.protocol === "file:" ? "http://localhost:5000" : "";
+const API_BASE = window.ADC_API_BASE ?? (window.location.protocol === "file:" ? "http://localhost:5000" : "");
 const PAGE_PATH = window.location.pathname.replaceAll("\\", "/");
 const DEMO_PAGE = PAGE_PATH.split("/").pop() || "htmldemo.html";
-const detailJobId = Number(new URLSearchParams(window.location.search).get("id"));
+const params = new URLSearchParams(window.location.search);
+const detailJobId = Number(params.get("id"));
+const detailJobSlug = params.get("slug") || "";
  
 let positions = [
   { id:1, title:"Head of Production", vn:"Giám đốc Sản xuất", dept:"Khối Vận hành", level:"Senior Leadership", report:"P.TGĐ Vận hành", urgent:true, color:COLORS.red, reqs:["10+ năm quản lý sản xuất quy mô lớn (>300 CN)","Kinh nghiệm quản lý đa nhà máy (multi-site)","Ngành nhựa / polymer / extrusion là lợi thế lớn","Thành thạo SAP, Lean, 5S, Kaizen","Tiếng Anh giao tiếp tốt"] },
@@ -495,12 +497,14 @@ function normalizeJob(job, index = 0) {
     urgent: Boolean(job.urgent),
     color: job.color || rainbow[index % rainbow.length],
     status: job.status || "active",
+    slug: job.slug || slugify(job.vn || job.title || job.id),
     employmentType: job.employmentType || job.employment_type || "Full-time",
     workLocation: job.workLocation || job.work_location || "KCN Tân Tạo, Bình Tân, TP.HCM",
     locationShort: job.locationShort || job.location_short || "TP.HCM",
     salaryText: job.salaryText || job.salary_text || "Thỏa thuận theo năng lực",
     ageRange: job.ageRange || job.age_range || "",
     experienceText: job.experienceText || job.experience_text || "",
+    deadline: job.deadline || "",
     publishedAt: job.publishedAt || job.published_at || job.created_at || "",
     quantity: Number(job.quantity || 1),
     reqs,
@@ -532,16 +536,34 @@ function escapeAttribute(value) {
   return escapeHtml(value).replaceAll("`", "&#096;");
 }
 
+function demoJobUrl(job) {
+  return job.slug
+    ? `${DEMO_PAGE}?slug=${encodeURIComponent(job.slug)}`
+    : `${DEMO_PAGE}?id=${encodeURIComponent(job.id)}`;
+}
+
+function slugify(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 180);
+}
+
 function showJobsState(message) {
   document.getElementById("jobList").innerHTML = `<div class="jobs-state">${escapeHtml(message)}</div>`;
 }
 
 async function loadPositionsFromDatabase() {
-  if (detailJobId) {
+  if (detailJobId || detailJobSlug) {
     document.body.classList.add("detail-mode");
     document.getElementById("jobDetailSection").hidden = false;
   } else {
-    showJobsState("Dang tai du lieu tuyen dung...");
+    showJobsState("Đang tải dữ liệu tuyển dụng...");
   }
 
   try {
@@ -551,8 +573,10 @@ async function loadPositionsFromDatabase() {
     const result = await response.json();
     const data = Array.isArray(result) ? result : result.data;
 
-    if (Array.isArray(data)) {
+    if (Array.isArray(data) && data.length > 0) {
       positions = data.map(normalizeJob);
+    } else {
+      positions = positions.map(normalizeJob);
     }
   } catch (error) {
     console.warn("Using fallback jobs because /api/jobs is unavailable:", error);
@@ -562,7 +586,7 @@ async function loadPositionsFromDatabase() {
   selectedDept = "all";
   expandedJob = null;
 
-  if (detailJobId) {
+  if (detailJobId || detailJobSlug) {
     renderDetailPage();
     return;
   }
@@ -585,13 +609,16 @@ function renderDetailPage() {
   const loading = document.getElementById("detailLoading");
   const notFound = document.getElementById("detailNotFound");
   const card = document.getElementById("detailCard");
-  const job = activePositions().find(item => item.id === detailJobId);
+  const job = activePositions().find(item => {
+    if (detailJobSlug) return item.slug === detailJobSlug;
+    return item.id === detailJobId;
+  });
 
   loading.hidden = true;
 
   if (!job) {
     notFound.hidden = false;
-    document.title = "ADC Careers | Khong tim thay vi tri";
+    document.title = "ADC Careers | Không tìm thấy vị trí";
     return;
   }
 
@@ -629,6 +656,7 @@ ${renderOverview("Độ tuổi", job.ageRange || "Không yêu cầu")}
 ${renderOverview("Kinh nghiệm", job.experienceText || experienceFallback(job))}
 ${renderOverview("Ngành nghề", job.industry || job.dept)}
 ${renderOverview("Ngày đăng", formatDate(job.publishedAt))}
+${renderOverview("Hạn nộp", formatDate(job.deadline))}
 ${renderOverview("Số lượng", `${job.quantity || 1} người`)}
 ${renderOverview("Báo cáo", job.report || "P&O")}
 ${renderOverview("Đãi ngộ", job.salaryText)}
@@ -670,7 +698,7 @@ ${related.length ? `
 <h2 class="detail-section-title">Vị trí tương tự</h2>
 <div class="detail-related">
 ${related.map(item => `
-<a class="detail-related-card" href="${DEMO_PAGE}?id=${encodeURIComponent(item.id)}" style="--related-color:${escapeAttribute(item.color || COLORS.blue)}">
+<a class="detail-related-card" href="${demoJobUrl(item)}" style="--related-color:${escapeAttribute(item.color || COLORS.blue)}">
 <span>ADC · ${escapeHtml(item.dept)}</span>
 <strong>${escapeHtml(item.title)}</strong>
 <small>${escapeHtml(item.vn)}</small>
@@ -761,14 +789,14 @@ function renderJobs() {
   const list = document.getElementById("jobList");
 
   if (!filtered.length) {
-    showJobsState("Chua co vi tri phu hop voi bo loc hien tai.");
+    showJobsState("Chưa có vị trí phù hợp với bộ lọc hiện tại.");
     return;
   }
 
   list.innerHTML = filtered.map(job => {
     const isOpen = expandedJob === job.id;
-    const applySubject = encodeURIComponent(`Ung tuyen - ${job.title}`);
-    const detailUrl = `${DEMO_PAGE}?id=${encodeURIComponent(job.id)}`;
+    const applySubject = encodeURIComponent(`Ứng tuyển - ${job.title}`);
+    const detailUrl = demoJobUrl(job);
     return `
 <div class="job-card" style="--job-color:${job.color};border-left-color:${job.color}">
 <div class="job-header" onclick="toggleJob(${job.id})">
@@ -793,10 +821,10 @@ function renderJobs() {
 <div>
 <div class="info-label" style="color:${job.color}">THÔNG TIN</div>
 <div class="info-list">
-<div>📍 KCN Tân Tạo, Q. Bình Tân, TP.HCM</div>
+<div>📍 ${escapeHtml(job.workLocation || "KCN Tân Tạo, Q. Bình Tân, TP.HCM")}</div>
 <div>👤 Báo cáo: ${escapeHtml(job.report || "P&O")}</div>
-<div>⏰ ${escapeHtml(job.level || "Full-time")}</div>
-<div>💰 Cạnh tranh, thỏa thuận theo năng lực</div>
+<div>⏰ ${escapeHtml(job.employmentType || job.level || "Full-time")}</div>
+<div>💰 ${escapeHtml(job.salaryText || "Cạnh tranh, thỏa thuận theo năng lực")}</div>
 </div>
 </div>
 </div>

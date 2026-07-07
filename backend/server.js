@@ -47,6 +47,14 @@ app.get(["/job", "/job.html"], (req, res) => {
   res.sendFile(path.join(frontendDir, "job.html"));
 });
 
+app.get("/jobs/:slug", (req, res) => {
+  res.sendFile(path.join(frontendDir, "job.html"));
+});
+
+app.get(["/thank-you", "/thank-you.html"], (req, res) => {
+  res.sendFile(path.join(frontendDir, "thank-you.html"));
+});
+
 app.get(["/demo", "/htmldemo", "/htmldemo.html"], (req, res) => {
   res.sendFile(htmlDemoFile);
 });

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ADC Careers | Cảm ơn bạn đã ứng tuyển</title>
+  <meta name="description" content="ADC Careers đã ghi nhận hồ sơ ứng tuyển của bạn. Đội ngũ P&O sẽ liên hệ khi có cập nhật phù hợp." />
+  <link rel="icon" type="image/png" href="assets/images/sitelogomini.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="tech-bar"></div>
+
+  <nav class="site-nav" aria-label="Điều hướng chính">
+    <a href="index.html#top" class="logo" aria-label="ADC Careers">
+      <img class="logo-mark" src="assets/images/sitelogo.png" alt="Asia Dragon Capital" />
+    </a>
+    <div class="nav-links">
+      <a href="index.html#ve-adc">Về ADC</a>
+      <a href="index.html#co-hoi">Cơ hội</a>
+      <a href="index.html#doi-song">Đời sống</a>
+      <a href="index.html#quy-trinh">Quy trình</a>
+      <a href="index.html#lien-he">Liên hệ</a>
+    </div>
+  </nav>
+
+  <main id="top">
+    <section class="section positions thank-you-section" data-bg-image="assets/images/bg-co-hoi.png">
+      <div class="section-inner">
+        <article class="thank-you-card">
+          <div class="eyebrow">Application Received</div>
+          <h1>Cảm ơn bạn đã ứng tuyển</h1>
+          <p id="thankYouMessage">Hồ sơ của bạn đã được ghi nhận trên hệ thống ADC Careers.</p>
+          <div class="thank-you-actions">
+            <a class="btn btn-primary" href="index.html#co-hoi">Xem vị trí khác</a>
+            <a class="btn btn-outline" href="mailto:hr@asiadragoncordage.com">Liên hệ P&O</a>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer data-bg-image="assets/images/bg-footer.png">
+    <div class="footer-badges">
+      <span class="footer-badge">ISO 9001:2015</span>
+      <span class="footer-badge">ANSI S315.4</span>
+      <span class="footer-badge">SAP HANA</span>
+    </div>
+    <div>© 2026 Asia Dragon Capital (ADC) | Leading Manufacturer Since 2006</div>
+    <div class="footer-motto">Beauty · Strength · Wealth</div>
+  </footer>
+
+  <script src="js/shared.js"></script>
+  <script>
+    loadOptionalBackgrounds();
+
+    const jobName = new URLSearchParams(window.location.search).get("job");
+    if (jobName) {
+      document.getElementById("thankYouMessage").textContent =
+        `Hồ sơ ứng tuyển vị trí ${jobName} đã được ghi nhận. Đội ngũ P&O sẽ liên hệ khi có cập nhật phù hợp.`;
+    }
+  </script>
+</body>
+</html>

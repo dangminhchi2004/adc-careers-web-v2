@@ -70,6 +70,66 @@ async function getApplications(req, res) {
   }
 }
 
+async function updateApplicationStatus(req, res) {
+  try {
+    const status = String(req.body.status || "").trim();
+    const allowedStatuses = ["new", "screening", "interview", "offer", "hired", "rejected"];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: "Trang thai ho so khong hop le." });
+    }
+
+    const application = await Application.updateStatus(req.params.id, status);
+    if (!application) {
+      return res.status(404).json({ success: false, message: "Khong tim thay ho so ung vien." });
+    }
+
+    res.json({ success: true, data: application });
+  } catch (error) {
+    console.error("PUT /api/admin/applications/:id/status failed:", error);
+    res.status(500).json({ success: false, message: "Khong the cap nhat trang thai ho so." });
+  }
+}
+
+async function exportApplications(req, res) {
+  try {
+    const applications = await Application.getAll();
+    const headers = [
+      "ID",
+      "Ho ten",
+      "Email",
+      "Dien thoai",
+      "Vi tri",
+      "Phong ban",
+      "Luong ky vong",
+      "Trang thai",
+      "CV",
+      "Ngay gui",
+      "Ghi chu"
+    ];
+    const rows = applications.map((application) => [
+      application.id,
+      application.fullName,
+      application.email,
+      application.phone,
+      application.jobTitle || application.jobTitleVn || "",
+      application.jobDept || "",
+      application.expectedSalary || "",
+      application.status || "new",
+      application.cvOriginalName || application.cvFileName || "",
+      application.appliedAt ? new Date(application.appliedAt).toISOString() : "",
+      application.note || ""
+    ]);
+    const csv = [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", "attachment; filename=\"adc-careers-applications.csv\"");
+    res.send(`\uFEFF${csv}`);
+  } catch (error) {
+    console.error("GET /api/admin/applications/export failed:", error);
+    res.status(500).json({ success: false, message: "Khong the xuat du lieu ho so." });
+  }
+}
+
 async function downloadApplicationCv(req, res) {
   try {
     const application = await Application.getById(req.params.id);
@@ -112,8 +172,10 @@ module.exports = {
   createJob,
   deleteJob,
   downloadApplicationCv,
+  exportApplications,
   getApplications,
   getJobs,
+  updateApplicationStatus,
   updateJob
 };
 
@@ -123,4 +185,9 @@ function buildContentDisposition(fileName, mimeType) {
     .replace(/["\\]/g, "_");
   const disposition = mimeType === "application/pdf" ? "inline" : "attachment";
   return `${disposition}; filename="${fallback}"; filename*=UTF-8''${encodeURIComponent(fileName || "cv")}`;
+}
+
+function csvCell(value) {
+  const text = String(value ?? "");
+  return `"${text.replace(/"/g, '""')}"`;
 }

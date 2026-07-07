@@ -24,6 +24,7 @@
         urgent: true,
         color: COLORS.red,
         status: "active",
+        slug: "giam-doc-san-xuat",
         reqs: [
           "10+ năm quản lý sản xuất quy mô lớn, ưu tiên môi trường trên 300 công nhân.",
           "Kinh nghiệm quản lý đa nhà máy, thiết lập KPI và cải tiến năng suất.",
@@ -41,6 +42,7 @@
         urgent: true,
         color: COLORS.orange,
         status: "active",
+        slug: "giam-doc-nhan-su-to-chuc",
         reqs: [
           "7+ năm kinh nghiệm HR management, ưu tiên ngành sản xuất.",
           "Có kinh nghiệm xây dựng hệ thống HR từ nền tảng đến vận hành.",
@@ -58,6 +60,7 @@
         urgent: true,
         color: COLORS.yellow,
         status: "active",
+        slug: "truong-phong-kinh-doanh-quoc-te",
         reqs: [
           "7+ năm B2B sales trong sản xuất hoặc xuất khẩu.",
           "Có network khách hàng tại Mỹ, Úc hoặc EU là lợi thế.",
@@ -75,6 +78,7 @@
         urgent: false,
         color: COLORS.green,
         status: "active",
+        slug: "truong-phong-ke-hoach-san-xuat",
         reqs: [
           "7+ năm kinh nghiệm planning trong môi trường sản xuất.",
           "Thành thạo SAP PP/MM, MRP, S&OP và phối hợp liên phòng ban.",
@@ -92,6 +96,7 @@
         urgent: false,
         color: COLORS.blue,
         status: "active",
+        slug: "ky-su-tu-dong-hoa",
         reqs: [
           "3+ năm kinh nghiệm PLC, SCADA, HMI hoặc hệ thống điều khiển công nghiệp.",
           "Từng làm việc với máy móc châu Âu là lợi thế.",
@@ -109,6 +114,7 @@
         urgent: false,
         color: COLORS.purple,
         status: "active",
+        slug: "chuyen-vien-kinh-doanh-cap-cao",
         reqs: [
           "3-5 năm sales B2B, ưu tiên export hoặc manufacturing.",
           "Tiếng Anh tốt, có khả năng chăm sóc khách hàng quốc tế.",
@@ -128,6 +134,7 @@
         urgent: Boolean(job.urgent),
         color: job.color || COLORS.blue,
         status: job.status || "active",
+        slug: job.slug || slugify(job.vn || job.title || job.id),
         employmentType: job.employmentType || job.employment_type || "Full-time",
         workLocation: job.workLocation || job.work_location || "KCN Tân Tạo, Bình Tân, TP.HCM",
         locationShort: job.locationShort || job.location_short || "TP.HCM",
@@ -196,6 +203,22 @@
       }
     }
 
+    function jobUrl(job) {
+      return job.slug ? `jobs/${encodeURIComponent(job.slug)}` : `job.html?id=${encodeURIComponent(job.id)}`;
+    }
+
+    function slugify(value) {
+      return String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "D")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 180);
+    }
+
     async function fetchJobs() {
       try {
         const response = await fetch(`${API_BASE}/api/jobs`);
@@ -224,7 +247,7 @@
     }
 
     function escapeAttribute(value) {
-      return String(value).replaceAll("'", "\\'");
+      return escapeHtml(value).replaceAll("`", "&#096;");
     }
 
     function loadOptionalBackgrounds() {
