@@ -89,7 +89,7 @@
   .info-label{font-size:9px;letter-spacing:2px;font-weight:700;margin-bottom:8px}
   .info-list{font-size:12px;color:rgba(255,255,255,.6);line-height:2.2}
   .job-actions{display:flex;gap:10px;flex-wrap:wrap}
-  .apply-btn{display:inline-block;color:#fff;padding:10px 26px;font-size:11px;font-weight:700;letter-spacing:2px;border-radius:5px}
+  .apply-btn{border:0;cursor:pointer;display:inline-block;color:#fff;padding:10px 26px;font-size:11px;font-weight:700;letter-spacing:2px;border-radius:5px}
   .detail-btn{display:inline-block;color:#fff;padding:9px 22px;font-size:11px;font-weight:700;letter-spacing:2px;border-radius:5px;border:1px solid rgba(255,255,255,.22)}
   .jobs-state{background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.16);border-radius:10px;color:rgba(255,255,255,.68);font-size:13px;padding:18px;text-align:center}
 
@@ -117,7 +117,7 @@
   .detail-info-row{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:8px;color:rgba(255,255,255,.68);font-size:13px;padding:12px 14px}
   .detail-info-row strong{color:#fff;display:block;font-size:10px;letter-spacing:1.8px;margin-bottom:3px;text-transform:uppercase}
   .detail-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
-  .detail-primary{background:linear-gradient(135deg,var(--detail-color,var(--gold)),var(--gold-l));color:var(--navy);display:inline-flex;font-size:12px;font-weight:900;letter-spacing:2px;padding:12px 24px;border-radius:6px;text-transform:uppercase}
+  .detail-primary{background:linear-gradient(135deg,var(--detail-color,var(--gold)),var(--gold-l));border:0;color:var(--navy);cursor:pointer;display:inline-flex;font-size:12px;font-weight:900;letter-spacing:2px;padding:12px 24px;border-radius:6px;text-transform:uppercase}
   .detail-secondary{border:1px solid rgba(255,255,255,.2);color:#fff;display:inline-flex;font-size:12px;font-weight:800;letter-spacing:2px;padding:11px 22px;border-radius:6px;text-transform:uppercase}
   .detail-state{background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.16);border-radius:12px;color:rgba(255,255,255,.72);padding:26px;text-align:center}
   .detail-summary{color:rgba(255,255,255,.68);font-size:14px;line-height:1.7;margin-top:14px;max-width:680px}
@@ -139,6 +139,24 @@
   .detail-related-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-top:4px solid var(--related-color,var(--gold));border-radius:12px;color:#fff;display:grid;gap:7px;padding:16px}
   .detail-related-card span,.detail-related-card small{color:rgba(255,255,255,.56);font-size:11px;font-weight:650}
   .detail-related-card strong{font-size:14px;line-height:1.35}
+
+  .apply-modal{align-items:center;background:rgba(4,14,28,.74);display:none;inset:0;justify-content:center;padding:24px;position:fixed;z-index:100}
+  .apply-modal.show{display:flex}
+  .apply-modal-panel{background:#fff;border-radius:14px;box-shadow:0 28px 80px rgba(0,0,0,.34);color:var(--navy);max-width:680px;overflow:hidden;width:min(100%,680px)}
+  .apply-modal-head{align-items:flex-start;background:linear-gradient(135deg,var(--navy),#16395e);color:#fff;display:flex;gap:16px;justify-content:space-between;padding:22px 24px}
+  .apply-modal-head h2{font-size:23px;line-height:1.2;margin-bottom:6px}
+  .apply-modal-head p{color:rgba(255,255,255,.72);font-size:13px}
+  .apply-close{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:999px;color:#fff;cursor:pointer;font-size:24px;height:38px;line-height:1;width:38px}
+  .apply-form{display:grid;gap:14px;padding:24px}
+  .apply-form-grid{display:grid;gap:14px;grid-template-columns:1fr 1fr}
+  .apply-field{display:grid;gap:6px}
+  .apply-field.full{grid-column:1/-1}
+  .apply-field label{color:#24364a;font-size:12px;font-weight:800}
+  .apply-field input,.apply-field textarea{border:1px solid #d8e0e9;border-radius:8px;font:inherit;font-size:14px;padding:12px 13px;width:100%}
+  .apply-field textarea{min-height:96px;resize:vertical}
+  .apply-hint{color:#697586;font-size:12px}
+  .apply-form-actions{display:flex;gap:10px;justify-content:flex-end}
+  .apply-cancel{background:#eef3f7;color:#26384c}
  
   /* Culture */
   .culture-section{padding:60px 40px;max-width:1000px;margin:0 auto}
@@ -191,6 +209,10 @@
     .detail-head{flex-direction:column}
     .detail-tags{justify-content:flex-start}
     .detail-title{font-size:28px}
+    .apply-modal{align-items:flex-start;padding:16px}
+    .apply-form-grid{grid-template-columns:1fr}
+    .apply-form-actions{flex-direction:column-reverse}
+    .apply-form-actions .apply-btn{width:100%}
   }
 </style>
 </head>
@@ -247,7 +269,7 @@ Không tìm thấy vị trí này hoặc vị trí đã ngừng tuyển.
 <div class="detail-info-row"><strong>Đãi ngộ</strong>Cạnh tranh, thỏa thuận theo năng lực</div>
 </div>
 <div class="detail-actions">
-<a id="detailApply" class="detail-primary" href="mailto:hr@asiadragoncordage.com">Ứng tuyển ngay</a>
+<button id="detailApply" class="detail-primary" type="button" data-open-apply data-apply-job="ADC Careers">Ứng tuyển ngay</button>
 <a class="detail-secondary" href="htmldemo.html#co-hoi">Vị trí khác</a>
 </div>
 </div>
@@ -420,6 +442,51 @@ Không tìm thấy vị trí này hoặc vị trí đã ngừng tuyển.
 <div class="footer-copy">© 2026 Asia Dragon Capital (ADC) | Leading Manufacturer Since 2006</div>
 <div class="footer-motto">Beauty · Strength · Wealth</div>
 </footer>
+
+<div class="apply-modal" id="applyModal" role="dialog" aria-modal="true" aria-labelledby="applyModalTitle" aria-hidden="true">
+<div class="apply-modal-panel">
+<div class="apply-modal-head">
+<div>
+<h2 id="applyModalTitle">Ứng tuyển vị trí</h2>
+<p id="applyModalJob">ADC Careers</p>
+</div>
+<button class="apply-close" type="button" data-close-apply aria-label="Đóng form">×</button>
+</div>
+<form class="apply-form" id="demoApplyForm">
+<div class="apply-form-grid">
+<div class="apply-field">
+<label for="demoFullName">Họ và tên *</label>
+<input id="demoFullName" name="fullName" type="text" autocomplete="name" required />
+</div>
+<div class="apply-field">
+<label for="demoEmail">Email *</label>
+<input id="demoEmail" name="email" type="email" autocomplete="email" required />
+</div>
+<div class="apply-field">
+<label for="demoPhone">Số điện thoại *</label>
+<input id="demoPhone" name="phone" type="tel" autocomplete="tel" required />
+</div>
+<div class="apply-field">
+<label for="demoSalary">Lương kỳ vọng</label>
+<input id="demoSalary" name="expectedSalary" type="text" placeholder="VD: Thỏa thuận" />
+</div>
+<div class="apply-field full">
+<label for="demoCv">CV đính kèm *</label>
+<input id="demoCv" name="cvFile" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required />
+<div class="apply-hint">Chấp nhận PDF, DOC, DOCX. Dung lượng tối đa 5MB.</div>
+</div>
+<div class="apply-field full">
+<label for="demoNote">Ghi chú</label>
+<textarea id="demoNote" name="note" placeholder="Thời gian có thể bắt đầu, portfolio hoặc thông tin bổ sung."></textarea>
+</div>
+</div>
+<div class="apply-form-actions">
+<button class="apply-btn apply-cancel" type="button" data-close-apply>Hủy</button>
+<button class="apply-btn" type="submit" style="background:var(--gold);color:var(--navy)">Gửi hồ sơ</button>
+</div>
+</form>
+</div>
+</div>
  
 <script>
 const COLORS = { red:"#E8363A", orange:"#F57C22", yellow:"#FFB900", green:"#4CAF50", blue:"#2196F3", indigo:"#5C6BC0", purple:"#9C27B0" };
@@ -442,6 +509,24 @@ let positions = [
  
 let selectedDept = "all";
 let expandedJob = null;
+let currentApplyJob = "ADC Careers";
+
+function openApplyModal(jobName = "ADC Careers") {
+  const modal = document.getElementById("applyModal");
+  const jobLabel = document.getElementById("applyModalJob");
+  currentApplyJob = jobName || "ADC Careers";
+  jobLabel.textContent = currentApplyJob;
+  modal.classList.add("show");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeApplyModal() {
+  const modal = document.getElementById("applyModal");
+  modal.classList.remove("show");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
 
 function normalizeRequirements(reqs) {
   if (Array.isArray(reqs)) return reqs;
@@ -708,7 +793,7 @@ ${related.map(item => `
 </div>` : ""}
 
 <div class="detail-actions">
-<a class="detail-primary" href="mailto:hr@asiadragoncordage.com?subject=${encodeURIComponent(`Ứng tuyển - ${job.title}`)}">Ứng tuyển ngay</a>
+<button class="detail-primary" type="button" data-open-apply data-apply-job="${escapeAttribute(job.vn || job.title)}">Ứng tuyển ngay</button>
 <a class="detail-secondary" href="${DEMO_PAGE}#co-hoi">Xem vị trí khác</a>
 </div>
 </div>
@@ -795,7 +880,6 @@ function renderJobs() {
 
   list.innerHTML = filtered.map(job => {
     const isOpen = expandedJob === job.id;
-    const applySubject = encodeURIComponent(`Ứng tuyển - ${job.title}`);
     const detailUrl = demoJobUrl(job);
     return `
 <div class="job-card" style="--job-color:${job.color};border-left-color:${job.color}">
@@ -830,7 +914,7 @@ function renderJobs() {
 </div>
 <div class="job-actions">
 <a href="${detailUrl}" class="detail-btn">XEM CHI TIẾT</a>
-<a href="mailto:hr@asiadragoncordage.com?subject=${applySubject}" class="apply-btn" style="background:${job.color}">ỨNG TUYỂN NGAY →</a>
+<button class="apply-btn" type="button" data-open-apply data-apply-job="${escapeAttribute(job.vn || job.title)}" style="background:${job.color}">ỨNG TUYỂN NGAY →</button>
 </div>
 </div>
 </div>`;
@@ -848,6 +932,36 @@ function toggleJob(id) {
   expandedJob = expandedJob === id ? null : id;
   renderJobs();
 }
+
+document.addEventListener("click", (event) => {
+  const applyButton = event.target.closest("[data-open-apply]");
+  if (applyButton) {
+    event.preventDefault();
+    openApplyModal(applyButton.dataset.applyJob);
+    return;
+  }
+
+  if (event.target.closest("[data-close-apply]")) {
+    event.preventDefault();
+    closeApplyModal();
+    return;
+  }
+
+  const modal = document.getElementById("applyModal");
+  if (event.target === modal) closeApplyModal();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeApplyModal();
+});
+
+document.getElementById("demoApplyForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (!event.currentTarget.reportValidity()) return;
+  closeApplyModal();
+  alert(`Demo: Hồ sơ ứng tuyển cho ${currentApplyJob} đã được ghi nhận.`);
+  event.currentTarget.reset();
+});
  
 renderFilters();
 loadPositionsFromDatabase();
