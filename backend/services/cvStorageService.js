@@ -2,6 +2,10 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 
+function safeUUID() {
+  return crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString("hex");
+}
+
 const uploadsDir = path.join(__dirname, "..", "uploads", "cvs");
 const GRAPH_BASE_URL = "https://graph.microsoft.com/v1.0";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
@@ -292,7 +296,7 @@ async function uploadToGoogleDrive(file) {
     name: fileName,
     parents: [monthFolderId]
   };
-  const boundary = `adc-careers-${crypto.randomUUID()}`;
+  const boundary = `adc-careers-${safeUUID()}`;
   const body = Buffer.concat([
     Buffer.from(`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`),
     Buffer.from(JSON.stringify(metadata)),
@@ -681,7 +685,7 @@ function buildFileName(originalName) {
     .replace(/^-+|-+$/g, "")
     .slice(0, 80) || "cv";
 
-  return `${Date.now()}-${crypto.randomUUID()}-${baseName}${ext}`;
+  return `${Date.now()}-${safeUUID()}-${baseName}${ext}`;
 }
 
 function encodeOneDrivePath(value) {
