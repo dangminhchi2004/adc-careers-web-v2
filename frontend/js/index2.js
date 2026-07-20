@@ -17,7 +17,7 @@ async function loadPositions() {
   }
 
   positions = await fetchJobs(); // from shared.js
-  
+
   if (detailJobId || detailJobSlug) {
     renderDetailPage();
     return;
@@ -42,7 +42,7 @@ function renderFilters() {
     const label = d === "all" ? "Tất cả" : d;
     const color = RAINBOW[i % 7];
     const isActive = selectedDept === d;
-    return `<button class="demo-filter-btn${isActive?' active':''}" data-dept="${escapeAttribute(d)}" style="${isActive?`--active-color:${color};border-color:${color};color:${color};background:${color}20`:''}" onclick="setDept(this.dataset.dept)">${escapeHtml(label)}</button>`;
+    return `<button class="demo-filter-btn${isActive ? ' active' : ''}" data-dept="${escapeAttribute(d)}" style="${isActive ? `--active-color:${color};border-color:${color};color:${color};background:${color}20` : ''}" onclick="setDept(this.dataset.dept)">${escapeHtml(label)}</button>`;
   }).join("");
   setTimeout(() => { if (window.initScrollAnimations) window.initScrollAnimations(); }, 50);
 }
@@ -72,10 +72,10 @@ function renderJobs() {
 </div>
 <div class="demo-job-right">
 <span class="demo-job-dept-badge">${escapeHtml(job.dept)}</span>
-<span class="demo-job-arrow" style="color:${job.color};transform:${isOpen?'rotate(180deg)':'rotate(0)'}">▾</span>
+<span class="demo-job-arrow" style="color:${job.color};transform:${isOpen ? 'rotate(180deg)' : 'rotate(0)'}">▾</span>
 </div>
 </div>
-<div class="demo-job-body${isOpen?'':' hidden'}" style="border-top-color:${job.color}18">
+<div class="demo-job-body${isOpen ? '' : ' hidden'}" style="border-top-color:${job.color}18">
 <div class="demo-job-body-inner">
 <div>
 <div class="demo-reqs-label" style="color:${job.color}">YÊU CẦU CHÍNH</div>
@@ -98,34 +98,34 @@ function renderJobs() {
 </div>
 </div>`;
   }).join("");
-  
+
   setTimeout(() => {
     if (window.initScrollAnimations) window.initScrollAnimations();
   }, 50);
 }
 
-window.setDept = function(dept) {
+window.setDept = function (dept) {
   selectedDept = dept;
   expandedJob = null;
   renderFilters();
   renderJobs();
 };
 
-window.toggleJob = function(id) {
+window.toggleJob = function (id) {
   expandedJob = expandedJob === id ? null : id;
-  
+
   const allCards = document.querySelectorAll('.demo-job-card');
   allCards.forEach(card => {
     const cardId = Number(card.dataset.jobId);
     const body = card.querySelector('.demo-job-body');
     const arrow = card.querySelector('.demo-job-arrow');
-    
+
     if (cardId === expandedJob) {
       body.classList.remove('hidden');
-      if(arrow) arrow.style.transform = 'rotate(180deg)';
+      if (arrow) arrow.style.transform = 'rotate(180deg)';
     } else {
       body.classList.add('hidden');
-      if(arrow) arrow.style.transform = 'rotate(0)';
+      if (arrow) arrow.style.transform = 'rotate(0)';
     }
   });
 };
@@ -191,14 +191,14 @@ document.addEventListener("keydown", (event) => {
 
 document.addEventListener("DOMContentLoaded", () => {
   loadPositions();
-  
+
   const form = document.getElementById("demoApplyForm");
   if (form) {
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const currentTarget = event.currentTarget;
       if (!currentTarget.reportValidity()) return;
-      
+
       const submitBtn = currentTarget.querySelector('.apply-submit');
       const originalText = submitBtn.textContent;
       submitBtn.textContent = 'ĐANG GỬI...';
@@ -209,7 +209,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // jobId đã được submit tự động qua <select name="jobId">
 
         const apiBaseUrl = typeof API_BASE !== 'undefined' ? API_BASE : (window.ADC_API_BASE ?? (window.location.protocol === "file:" ? "http://localhost:5000" : ""));
-        const response = await fetch(`${apiBaseUrl}/api/apply`, {
+        const cleanBaseUrl = apiBaseUrl.replace(/\/$/, "");
+
+        const response = await fetch(`${cleanBaseUrl}/api/apply`, {
           method: "POST",
           body: formData
         });
@@ -428,7 +430,7 @@ function defaultEnvironmentSections() {
 
 
 // Scroll Animations Logic
-window.initScrollAnimations = function() {
+window.initScrollAnimations = function () {
   const observer = new IntersectionObserver((entries, obs) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -444,7 +446,7 @@ window.initScrollAnimations = function() {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  if(window.initScrollAnimations) window.initScrollAnimations();
+  if (window.initScrollAnimations) window.initScrollAnimations();
 
   // CTA Section Color Picker Logic
   const ctaSection = document.querySelector(".demo-cta-section");
