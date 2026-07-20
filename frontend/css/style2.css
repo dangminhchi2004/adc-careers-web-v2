@@ -361,7 +361,7 @@
 
 .demo-cta-email {
   background: var(--navy);
-  color: var(--gold);
+  color: #fff;
   padding: 12px 28px;
   font-size: var(--text-sm);
   font-weight: 700;
