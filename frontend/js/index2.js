@@ -2,6 +2,7 @@ let positions = [];
 let selectedDept = "all";
 let expandedJob = null;
 let currentApplyJob = "ADC Careers";
+let currentApplyJobId = null;
 
 const params = new URLSearchParams(window.location.search);
 const detailJobId = Number(params.get("id"));
@@ -92,7 +93,7 @@ function renderJobs() {
 </div>
 <div class="demo-job-actions">
 <a href="${detailUrl}" class="demo-detail-btn">XEM CHI TIẾT</a>
-<button class="demo-apply-btn" type="button" data-open-apply data-apply-job="${escapeAttribute(job.vn || job.title)}" style="background:${job.color}">ỨNG TUYỂN NGAY →</button>
+<button class="demo-apply-btn" type="button" data-open-apply data-apply-job="${escapeAttribute(job.vn || job.title)}" data-job-id="${job.id}" style="background:${job.color}">ỨNG TUYỂN NGAY →</button>
 </div>
 </div>
 </div>`;
@@ -129,11 +130,12 @@ window.toggleJob = function(id) {
   });
 };
 
-function openApplyModal(jobName = "ADC Careers") {
+function openApplyModal(jobName = "ADC Careers", jobId = null) {
   const modal = document.getElementById("applyModal");
   const jobLabel = document.getElementById("applyModalJob");
   if (!modal) return;
   currentApplyJob = jobName || "ADC Careers";
+  currentApplyJobId = jobId;
   jobLabel.textContent = currentApplyJob;
   modal.classList.add("show");
   modal.setAttribute("aria-hidden", "false");
@@ -152,7 +154,7 @@ document.addEventListener("click", (event) => {
   const applyButton = event.target.closest("[data-open-apply]");
   if (applyButton) {
     event.preventDefault();
-    openApplyModal(applyButton.dataset.applyJob);
+    openApplyModal(applyButton.dataset.applyJob, applyButton.dataset.jobId);
     return;
   }
 
@@ -175,12 +177,46 @@ document.addEventListener("DOMContentLoaded", () => {
   
   const form = document.getElementById("demoApplyForm");
   if (form) {
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      if (!event.currentTarget.reportValidity()) return;
-      closeApplyModal();
-      alert(`Hồ sơ ứng tuyển cho ${currentApplyJob} đã được ghi nhận.`);
-      event.currentTarget.reset();
+      const currentTarget = event.currentTarget;
+      if (!currentTarget.reportValidity()) return;
+      
+      const submitBtn = currentTarget.querySelector('.apply-submit');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'ĐANG GỬI...';
+      submitBtn.disabled = true;
+
+      try {
+        const formData = new FormData(currentTarget);
+        if (currentApplyJobId) {
+          formData.append("jobId", currentApplyJobId);
+        } else {
+          formData.append("jobId", "0"); // General application if supported
+        }
+
+        const apiBaseUrl = typeof API_BASE !== 'undefined' ? API_BASE : (window.ADC_API_BASE ?? (window.location.protocol === "file:" ? "http://localhost:5000" : ""));
+        const response = await fetch(`${apiBaseUrl}/api/apply`, {
+          method: "POST",
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success !== false) {
+          closeApplyModal();
+          alert(`Hồ sơ ứng tuyển cho ${currentApplyJob} đã được gửi thành công!`);
+          currentTarget.reset();
+        } else {
+          alert(`Lỗi: ${result.message || 'Không thể gửi hồ sơ. Vui lòng kiểm tra lại kích thước hoặc định dạng file.'}`);
+        }
+      } catch (error) {
+        console.error("Apply error:", error);
+        alert("Có lỗi xảy ra khi kết nối tới máy chủ. Vui lòng thử lại sau.");
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
     });
   }
 });
@@ -300,7 +336,7 @@ ${related.map(item => `
 </div>` : ""}
 
 <div class="detail-actions">
-<button class="detail-primary" type="button" data-open-apply data-apply-job="${escapeAttribute(job.vn || job.title)}">Ứng tuyển ngay</button>
+<button class="detail-primary" type="button" data-open-apply data-apply-job="${escapeAttribute(job.vn || job.title)}" data-job-id="${job.id}">Ứng tuyển ngay</button>
 <a class="detail-secondary" href="${DEMO_PAGE}#co-hoi">Xem vị trí khác</a>
 </div>
 </div>
