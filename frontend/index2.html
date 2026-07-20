@@ -308,8 +308,12 @@
 
     <!-- CTA (Section 6) -->
     <section id="lien-he" class="demo-cta-section">
+      <div class="color-picker-wrapper">
+        <label for="ctaColorPicker" class="color-picker-label">Màu nền</label>
+        <input type="color" id="ctaColorPicker" value="#EFBF04" title="Tùy chỉnh màu nền" />
+      </div>
       <h2 class="shared-title" style="color:var(--navy);">Sẵn sàng cho thử thách mới?</h2>
-      <p>Gửi CV tiếng Anh + mức lương kỳ vọng</p>
+      <p>Gửi CV + mức lương kỳ vọng</p>
       <div class="demo-cta-links">
         <a href="mailto:adc.hr@asiadragoncordage.com" class="demo-cta-email">📧 adc.hr@asiadragoncordage.com</a>
         <span class="demo-cta-info">📞 0908 022 098</span>
@@ -340,6 +344,10 @@
       </div>
       <form class="apply-form" id="demoApplyForm">
         <div class="apply-form-grid">
+          <div class="apply-field full" id="genericJobSelect" style="display: none;">
+            <label for="demoJobId">Vị trí ứng tuyển *</label>
+            <select id="demoJobId" name="jobId"></select>
+          </div>
           <div class="apply-field">
             <label for="demoFullName">Họ và tên *</label>
             <input id="demoFullName" name="fullName" type="text" autocomplete="name" required />

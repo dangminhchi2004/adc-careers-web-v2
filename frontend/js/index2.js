@@ -133,10 +133,27 @@ window.toggleJob = function(id) {
 function openApplyModal(jobName = "ADC Careers", jobId = null) {
   const modal = document.getElementById("applyModal");
   const jobLabel = document.getElementById("applyModalJob");
+  const genericSelect = document.getElementById("genericJobSelect");
+  const selectEl = document.getElementById("demoJobId");
+
   if (!modal) return;
   currentApplyJob = jobName || "ADC Careers";
   currentApplyJobId = jobId;
   jobLabel.textContent = currentApplyJob;
+
+  if (genericSelect && selectEl) {
+    if (!jobId) {
+      genericSelect.style.display = "block";
+      selectEl.required = true;
+      selectEl.innerHTML = `<option value="">-- Chọn vị trí ứng tuyển --</option>` +
+        positions.map(p => `<option value="${p.id}">${escapeAttribute(p.vn || p.title)}</option>`).join("");
+    } else {
+      genericSelect.style.display = "none";
+      selectEl.required = false;
+      selectEl.innerHTML = `<option value="${jobId}" selected>Selected</option>`;
+    }
+  }
+
   modal.classList.add("show");
   modal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
@@ -189,11 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         const formData = new FormData(currentTarget);
-        if (currentApplyJobId) {
-          formData.append("jobId", currentApplyJobId);
-        } else {
-          formData.append("jobId", "0"); // General application if supported
-        }
+        // jobId đã được submit tự động qua <select name="jobId">
 
         const apiBaseUrl = typeof API_BASE !== 'undefined' ? API_BASE : (window.ADC_API_BASE ?? (window.location.protocol === "file:" ? "http://localhost:5000" : ""));
         const response = await fetch(`${apiBaseUrl}/api/apply`, {
@@ -432,4 +445,14 @@ window.initScrollAnimations = function() {
 
 document.addEventListener("DOMContentLoaded", () => {
   if(window.initScrollAnimations) window.initScrollAnimations();
+
+  // CTA Section Color Picker Logic
+  const ctaSection = document.querySelector(".demo-cta-section");
+  const ctaColorPicker = document.getElementById("ctaColorPicker");
+
+  if (ctaSection && ctaColorPicker) {
+    ctaColorPicker.addEventListener("input", (e) => {
+      ctaSection.style.background = e.target.value;
+    });
+  }
 });
