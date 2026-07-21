@@ -1,6 +1,7 @@
 const Application = require("../models/applyModel");
 const Job = require("../models/jobModel");
 const { loadCv } = require("../services/cvStorageService");
+const auditService = require("../services/auditService");
 
 async function getJobs(req, res) {
   try {
@@ -20,6 +21,7 @@ async function createJob(req, res) {
     }
 
     const job = await Job.create(req.body);
+    auditService.logAction(req, "CREATE_JOB", "JOB", job.id, { title: job.title });
     res.status(201).json({ success: true, data: job });
   } catch (error) {
     console.error("POST /api/admin/jobs failed:", error);
@@ -39,6 +41,7 @@ async function updateJob(req, res) {
       return res.status(404).json({ success: false, message: "Khong tim thay vi tri." });
     }
 
+    auditService.logAction(req, "UPDATE_JOB", "JOB", job.id, { title: job.title });
     res.json({ success: true, data: job });
   } catch (error) {
     console.error("PUT /api/admin/jobs/:id failed:", error);
@@ -53,6 +56,7 @@ async function deleteJob(req, res) {
       return res.status(404).json({ success: false, message: "Khong tim thay vi tri." });
     }
 
+    auditService.logAction(req, "DELETE_JOB", "JOB", req.params.id);
     res.json({ success: true });
   } catch (error) {
     console.error("DELETE /api/admin/jobs/:id failed:", error);
@@ -83,6 +87,7 @@ async function updateApplicationStatus(req, res) {
       return res.status(404).json({ success: false, message: "Khong tim thay ho so ung vien." });
     }
 
+    auditService.logAction(req, "UPDATE_STATUS", "APPLICATION", application.id, { status });
     res.json({ success: true, data: application });
   } catch (error) {
     console.error("PUT /api/admin/applications/:id/status failed:", error);
@@ -138,6 +143,8 @@ async function downloadApplicationCv(req, res) {
     }
 
     const cv = await loadCv(application);
+    auditService.logAction(req, "DOWNLOAD_CV", "APPLICATION", application.id, { fileName: cv.fileName });
+
     res.setHeader("Content-Type", cv.mimeType);
     res.setHeader("Content-Length", cv.buffer.length);
     res.setHeader("Content-Disposition", buildContentDisposition(cv.fileName, cv.mimeType));

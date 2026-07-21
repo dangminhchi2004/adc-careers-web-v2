@@ -64,6 +64,19 @@ async function ensureSchema() {
   `);
 
   await addColumnIfMissing("jobs", "status", "VARCHAR(20) DEFAULT 'active'");
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS audit_logs (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      action VARCHAR(100) NOT NULL,
+      username VARCHAR(255) NOT NULL,
+      entity_type VARCHAR(100),
+      entity_id INT,
+      details JSON,
+      ip_address VARCHAR(50),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
   await addColumnIfMissing("jobs", "slug", "VARCHAR(180) UNIQUE");
   await addColumnIfMissing("jobs", "summary", "TEXT");
   await addColumnIfMissing("jobs", "employment_type", "VARCHAR(80) DEFAULT 'Full-time'");

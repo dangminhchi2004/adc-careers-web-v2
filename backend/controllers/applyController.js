@@ -1,5 +1,6 @@
 const Application = require("../models/applyModel");
 const { deleteStoredCv, storeCv } = require("../services/cvStorageService");
+const fileType = require("file-type");
 
 const ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx"];
 
@@ -14,6 +15,26 @@ async function submitApplication(req, res) {
         success: false,
         message: validationError
       });
+    }
+
+    if (cvFile && cvFile.buffer) {
+      const type = await fileType.fromBuffer(cvFile.buffer);
+      
+      const lowerName = cvFile.originalname.toLowerCase();
+      if (lowerName.endsWith(".pdf") && (!type || type.ext !== "pdf")) {
+        return res.status(400).json({
+          success: false,
+          message: "Hệ thống phát hiện file PDF không hợp lệ hoặc có dấu hiệu giả mạo."
+        });
+      }
+
+      const executableExts = ["exe", "msi", "elf", "dll", "cab", "rpm", "deb", "dmg", "sys"];
+      if (type && executableExts.includes(type.ext)) {
+        return res.status(400).json({
+          success: false,
+          message: "File tải lên chứa định dạng thực thi nguy hiểm. Yêu cầu bị từ chối."
+        });
+      }
     }
 
     const cvStorage = await storeCv(cvFile);

@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const auditService = require("../services/auditService");
 
 function login(req, res) {
   const { username, password } = req.body;
@@ -20,6 +21,9 @@ function login(req, res) {
     process.env.JWT_SECRET || "adc_careers_local_secret",
     { expiresIn: "8h" }
   );
+
+  req.user = { username }; // Set req.user manually for auditService
+  auditService.logAction(req, "LOGIN", "USER", null, { message: "Admin login successful" });
 
   res.json({
     success: true,
