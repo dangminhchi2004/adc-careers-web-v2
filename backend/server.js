@@ -46,8 +46,8 @@ app.get("/admin", (req, res) => {
   res.sendFile(path.join(frontendDir, "admin.html"));
 });
 
-app.get("/login", (req, res) => {
-  res.sendFile(path.join(frontendDir, "login.html"));
+app.get("/auth-zone", (req, res) => {
+  res.sendFile(path.join(frontendDir, "auth-zone.html"));
 });
 
 app.get(["/job", "/job.html"], (req, res) => {

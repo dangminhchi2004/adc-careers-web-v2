@@ -2,7 +2,7 @@ const API_BASE = window.ADC_API_BASE ?? (window.location.protocol === "file:" ? 
 const token = localStorage.getItem("adcAdminToken");
 
 if (!token) {
-  window.location.href = "login.html";
+  window.location.href = "auth-zone.html";
 }
 
 let jobs = [];
@@ -137,7 +137,7 @@ async function requestJson(url, options) {
 function logout() {
   localStorage.removeItem("adcAdminToken");
   localStorage.removeItem("adcAdminUser");
-  window.location.href = "login.html";
+  window.location.href = "auth-zone.html";
 }
 
 function renderMetrics() {

@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ADC Careers | Cùng ADC kiến tạo hôm nay, dẫn đầu ngày mai</title>
-  <meta name="description" content="Khám phá cơ hội nghề nghiệp tại ADC, xem vị trí tuyển dụng, môi trường làm việc và gửi hồ sơ ứng tuyển trực tuyến." />
-  <meta property="og:title" content="ADC Careers | Cơ hội nghề nghiệp tại ADC" />
-  <meta property="og:description" content="Gia nhập ADC để phát triển sự nghiệp trong môi trường sản xuất hiện đại, chuyên nghiệp và định hướng quốc tế." />
-  <meta property="og:type" content="website" />
+  <title>ADC Careers | Phiên bản mới</title>
   <link rel="icon" type="image/png" href="assets/images/sitelogomini.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style2.css" />
+  <script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
 </head>
+
 <body>
   <div class="tech-bar"></div>
 
@@ -31,34 +32,109 @@
   </nav>
 
   <main id="top">
-    <section class="hero" data-bg-image="assets/images/bg-hero.png">
-      <div class="hero-overlay"></div>
-      <div class="hero-wrap">
-        <div class="hero-content">
-          <div class="eyebrow">Gia nhập đội ngũ</div>
-          <h1>Cùng ADC Kiến tạo hôm nay <span>Dẫn đầu ngày mai</span></h1>
-          <p class="hero-copy">Tại ADC, chúng tôi không chỉ sản xuất những sản phẩm đạt chuẩn quốc tế mà còn xây dựng một môi trường làm việc nơi mỗi cá nhân đều có cơ hội phát triển, đóng góp và tạo nên những giá trị khác biệt.</p>
-          <div class="hero-actions">
-            <a class="btn btn-primary" href="#co-hoi">Xem vị trí đang tuyển</a>
-            <a class="btn btn-outline" href="#ve-adc">Khám phá ADC</a>
+    <!-- Nơi chứa các section mới sẽ được thiết kế -->
+    <section id="jobDetailSection" class="detail-section" hidden>
+      <div class="detail-inner">
+        <a class="back-link" href="index.html#co-hoi">← Quay lại danh sách vị trí</a>
+        <div id="detailLoading" class="detail-state">Đang tải thông tin vị trí...</div>
+        <div id="detailNotFound" class="detail-state" hidden>
+          Không tìm thấy vị trí này hoặc vị trí đã ngừng tuyển.
+          <br />
+          <a href="index.html#co-hoi" style="color:var(--gold);font-weight:800">Xem tất cả vị trí đang tuyển</a>
+        </div>
+        <article id="detailCard" class="detail-card" hidden>
+          <div class="detail-head">
+            <div>
+              <div class="detail-kicker">Chi tiết vị trí</div>
+              <h1 id="detailTitle" class="detail-title"></h1>
+              <div id="detailVn" class="detail-vn"></div>
+              <p class="detail-summary" id="detailSummary"></p>
+            </div>
+            <div class="detail-tags">
+              <span id="detailUrgent" class="detail-tag urgent" hidden>URGENT</span>
+              <span id="detailDept" class="detail-tag"></span>
+              <span id="detailLevel" class="detail-tag"></span>
+            </div>
           </div>
-          <div class="hero-stats" aria-label="Thông tin nhanh về ADC">
-            <div class="stat">
-              <div class="stat-num">4</div>
-              <div class="stat-label">Nhà máy</div>
+          <div class="detail-overview" id="detailOverview"></div>
+          <div class="detail-content" id="detailContent"></div>
+          <div class="detail-benefits" id="detailBenefits"></div>
+          <div class="detail-related" id="detailRelated"></div>
+          <div class="detail-grid">
+            <div>
+              <div class="detail-block-title" id="detailReqTitle">Yêu cầu chính</div>
+              <div id="detailReqs" class="detail-reqs"></div>
             </div>
-            <div class="stat">
-              <div class="stat-num">500+</div>
-              <div class="stat-label">Nhân sự</div>
+            <div>
+              <div class="detail-block-title" id="detailInfoTitle">Thông tin</div>
+              <div class="detail-info">
+                <div class="detail-info-row"><strong>Địa điểm</strong>KCN Tân Tạo, Q. Bình Tân, TP.HCM</div>
+                <div class="detail-info-row"><strong>Báo cáo</strong><span id="detailReport"></span></div>
+                <div class="detail-info-row"><strong>Hình thức</strong>Full-time</div>
+                <div class="detail-info-row"><strong>Đãi ngộ</strong>Cạnh tranh, thỏa thuận theo năng lực</div>
+              </div>
+              <div class="detail-actions">
+                <button id="detailApply" class="detail-primary" type="button" data-open-apply
+                  data-apply-job="ADC Careers">Ứng tuyển ngay</button>
+                <a class="detail-secondary" href="index.html#co-hoi">Vị trí khác</a>
+              </div>
             </div>
-            <div class="stat">
-              <div class="stat-num">20+</div>
-              <div class="stat-label">Quốc gia</div>
-            </div>
-            <div class="stat">
-              <div class="stat-num">Top 5</div>
-              <div class="stat-label">Mỹ & Úc</div>
-            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="hero-demo">
+      <div class="hero-orb"
+        style="background:radial-gradient(circle,rgba(232,54,58,.08),transparent 70%);top:10%;left:5%"></div>
+      <div class="hero-orb"
+        style="background:radial-gradient(circle,rgba(245,124,34,.08),transparent 70%);top:22%;left:19%"></div>
+      <div class="hero-orb"
+        style="background:radial-gradient(circle,rgba(255,185,0,.08),transparent 70%);top:34%;left:33%"></div>
+      <div class="hero-orb"
+        style="background:radial-gradient(circle,rgba(76,175,80,.08),transparent 70%);top:46%;left:47%"></div>
+      <div class="hero-orb"
+        style="background:radial-gradient(circle,rgba(33,150,243,.08),transparent 70%);top:58%;left:61%"></div>
+      <div class="hero-orb"
+        style="background:radial-gradient(circle,rgba(92,107,192,.08),transparent 70%);top:10%;left:75%"></div>
+
+      <div class="hero-inner-demo">
+        <div class="hero-eyebrow-demo">GIA NHẬP ĐỘI NGŨ</div>
+        <h1 class="hero-title-demo">Cùng ADC<br /><span>Kiến tạo Tương lai</span></h1>
+        <p class="hero-desc-demo">Nhà sản xuất dây sợi &amp; dây thừng hàng đầu châu Á. Top 5 tại Mỹ &amp; Úc. 20+ quốc
+          gia xuất khẩu. Máy móc công nghệ hàng đầu từ châu Âu.</p>
+
+        <div class="stats-demo">
+          <div>
+            <div class="stat-num-demo">4</div>
+            <div class="stat-label-demo">Nhà máy</div>
+            <div class="stat-bar-demo" style="background:var(--red)"></div>
+          </div>
+          <div>
+            <div class="stat-num-demo">500+</div>
+            <div class="stat-label-demo">Nhân sự</div>
+            <div class="stat-bar-demo" style="background:var(--green)"></div>
+          </div>
+          <div>
+            <div class="stat-num-demo">20+</div>
+            <div class="stat-label-demo">Quốc gia</div>
+            <div class="stat-bar-demo" style="background:var(--blue)"></div>
+          </div>
+          <div>
+            <div class="stat-num-demo">Top 5</div>
+            <div class="stat-label-demo">Mỹ &amp; Úc</div>
+            <div class="stat-bar-demo" style="background:var(--purple)"></div>
+          </div>
+        </div>
+
+        <a href="#co-hoi" class="btn-gold-demo">Xem vị trí đang tuyển →</a>
+
+        <div class="core-value-demo">
+          <div class="core-label-demo">CORE VALUE</div>
+          <div class="core-words-demo">
+            <span style="color:var(--gold)">ĐẸP</span>
+            <span style="color:var(--blue)">MẠNH</span>
+            <span style="color:var(--green)">GIÀU</span>
           </div>
         </div>
       </div>
@@ -66,270 +142,183 @@
 
     <section id="ve-adc" class="section bg-light" data-bg-image="assets/images/bg-ve-adc.png">
       <div class="section-inner">
-        <div class="section-head">
-          <div class="eyebrow-dark">Employee Value Proposition</div>
-          <h2>Tại sao chọn ADC?</h2>
-          <p>Không chỉ là nơi làm việc, ADC là nơi mỗi cá nhân được trao cơ hội phát triển, tạo ra giá trị và đồng hành cùng hành trình vươn tầm quốc tế của doanh nghiệp Việt Nam.</p>
+        <div class="section-head animate-on-scroll">
+          <div class="eyebrow-dark shared-eyebrow">EMPLOYEE VALUE PROPOSITION</div>
+          <h2 class="shared-title">Tại sao chọn ADC?</h2>
+          <p>Không chỉ là nơi làm việc, ADC là nơi mỗi cá nhân được trao cơ hội phát triển, tạo ra giá trị và đồng hành
+            cùng hành trình vươn tầm quốc tế của doanh nghiệp Việt Nam.</p>
         </div>
         <div class="evp-grid">
-          <article class="evp-card">
+          <article class="evp-card bg-red animate-on-scroll delay-100">
             <div class="evp-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-7h6v7M8 10h.01M12 10h.01M16 10h.01"></path></svg>
+              <svg viewBox="0 0 24 24">
+                <path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-7h6v7M8 10h.01M12 10h.01M16 10h.01"></path>
+              </svg>
             </div>
             <h3>Con người tạo nên khác biệt</h3>
-            <p>Chúng tôi tin rằng thành công bền vững bắt đầu từ những con người có trách nhiệm, tinh thần học hỏi và khát vọng phát triển.</p>
+            <p>Chúng tôi tin rằng thành công bền vững bắt đầu từ những con người có trách nhiệm, tinh thần học hỏi và
+              khát vọng phát triển.</p>
           </article>
-          <article class="evp-card">
+          <article class="evp-card bg-orange animate-on-scroll delay-200">
             <div class="evp-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"></path></svg>
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path
+                  d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z">
+                </path>
+              </svg>
             </div>
             <h3>Môi trường đề cao sự phát triển</h3>
-            <p>Mỗi cá nhân đều được tạo điều kiện để học hỏi, nâng cao năng lực và phát triển sự nghiệp theo năng lực thực tế.</p>
+            <p>Mỗi cá nhân đều được tạo điều kiện để học hỏi, nâng cao năng lực và phát triển sự nghiệp theo năng lực
+              thực tế.</p>
           </article>
-          <article class="evp-card">
+          <article class="evp-card bg-yellow animate-on-scroll delay-300">
             <div class="evp-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5 10-5Z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+              <svg viewBox="0 0 24 24">
+                <path d="M22 10 12 5 2 10l10 5 10-5Z"></path>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+              </svg>
             </div>
             <h3>Văn hóa đồng hành và tôn trọng</h3>
-            <p>Xây dựng môi trường làm việc cởi mở, hợp tác và tôn trọng sự khác biệt, nơi mọi ý kiến đều được lắng nghe.</p>
+            <p>Xây dựng môi trường làm việc cởi mở, hợp tác và tôn trọng sự khác biệt, nơi mọi ý kiến đều được lắng
+              nghe.</p>
           </article>
-          <article class="evp-card">
+          <article class="evp-card bg-green animate-on-scroll delay-400">
             <div class="evp-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"></path></svg>
+              <svg viewBox="0 0 24 24">
+                <path d="m16 18 6-6-6-6M8 6l-6 6 6 6"></path>
+              </svg>
             </div>
             <h3>Tinh thần đổi mới liên tục</h3>
-            <p>Khuyến khích tư duy cải tiến, ứng dụng công nghệ và không ngừng tìm kiếm những giải pháp hiệu quả hơn mỗi ngày.</p>
+            <p>Khuyến khích tư duy cải tiến, ứng dụng công nghệ và không ngừng tìm kiếm những giải pháp hiệu quả hơn mỗi
+              ngày.</p>
           </article>
-          <article class="evp-card">
+          <article class="evp-card bg-blue animate-on-scroll delay-100">
             <div class="evp-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path></svg>
+              <svg viewBox="0 0 24 24">
+                <rect x="2" y="7" width="20" height="14" rx="2"></rect>
+                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
+              </svg>
             </div>
             <h3>Cơ hội tạo dấu ấn</h3>
-            <p>Trao quyền để mỗi cá nhân chủ động đóng góp, tạo ra giá trị và nhìn thấy tác động từ công việc của mình.</p>
+            <p>Trao quyền để mỗi cá nhân chủ động đóng góp, tạo ra giá trị và nhìn thấy tác động từ công việc của mình.
+            </p>
           </article>
-          <article class="evp-card">
+          <article class="evp-card bg-purple animate-on-scroll delay-200">
             <div class="evp-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              <svg viewBox="0 0 24 24">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
             </div>
             <h3>Đồng hành cùng sự tăng trưởng</h3>
-            <p>Gia nhập một doanh nghiệp đang phát triển mạnh mẽ, mở rộng quy mô và từng bước khẳng định vị thế trên thị trường quốc tế.</p>
+            <p>Gia nhập một doanh nghiệp đang phát triển mạnh mẽ, mở rộng quy mô và từng bước khẳng định vị thế trên thị
+              trường quốc tế.</p>
           </article>
         </div>
       </div>
     </section>
 
-    <section id="co-hoi" class="section positions" data-bg-image="assets/images/bg-co-hoi.png">
-      <div class="section-inner">
-        <div class="section-head">
-          <div class="eyebrow">Open Positions</div>
-          <h2>Vị trí đang tuyển</h2>
-          <p>Lọc theo phòng ban, chọn một vị trí để xem chi tiết yêu cầu và gửi hồ sơ ứng tuyển.</p>
+    <!-- Positions (Section 3) -->
+    <section id="co-hoi" class="demo-positions-section">
+      <div class="demo-positions-inner">
+        <div class="demo-section-center animate-on-scroll">
+          <div class="demo-positions-eyebrow shared-eyebrow">OPEN POSITIONS</div>
+          <h2 class="demo-section-title-white shared-title">Vị trí đang tuyển</h2>
+          <div class="demo-section-line" style="background:linear-gradient(90deg,var(--gold),var(--orange))"></div>
         </div>
-        <form class="job-search-panel" id="jobSearchForm" role="search">
-          <label>
-            <span>Từ khóa</span>
-            <input id="jobSearchInput" type="search" placeholder="Tên vị trí, phòng ban, kỹ năng..." autocomplete="off" />
-          </label>
-          <label>
-            <span>Cấp bậc</span>
-            <select id="jobLevelFilter">
-              <option value="all">Tất cả cấp bậc</option>
-            </select>
-          </label>
-          <label>
-            <span>Địa điểm</span>
-            <select id="jobLocationFilter">
-              <option value="all">Tất cả địa điểm</option>
-            </select>
-          </label>
-          <label>
-            <span>Ưu tiên</span>
-            <select id="jobUrgentFilter">
-              <option value="all">Tất cả vị trí</option>
-              <option value="urgent">Urgent</option>
-            </select>
-          </label>
-        </form>
-        <div class="jobs-toolbar">
-          <div class="filter-scroll">
-            <button id="filterPrevBtn" class="filter-arrow" type="button" aria-label="Cuộn phòng ban sang trái">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
-            </button>
-            <div id="filterBar" class="filter-bar" aria-label="Lọc vị trí theo phòng ban"></div>
-            <button id="filterNextBtn" class="filter-arrow" type="button" aria-label="Cuộn phòng ban sang phải">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
-            </button>
+        <div class="demo-filter-bar" id="filterBar"></div>
+        <div class="demo-job-list" id="jobList"></div>
+      </div>
+    </section>
+
+    <!-- Culture (Section 4) -->
+    <section id="doi-song" class="demo-culture-section section bg-light">
+      <div class="demo-culture-inner">
+        <div class="demo-section-center animate-on-scroll">
+          <div class="demo-section-eyebrow-green shared-eyebrow">LIFE AT ADC</div>
+          <h2 class="demo-section-title shared-title" style="color:var(--navy);">Đời sống tại ADC</h2>
+          <div class="demo-section-line" style="background:linear-gradient(90deg,var(--green),var(--blue))"></div>
+        </div>
+        <div class="demo-culture-grid">
+          <!-- Row 1: 3 First Cards -->
+          <div class="demo-culture-card animate-on-scroll delay-100" style="background:var(--red)">
+            <h3>Nhà máy hiện đại nhất Việt Nam</h3>
+            <p>4 nhà máy với máy móc công nghệ hàng đầu trong ngành từ Đức, Áo, Ý, Đan Mạch, Hàn Quốc, Đài Loan. Tiêu
+              chuẩn ISO 9001:2015, ANSI S315.4.</p>
           </div>
-          <div id="jobCount" class="job-count"></div>
-        </div>
-        <div id="jobResults" class="job-results">
-          <div id="emptyState" class="empty-state">Chưa có vị trí phù hợp với bộ lọc hiện tại.</div>
-          <div id="jobList" class="job-list"></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="doi-song" class="section bg-light life-section" data-bg-image="assets/images/bg-doi-song.png">
-      <div class="section-inner">
-        <div class="section-head">
-          <div class="eyebrow-dark">Life At ADC</div>
-          <h2>Đời sống tại ADC</h2>
-          <p>Chúng tôi tin rằng một môi trường làm việc tốt không chỉ tạo ra kết quả kinh doanh vượt trội mà còn giúp mỗi cá nhân phát triển toàn diện về năng lực, tư duy và giá trị sống.</p>
-        </div>
-        <div class="culture-grid">
-          <article class="culture-card culture-card-plain" style="--card-accent:#D8A329">
-            <div class="card-content">
-              <span class="culture-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5Z"></path><path d="M5 10v6c3 3 11 3 14 0v-6"></path><path d="M12 13v8"></path></svg>
-              </span>
-              <h3>Văn hóa chuyên nghiệp</h3>
-              <p>Xây dựng môi trường làm việc dựa trên sự chính trực, trách nhiệm, tinh thần hợp tác và cam kết hướng đến kết quả.</p>
-            </div>
-          </article>
-          <article class="culture-card culture-card-plain" style="--card-accent:#2EA6A1">
-            <div class="card-content">
-              <span class="culture-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M9 9h6v6H9z"></path><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"></path></svg>
-              </span>
-              <h3>Công nghệ & Đổi mới</h3>
-              <p>Không ngừng đầu tư công nghệ, chuyển đổi số và cải tiến quy trình nhằm nâng cao hiệu quả hoạt động và trải nghiệm làm việc.</p>
-            </div>
-          </article>
-          <article class="culture-card culture-card-plain" style="--card-accent:#4F7FD9">
-            <div class="card-content">
-              <span class="culture-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M4 19.5V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-1.5Z"></path><path d="M8 7h6M8 11h7"></path><path d="m14 15 2 2 4-4"></path></svg>
-              </span>
-              <h3>Học hỏi & Phát triển</h3>
-              <p>Trao cơ hội để mỗi cá nhân liên tục nâng cao năng lực chuyên môn, phát triển kỹ năng và mở rộng lộ trình nghề nghiệp.</p>
-            </div>
-          </article>
-          <article class="culture-card culture-card-plain" style="--card-accent:#E07A5F">
-            <div class="card-content">
-              <span class="culture-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.35-7-11a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 6.65-7 11-7 11Z"></path><path d="M8 12h8"></path></svg>
-              </span>
-              <h3>ĐẸP</h3>
-              <p>Đẹp trong ứng xử: tôn trọng, tử tế và có trách nhiệm với đồng nghiệp, khách hàng cũng như cộng đồng xung quanh.</p>
-            </div>
-          </article>
-          <article class="culture-card culture-card-plain" style="--card-accent:#7CB342">
-            <div class="card-content">
-              <span class="culture-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 10-13h-7l1-7Z"></path></svg>
-              </span>
-              <h3>MẠNH</h3>
-              <p>Mạnh về năng lực: không ngừng nâng cao chuyên môn, bản lĩnh vượt thử thách và tinh thần chinh phục mục tiêu lớn.</p>
-            </div>
-          </article>
-          <article class="culture-card culture-card-plain" style="--card-accent:#8E6DD8">
-            <div class="card-content">
-              <span class="culture-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M3 18h18"></path><path d="M6 18V9l6-4 6 4v9"></path><path d="M9 18v-6h6v6"></path><path d="M8 22h8"></path></svg>
-              </span>
-              <h3>GIÀU</h3>
-              <p>Giàu giá trị đóng góp: làm giàu tri thức, kinh nghiệm và thành quả bằng nỗ lực chính đáng trong từng vai trò.</p>
-            </div>
-          </article>
-        </div>
-        <p class="life-outro">Tại ADC, chúng tôi không chỉ tạo ra những sản phẩm chất lượng cho thị trường toàn cầu mà còn xây dựng một môi trường nơi mỗi cá nhân có cơ hội phát triển, thành công và tự hào về hành trình nghề nghiệp của mình.</p>
-      </div>
-    </section>
-
-    <section id="quy-trinh" class="section process" data-bg-image="assets/images/bg-quy-trinh.png">
-      <div class="section-inner">
-        <div class="section-head">
-          <div class="eyebrow-dark">How To Apply</div>
-          <h2>Quy trình ứng tuyển</h2>
-          <p>Quy trình được thiết kế rõ ràng, minh bạch và tập trung vào trải nghiệm của ứng viên.</p>
-        </div>
-        <div class="steps-grid">
-          <article class="step-card">
-            <div class="step-top">
-              <span class="process-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"></path>
-                  <path d="M14 2v5h5"></path>
-                  <path d="M9 13h6"></path>
-                  <path d="M9 17h4"></path>
-                </svg>
-              </span>
-              <span class="step-num">01</span>
-            </div>
-            <h3>Gửi hồ sơ</h3>
-            <p>Điền thông tin, đính kèm CV và chọn vị trí phù hợp với kinh nghiệm của bạn.</p>
-          </article>
-          <article class="step-card">
-            <div class="step-top">
-              <span class="process-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <path d="M9 11l3 3L22 4"></path>
-                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                </svg>
-              </span>
-              <span class="step-num">02</span>
-            </div>
-            <h3>Sàng lọc hồ sơ</h3>
-            <p>P&O đánh giá hồ sơ trong 3-5 ngày làm việc và phản hồi các ứng viên phù hợp.</p>
-          </article>
-          <article class="step-card">
-            <div class="step-top">
-              <span class="process-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="9" cy="7" r="4"></circle>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-              </span>
-              <span class="step-num">03</span>
-            </div>
-            <h3>Phỏng vấn</h3>
-            <p>Trao đổi cùng HR, quản lý tuyển dụng và các lãnh đạo liên quan đến vị trí.</p>
-          </article>
-          <article class="step-card">
-            <div class="step-top">
-              <span class="process-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <path d="M20 6L9 17l-5-5"></path>
-                  <path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
-                </svg>
-              </span>
-              <span class="step-num">04</span>
-            </div>
-            <h3>Offer</h3>
-            <p>Nhận đề nghị, hoàn tất thủ tục và bắt đầu hành trình phát triển mới tại ADC.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section id="lien-he" class="cta" data-bg-image="assets/images/bg-lien-he.png">
-      <div class="cta-overlay"></div>
-      <div class="cta-inner">
-        <div>
-          <h2>Sẵn sàng cho thử thách mới?</h2>
-          <p>Chọn một vị trí đang tuyển hoặc liên hệ trực tiếp với đội ngũ P&O của ADC.</p>
-          <div class="cta-contact" aria-label="Thông tin liên hệ tuyển dụng">
-            <a href="tel:0908022098">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3 5.18 2 2 0 0 1 5 3h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.63 2.6a2 2 0 0 1-.45 2.11L9 10.61a16 16 0 0 0 4.39 4.39l1.18-1.18a2 2 0 0 1 2.11-.45c.83.3 1.7.51 2.6.63A2 2 0 0 1 22 16.92z"></path>
-              </svg>
-              <span>0908 022 098</span>
-            </a>
-            <span>
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 1 1 18 0z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-              </svg>
-              <span>KCN Tân Tạo, Bình Tân, TP.HCM</span>
-            </span>
+          <div class="demo-culture-card animate-on-scroll delay-200" style="background:var(--blue)">
+            <h3>Môi trường làm việc</h3>
+            <p>Năng động, trẻ trung, hiện đại. Friendly Working Environment — nơi mọi người được tôn trọng, lắng nghe và
+              phát triển.</p>
+          </div>
+          <div class="demo-culture-card animate-on-scroll delay-300" style="background:var(--green)">
+            <h3>Hệ thống quản trị tiên tiến</h3>
+            <p>SAP HANA, Salesforce CRM, Office 365, chuẩn bị Power BI &amp; Automation. Bạn sẽ làm việc với công nghệ,
+              không phải giấy tờ.</p>
+          </div>
+          <!-- Row 2: Core Values split into 3 cards -->
+          <div class="demo-culture-card animate-on-scroll delay-100" style="background:var(--indigo)">
+            <h3>ĐẸP</h3>
+            <p>Đẹp từ con người đến sản phẩm, từ tư duy đến hành động.</p>
+          </div>
+          <div class="demo-culture-card animate-on-scroll delay-200" style="background:var(--orange)">
+            <h3>MẠNH</h3>
+            <p>Mạnh từ sự đoàn kết, hệ thống vững chắc và nội lực tập thể.</p>
+          </div>
+          <div class="demo-culture-card animate-on-scroll delay-300" style="background:var(--purple)">
+            <h3>GIÀU</h3>
+            <p>Giàu về nhân văn, tài chính cho toàn bộ nhân viên và đối tác.</p>
           </div>
         </div>
-        <div class="cta-actions">
-          <a class="btn btn-primary" href="#co-hoi">Ứng tuyển ngay</a>
-          <a class="btn btn-outline" href="mailto:hr@asiadragoncordage.com">hr@asiadragoncordage.com</a>
+      </div>
+    </section>
+
+    <!-- Process (Section 5) -->
+    <section id="quy-trinh" class="demo-process-section">
+      <div class="demo-process-inner">
+        <div class="demo-section-center animate-on-scroll">
+          <div class="demo-process-eyebrow shared-eyebrow">HOW TO APPLY</div>
+          <h2 class="demo-section-title shared-title" style="color:var(--navy);">Quy trình ứng tuyển</h2>
         </div>
+        <div class="demo-steps-grid">
+          <div class="demo-step-card animate-on-scroll delay-100" style="border-bottom-color:var(--red)">
+            <div class="demo-step-num" style="color:var(--red)">01</div>
+            <div class="demo-step-title">Gửi CV</div>
+            <div class="demo-step-desc">Email CV tiếng Anh + mức lương kỳ vọng</div>
+          </div>
+          <div class="demo-step-card animate-on-scroll delay-200" style="border-bottom-color:var(--green)">
+            <div class="demo-step-num" style="color:var(--green)">02</div>
+            <div class="demo-step-title">Sàng lọc</div>
+            <div class="demo-step-desc">P&amp;O review hồ sơ trong 3-5 ngày</div>
+          </div>
+          <div class="demo-step-card animate-on-scroll delay-300" style="border-bottom-color:var(--blue)">
+            <div class="demo-step-num" style="color:var(--blue)">03</div>
+            <div class="demo-step-title">Phỏng vấn</div>
+            <div class="demo-step-desc">2-3 vòng: HR → Hiring Manager → CEO</div>
+          </div>
+          <div class="demo-step-card animate-on-scroll delay-400" style="border-bottom-color:var(--purple)">
+            <div class="demo-step-num" style="color:var(--purple)">04</div>
+            <div class="demo-step-title">Offer</div>
+            <div class="demo-step-desc">Nhận offer &amp; bắt đầu hành trình mới</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA (Section 6) -->
+    <section id="lien-he" class="demo-cta-section">
+      <div class="color-picker-wrapper">
+        <label for="ctaColorPicker" class="color-picker-label">Chọn màu nền</label>
+        <input type="color" id="ctaColorPicker" value="#EFBF04" title="Tùy chỉnh màu nền" />
+      </div>
+      <h2 class="shared-title" style="color:var(--navy);">Sẵn sàng cho thử thách mới?</h2>
+      <p>Gửi CV + mức lương kỳ vọng</p>
+      <div class="demo-cta-links">
+        <a href="mailto:adc.hr@asiadragoncordage.com" class="demo-cta-email">📧 adc.hr@asiadragoncordage.com</a>
+        <span class="demo-cta-info">📞 0908 022 098</span>
+        <span class="demo-cta-info">📍 KCN Tân Tạo, Bình Tân, TP.HCM</span>
       </div>
     </section>
   </main>
@@ -338,14 +327,72 @@
     <div class="footer-badges">
       <span class="footer-badge">ISO 9001:2015</span>
       <span class="footer-badge">ANSI S315.4</span>
-      <span class="footer-badge">SAP HANA</span>
+      <span class="footer-badge">S/4HANA</span>
     </div>
     <div>© 2026 Asia Dragon Capital (ADC) | Leading Manufacturer Since 2006</div>
     <div class="footer-motto">Beauty · Strength · Wealth</div>
   </footer>
 
+  <div class="apply-modal" id="applyModal" role="dialog" aria-modal="true" aria-labelledby="applyModalTitle"
+    aria-hidden="true">
+    <div class="apply-modal-panel">
+      <div class="apply-modal-head">
+        <div>
+          <h2 id="applyModalTitle">Ứng tuyển vị trí</h2>
+          <p id="applyModalJob">ADC Careers</p>
+        </div>
+        <button class="apply-close" type="button" data-close-apply aria-label="Đóng form">×</button>
+      </div>
+      <form class="apply-form" id="demoApplyForm">
+        <div class="apply-form-grid">
+          <div class="apply-field full" id="genericJobSelect" style="display: none;">
+            <label for="demoJobId">Vị trí ứng tuyển *</label>
+            <select id="demoJobId" name="jobId"></select>
+          </div>
+          <div class="apply-field">
+            <label for="demoFullName">Họ và tên *</label>
+            <input id="demoFullName" name="fullName" type="text" autocomplete="name" required />
+          </div>
+          <div class="apply-field">
+            <label for="demoEmail">Email *</label>
+            <input id="demoEmail" name="email" type="email" autocomplete="email" required />
+          </div>
+          <div class="apply-field">
+            <label for="demoPhone">Số điện thoại *</label>
+            <input id="demoPhone" name="phone" type="tel" autocomplete="tel" required />
+          </div>
+          <div class="apply-field">
+            <label for="demoSalary">Lương kỳ vọng</label>
+            <input id="demoSalary" name="expectedSalary" type="text" placeholder="VD: Thỏa thuận" />
+          </div>
+          <div class="apply-field full">
+            <label for="demoCv">CV đính kèm *</label>
+            <input id="demoCv" name="cvFile" type="file"
+              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              required />
+            <div class="apply-hint">Chấp nhận PDF, DOC, DOCX. Dung lượng tối đa 5MB.</div>
+          </div>
+          <div class="apply-field full">
+            <label for="demoNote">Ghi chú</label>
+            <textarea id="demoNote" name="note"
+              placeholder="Thời gian có thể bắt đầu, portfolio hoặc thông tin bổ sung."></textarea>
+          </div>
+          <div class="apply-field full" data-field="captcha">
+            <div id="recaptchaContainer"></div>
+            <div class="error-text" style="color:var(--red);font-size:0.875rem;margin-top:0.25rem;"></div>
+          </div>
+        </div>
+        <div class="apply-form-actions">
+          <button class="apply-btn apply-cancel" type="button" data-close-apply>Hủy</button>
+          <button class="apply-btn apply-submit" type="submit">Gửi hồ sơ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="js/config.js"></script>
   <script src="js/shared.js"></script>
   <script src="js/index.js"></script>
 </body>
+
 </html>
