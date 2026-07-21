@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const { submitApplication } = require("../controllers/applyController");
+const { applyLimiter } = require("../middlewares/rateLimitMiddleware");
 
 const router = express.Router();
 
@@ -20,7 +21,7 @@ const upload = multer({
   }
 });
 
-router.post("/", (req, res, next) => {
+router.post("/", applyLimiter, (req, res, next) => {
   upload.single("cvFile")(req, res, (error) => {
     if (!error) return next();
 

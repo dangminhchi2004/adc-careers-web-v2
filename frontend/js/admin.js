@@ -40,9 +40,19 @@ const applicationSalaryFilter = document.getElementById("applicationSalaryFilter
 const applicationDateFrom = document.getElementById("applicationDateFrom");
 const applicationDateTo = document.getElementById("applicationDateTo");
 const exportApplicationsBtn = document.getElementById("exportApplicationsBtn");
+const jobModal = document.getElementById("jobModal");
+const closeJobModalBtn = document.getElementById("closeJobModalBtn");
 
 document.getElementById("refreshBtn").addEventListener("click", loadDashboard);
-document.getElementById("resetJobFormBtn").addEventListener("click", resetJobForm);
+document.getElementById("resetJobFormBtn").addEventListener("click", () => {
+  resetJobForm();
+  jobModal.hidden = false;
+});
+if (closeJobModalBtn) {
+  closeJobModalBtn.addEventListener("click", () => {
+    jobModal.hidden = true;
+  });
+}
 document.getElementById("logoutBtn").addEventListener("click", logout);
 document.getElementById("resetApplicationFiltersBtn").addEventListener("click", resetApplicationFilters);
 exportApplicationsBtn.addEventListener("click", exportFilteredApplications);
@@ -72,7 +82,10 @@ jobForm.addEventListener("submit", async (event) => {
     if (!result.success) throw new Error(result.message || "Không thể lưu vị trí.");
 
     showJobMessage("success", jobId ? "Đã cập nhật vị trí." : "Đã tạo vị trí mới.");
-    resetJobForm();
+    setTimeout(() => {
+      resetJobForm();
+      jobModal.hidden = true;
+    }, 1500);
     await loadDashboard();
   } catch (error) {
     showJobMessage("error", error.message);
@@ -139,8 +152,8 @@ function renderJobs() {
     return;
   }
 
-  jobsTable.innerHTML = jobs.map((job) => `
-    <tr>
+  jobsTable.innerHTML = jobs.map((job, index) => `
+    <tr class="animate-slide-up" style="--anim-order: ${index + 5};">
       <td data-label="Vị trí">
         <div class="table-title">${escapeHtml(job.title)}</div>
         <div class="table-sub">${escapeHtml(job.vn)}</div>
@@ -172,8 +185,8 @@ function renderApplications() {
     return;
   }
 
-  applicationsTable.innerHTML = filteredApplications.map((application) => `
-    <tr>
+  applicationsTable.innerHTML = filteredApplications.map((application, index) => `
+    <tr class="animate-slide-up" style="--anim-order: ${index + 5};">
       <td data-label="Ứng viên">
         <div class="table-title">${escapeHtml(application.fullName)}</div>
         <div class="table-sub">${escapeHtml(application.note || "Không có ghi chú")}</div>
@@ -371,8 +384,7 @@ function editJob(id) {
   document.getElementById("benefits").value = benefitsToLines(job.benefits);
   document.getElementById("environmentSections").value = environmentSectionsToLines(job.environmentSections);
   showJobMessage("success", "Đang chỉnh sửa vị trí. Bấm Lưu để cập nhật.");
-  setActiveTab("jobs");
-  document.getElementById("jobs").scrollIntoView({ behavior: "smooth", block: "start" });
+  jobModal.hidden = false;
 }
 
 async function deleteJob(id) {
@@ -668,5 +680,68 @@ window.editJob = editJob;
 window.deleteJob = deleteJob;
 window.downloadCv = downloadCv;
 window.updateApplicationStatus = updateApplicationStatus;
+
+// Password Modal Logic
+const changePasswordBtn = document.getElementById("changePasswordBtn");
+const passwordModal = document.getElementById("passwordModal");
+const closePasswordModalBtn = document.getElementById("closePasswordModalBtn");
+const passwordForm = document.getElementById("passwordForm");
+const passwordMessage = document.getElementById("passwordMessage");
+
+if (changePasswordBtn) {
+  changePasswordBtn.addEventListener("click", () => {
+    passwordForm.reset();
+    passwordMessage.textContent = "";
+    passwordMessage.className = "form-message";
+    passwordModal.removeAttribute("hidden");
+  });
+}
+
+if (closePasswordModalBtn) {
+  closePasswordModalBtn.addEventListener("click", () => {
+    passwordModal.setAttribute("hidden", "true");
+  });
+}
+
+if (passwordForm) {
+  passwordForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const oldPassword = document.getElementById("oldPassword").value;
+    const newPassword = document.getElementById("newPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+
+    if (newPassword !== confirmPassword) {
+      passwordMessage.textContent = "Mật khẩu mới không khớp.";
+      passwordMessage.className = "form-message visible error";
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/password`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ oldPassword, newPassword })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        passwordMessage.textContent = "Đổi mật khẩu thành công. Vui lòng đăng nhập lại.";
+        passwordMessage.className = "form-message visible success";
+        setTimeout(() => {
+          logout();
+        }, 2000);
+      } else {
+        passwordMessage.textContent = data.message || "Lỗi khi đổi mật khẩu.";
+        passwordMessage.className = "form-message visible error";
+      }
+    } catch (err) {
+      passwordMessage.textContent = "Lỗi kết nối máy chủ.";
+      passwordMessage.className = "form-message visible error";
+    }
+  });
+}
 
 loadDashboard();

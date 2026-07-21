@@ -3,6 +3,7 @@ let selectedDept = "all";
 let expandedJob = null;
 let currentApplyJob = "ADC Careers";
 let currentApplyJobId = null;
+let recaptchaWidgetId = null;
 
 const params = new URLSearchParams(window.location.search);
 const detailJobId = Number(params.get("id"));
@@ -141,6 +142,26 @@ function openApplyModal(jobName = "ADC Careers", jobId = null) {
   currentApplyJobId = jobId;
   jobLabel.textContent = currentApplyJob;
 
+  if (recaptchaWidgetId === null && window.grecaptcha) {
+    const baseUrl = window.ADC_API_BASE ?? (window.location.protocol === "file:" ? "http://localhost:5000" : "");
+    const cleanBaseUrl = baseUrl.replace(/\/$/, "");
+    fetch(`${cleanBaseUrl}/api/config/public`)
+      .then(res => res.json())
+      .then(config => {
+        if (config.recaptchaSiteKey) {
+          recaptchaWidgetId = grecaptcha.render("recaptchaContainer", {
+            sitekey: config.recaptchaSiteKey
+          });
+        }
+      })
+      .catch(e => console.error("Failed to load captcha config", e));
+  } else if (recaptchaWidgetId !== null && window.grecaptcha) {
+    grecaptcha.reset(recaptchaWidgetId);
+  }
+
+  const captchaError = modal.querySelector('[data-field="captcha"] .error-text');
+  if (captchaError) captchaError.textContent = "";
+
   if (genericSelect && selectEl) {
     if (!jobId) {
       genericSelect.style.display = "block";
@@ -205,8 +226,20 @@ document.addEventListener("DOMContentLoaded", () => {
       submitBtn.disabled = true;
 
       try {
+        const captchaError = currentTarget.querySelector('[data-field="captcha"] .error-text');
+        if (captchaError) captchaError.textContent = "";
+
         const formData = new FormData(currentTarget);
         // jobId đã được submit tự động qua <select name="jobId">
+
+        if (recaptchaWidgetId !== null && window.grecaptcha) {
+          const token = grecaptcha.getResponse(recaptchaWidgetId);
+          if (!token) {
+            if (captchaError) captchaError.textContent = "Vui lòng xác thực bạn không phải là người máy.";
+            throw new Error("CAPTCHA_MISSING");
+          }
+          formData.append("captchaToken", token);
+        }
 
         const apiBaseUrl = typeof API_BASE !== 'undefined' ? API_BASE : (window.ADC_API_BASE ?? (window.location.protocol === "file:" ? "http://localhost:5000" : ""));
         const cleanBaseUrl = apiBaseUrl.replace(/\/$/, "");
@@ -224,10 +257,14 @@ document.addEventListener("DOMContentLoaded", () => {
           currentTarget.reset();
         } else {
           alert(`Lỗi: ${result.message || 'Không thể gửi hồ sơ. Vui lòng kiểm tra lại kích thước hoặc định dạng file.'}`);
+          if (recaptchaWidgetId !== null && window.grecaptcha) grecaptcha.reset(recaptchaWidgetId);
         }
       } catch (error) {
-        console.error("Apply error:", error);
-        alert("Có lỗi xảy ra khi kết nối tới máy chủ. Vui lòng thử lại sau.");
+        if (error.message !== "CAPTCHA_MISSING") {
+          console.error("Apply error:", error);
+          alert("Có lỗi xảy ra khi kết nối tới máy chủ. Vui lòng thử lại sau.");
+          if (recaptchaWidgetId !== null && window.grecaptcha) grecaptcha.reset(recaptchaWidgetId);
+        }
       } finally {
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;

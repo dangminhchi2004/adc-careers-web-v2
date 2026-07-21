@@ -1,4 +1,5 @@
 const db = require("./db");
+const bcrypt = require("bcryptjs");
 
 async function ensureSchema() {
   await db.query(`
@@ -77,6 +78,25 @@ async function ensureSchema() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS admins (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      username VARCHAR(255) UNIQUE NOT NULL,
+      password_hash VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  const [adminRows] = await db.query("SELECT COUNT(*) AS count FROM admins");
+  if (adminRows[0].count === 0) {
+    const defaultUsername = process.env.ADMIN_USERNAME || "admin";
+    const defaultPassword = process.env.ADMIN_PASSWORD || "admin123";
+    const hash = await bcrypt.hash(defaultPassword, 10);
+    await db.query("INSERT INTO admins (username, password_hash) VALUES (?, ?)", [defaultUsername, hash]);
+    console.log("Seeded default admin user.");
+  }
+
   await addColumnIfMissing("jobs", "slug", "VARCHAR(180) UNIQUE");
   await addColumnIfMissing("jobs", "summary", "TEXT");
   await addColumnIfMissing("jobs", "employment_type", "VARCHAR(80) DEFAULT 'Full-time'");

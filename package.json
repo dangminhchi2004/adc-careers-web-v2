@@ -10,12 +10,15 @@
   "scripts": {
     "start": "node backend/server.js",
     "dev": "node backend/server.js",
-    "seed": "node backend/seed.js"
+    "seed": "node backend/seed.js",
+    "reset-admin": "node backend/scripts/resetAdmin.js"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "express-rate-limit": "^8.6.0",
     "file-type": "^16.5.4",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",

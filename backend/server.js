@@ -28,6 +28,13 @@ app.use("/api/apply", applyRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 
+app.get("/api/config/public", (req, res) => {
+  res.json({
+    success: true,
+    recaptchaSiteKey: process.env.RECAPTCHA_SITE_KEY || ""
+  });
+});
+
 app.use(express.static(frontendDir));
 app.use("/frontend", express.static(frontendDir));
 

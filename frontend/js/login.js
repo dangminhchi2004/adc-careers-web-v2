@@ -1,6 +1,24 @@
 const API_BASE = window.ADC_API_BASE ?? (window.location.protocol === "file:" ? "http://localhost:5000" : "");
 const loginForm = document.getElementById("loginForm");
 const loginMessage = document.getElementById("loginMessage");
+let recaptchaWidgetId = null;
+
+if (localStorage.getItem("adcAdminToken")) {
+  window.location.href = "admin.html";
+}
+
+fetch(`${API_BASE}/api/config/public`)
+  .then(res => res.json())
+  .then(config => {
+    if (config.recaptchaSiteKey && window.grecaptcha) {
+      grecaptcha.ready(function() {
+        recaptchaWidgetId = grecaptcha.render("recaptchaContainer", {
+          sitekey: config.recaptchaSiteKey
+        });
+      });
+    }
+  })
+  .catch(e => console.error("Failed to load captcha config", e));
 
 if (localStorage.getItem("adcAdminToken")) {
   window.location.href = "admin.html";
@@ -13,6 +31,15 @@ loginForm.addEventListener("submit", async (event) => {
   const password = document.getElementById("password").value;
   const submitButton = loginForm.querySelector("button");
 
+  let captchaToken = null;
+  if (recaptchaWidgetId !== null) {
+    captchaToken = grecaptcha.getResponse(recaptchaWidgetId);
+    if (!captchaToken) {
+      showMessage("error", "Vui lòng xác thực bạn không phải là người máy.");
+      return;
+    }
+  }
+
   try {
     submitButton.disabled = true;
     submitButton.textContent = "Đang đăng nhập...";
@@ -23,7 +50,7 @@ loginForm.addEventListener("submit", async (event) => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ username, password, captchaToken })
     });
     const result = await response.json();
 
@@ -39,6 +66,7 @@ loginForm.addEventListener("submit", async (event) => {
       ? "Không kết nối được backend. Hãy kiểm tra server đang chạy."
       : error.message;
     showMessage("error", message);
+    if (recaptchaWidgetId !== null) grecaptcha.reset(recaptchaWidgetId);
   } finally {
     submitButton.disabled = false;
     submitButton.textContent = "Đăng nhập";

@@ -12,6 +12,7 @@
     rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/style2.css" />
+  <script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
 </head>
 
 <body>
@@ -375,6 +376,10 @@
             <label for="demoNote">Ghi chú</label>
             <textarea id="demoNote" name="note"
               placeholder="Thời gian có thể bắt đầu, portfolio hoặc thông tin bổ sung."></textarea>
+          </div>
+          <div class="apply-field full" data-field="captcha">
+            <div id="recaptchaContainer"></div>
+            <div class="error-text" style="color:var(--red);font-size:0.875rem;margin-top:0.25rem;"></div>
           </div>
         </div>
         <div class="apply-form-actions">

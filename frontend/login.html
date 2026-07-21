@@ -9,8 +9,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/admin.css" />
+  <script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
 </head>
 <body class="login-page">
+  <div class="hero-orb" style="background:radial-gradient(circle,rgba(255,215,0,.15),transparent 70%);top:20%;left:20%;position:fixed;width:300px;height:300px;"></div>
+  <div class="hero-orb" style="background:radial-gradient(circle,rgba(33,150,243,.15),transparent 70%);bottom:10%;right:20%;position:fixed;width:400px;height:400px;"></div>
   <main class="login-shell">
     <section class="login-card">
       <img src="assets/images/sitelogo.png" alt="Asia Dragon Capital" />
@@ -28,6 +31,7 @@
           <span>Mật khẩu</span>
           <input id="password" name="password" type="password" autocomplete="current-password" required />
         </label>
+        <div id="recaptchaContainer" style="margin-top: 8px;"></div>
         <div id="loginMessage" class="form-message" role="status"></div>
         <button class="btn btn-primary" type="submit">Đăng nhập</button>
       </form>

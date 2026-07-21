@@ -13,6 +13,7 @@
     const formMessage = document.getElementById("formMessage");
     const modalJobName = document.getElementById("modalJobName");
     let allJobs = [];
+    let recaptchaWidgetId = null;
 
     async function init() {
       allJobs = await fetchJobs();
@@ -311,9 +312,26 @@
       return date.toISOString().slice(0, 10);
     }
 
-    function openApplyModal() {
+    async function openApplyModal() {
       clearFormState();
       applyForm.reset();
+
+      if (recaptchaWidgetId === null && window.grecaptcha) {
+        try {
+          const res = await fetch(`${API_BASE}/api/config/public`);
+          const config = await res.json();
+          if (config.recaptchaSiteKey) {
+            recaptchaWidgetId = grecaptcha.render("recaptchaContainer", {
+              sitekey: config.recaptchaSiteKey
+            });
+          }
+        } catch (e) {
+          console.error("Failed to load captcha config", e);
+        }
+      } else if (recaptchaWidgetId !== null && window.grecaptcha) {
+        grecaptcha.reset(recaptchaWidgetId);
+      }
+
       modalJobName.textContent = `${job.title} · ${job.vn}`;
       modal.classList.add("open");
       modal.setAttribute("aria-hidden", "false");
@@ -376,6 +394,14 @@
         }
       }
 
+      if (recaptchaWidgetId !== null && window.grecaptcha) {
+        const captchaResponse = grecaptcha.getResponse(recaptchaWidgetId);
+        if (!captchaResponse) {
+          setFieldError("captcha", "Vui lòng xác thực bạn không phải là người máy.");
+          valid = false;
+        }
+      }
+
       return valid;
     }
 
@@ -417,6 +443,11 @@
       formData.append("expectedSalary", payload.expectedSalary);
       formData.append("note", payload.note);
       formData.append("cvFile", payload.cvFile);
+
+      if (recaptchaWidgetId !== null && window.grecaptcha) {
+        formData.append("captchaToken", grecaptcha.getResponse(recaptchaWidgetId));
+      }
+
       return formData;
     }
 
@@ -466,6 +497,10 @@
           ? "Không kết nối được server. Vui lòng kiểm tra backend đang chạy ở http://localhost:5000."
           : error.message || "Không thể gửi hồ sơ lúc này. Vui lòng thử lại sau.";
         showFormMessage("error", message);
+        
+        if (recaptchaWidgetId !== null && window.grecaptcha) {
+          grecaptcha.reset(recaptchaWidgetId);
+        }
       } finally {
         submitButton.disabled = false;
         submitButton.textContent = "Gửi hồ sơ";

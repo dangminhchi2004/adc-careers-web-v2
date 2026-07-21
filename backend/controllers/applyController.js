@@ -6,8 +6,43 @@ const ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx"];
 
 async function submitApplication(req, res) {
   try {
-    const { jobId, fullName, email, phone, expectedSalary, note } = req.body;
+    const { jobId, fullName, email, phone, expectedSalary, note, captchaToken } = req.body;
     const cvFile = req.file;
+
+    if (!captchaToken) {
+      return res.status(400).json({
+        success: false,
+        message: "Vui lòng xác thực bạn không phải là người máy."
+      });
+    }
+
+    try {
+      const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+      if (secretKey) {
+        const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
+        const verifyResponse = await fetch(verifyUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `secret=${secretKey}&response=${captchaToken}`
+        });
+        const verifyData = await verifyResponse.json();
+        
+        if (!verifyData.success) {
+          return res.status(400).json({
+            success: false,
+            message: "Xác thực CAPTCHA thất bại. Vui lòng thử lại."
+          });
+        }
+      } else {
+        console.warn("RECAPTCHA_SECRET_KEY is not defined. Skipping CAPTCHA validation on server.");
+      }
+    } catch (e) {
+      console.error("CAPTCHA validation error:", e);
+      return res.status(500).json({
+        success: false,
+        message: "Lỗi kết nối máy chủ xác thực. Vui lòng thử lại sau."
+      });
+    }
 
     const validationError = validateApplication({ jobId, fullName, email, phone, cvFile });
     if (validationError) {
