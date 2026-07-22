@@ -1,5 +1,6 @@
 const cors = require("cors");
 const express = require("express");
+const helmet = require("helmet");
 const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
@@ -19,6 +20,25 @@ const uploadsDir = path.join(__dirname, "uploads", "cvs");
 fs.mkdirSync(uploadsDir, { recursive: true });
 
 app.use(cors());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://www.google.com/recaptcha/", "https://www.gstatic.com/recaptcha/"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      frameSrc: ["'self'", "https://www.google.com/recaptcha/"],
+      imgSrc: ["'self'", "data:"]
+    }
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+  },
+  frameguard: {
+    action: "sameorigin",
+  }
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
