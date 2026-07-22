@@ -163,8 +163,8 @@ function renderJobs() {
       <td data-label="Trạng thái"><span class="pill ${escapeAttribute(job.status)}">${escapeHtml(formatJobStatus(job.status))}</span></td>
       <td data-label="Thao tác">
         <div class="row-actions">
-          <button class="btn btn-secondary" type="button" onclick="editJob(${job.id})">Sửa</button>
-          <button class="btn btn-danger" type="button" onclick="deleteJob(${job.id})">Xóa</button>
+          <button class="btn btn-secondary" type="button" data-action="edit-job" data-id="${job.id}">Sửa</button>
+          <button class="btn btn-danger" type="button" data-action="delete-job" data-id="${job.id}">Xóa</button>
         </div>
       </td>
     </tr>
@@ -214,7 +214,7 @@ function renderApplicationStatus(application) {
   `).join("");
 
   return `
-    <select class="status-select pill ${escapeAttribute(currentStatus)}" onchange="updateApplicationStatus(${application.id}, this.value)">
+    <select class="status-select pill ${escapeAttribute(currentStatus)}" data-action="update-status" data-id="${application.id}">
       ${options}
     </select>
   `;
@@ -231,7 +231,7 @@ function formatJobStatus(status) {
 
 function renderCvLink(application) {
   if (!application.cvOriginalName && !application.cvFilePath) return "Không có CV";
-  return `<a class="cv-link" href="#" onclick="downloadCv(event, ${application.id})">${escapeHtml(application.cvOriginalName || "Tải CV")}</a>`;
+  return `<a class="cv-link" href="#" data-action="download-cv" data-id="${application.id}">${escapeHtml(application.cvOriginalName || "Tải CV")}</a>`;
 }
 
 async function downloadCv(event, applicationId) {
@@ -743,5 +743,27 @@ if (passwordForm) {
     }
   });
 }
+
+document.addEventListener("click", (e) => {
+  const target = e.target.closest("[data-action]");
+  if (!target) return;
+  const action = target.dataset.action;
+  const id = Number(target.dataset.id);
+
+  if (action === "edit-job") {
+    editJob(id);
+  } else if (action === "delete-job") {
+    deleteJob(id);
+  } else if (action === "download-cv") {
+    downloadCv(e, id);
+  }
+});
+
+document.addEventListener("change", (e) => {
+  const target = e.target.closest("[data-action='update-status']");
+  if (!target) return;
+  const id = Number(target.dataset.id);
+  updateApplicationStatus(id, target.value);
+});
 
 loadDashboard();

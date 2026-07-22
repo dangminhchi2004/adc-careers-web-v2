@@ -43,7 +43,7 @@ function renderFilters() {
     const label = d === "all" ? "Tất cả" : d;
     const color = RAINBOW[i % 7];
     const isActive = selectedDept === d;
-    return `<button class="demo-filter-btn${isActive ? ' active' : ''}" data-dept="${escapeAttribute(d)}" style="${isActive ? `--active-color:${color};border-color:${color};color:${color};background:${color}20` : ''}" onclick="setDept(this.dataset.dept)">${escapeHtml(label)}</button>`;
+    return `<button class="demo-filter-btn${isActive ? ' active' : ''}" data-dept="${escapeAttribute(d)}" data-action="filter-dept" style="${isActive ? `--active-color:${color};border-color:${color};color:${color};background:${color}20` : ''}">${escapeHtml(label)}</button>`;
   }).join("");
   setTimeout(() => { if (window.initScrollAnimations) window.initScrollAnimations(); }, 50);
 }
@@ -63,7 +63,7 @@ function renderJobs() {
     const detailUrl = jobUrl(job); // from shared.js
     return `
 <div class="demo-job-card animate-on-scroll" data-job-id="${job.id}" style="--job-color:${job.color};border-left-color:${job.color}">
-<div class="demo-job-header" onclick="toggleJob(${job.id})">
+<div class="demo-job-header" data-action="toggle-job" data-id="${job.id}">
 <div class="demo-job-meta">
           ${job.urgent ? `<span class="demo-urgent-badge">URGENT</span>` : ''}
 <div>
@@ -142,22 +142,24 @@ function openApplyModal(jobName = "ADC Careers", jobId = null) {
   currentApplyJobId = jobId;
   jobLabel.textContent = currentApplyJob;
 
-  if (recaptchaWidgetId === null && window.grecaptcha) {
-    const baseUrl = window.ADC_API_BASE ?? (window.location.protocol === "file:" ? "http://localhost:5000" : "");
-    const cleanBaseUrl = baseUrl.replace(/\/$/, "");
-    fetch(`${cleanBaseUrl}/api/config/public`)
-      .then(res => res.json())
-      .then(config => {
-        if (config.recaptchaSiteKey) {
-          recaptchaWidgetId = grecaptcha.render("recaptchaContainer", {
-            sitekey: config.recaptchaSiteKey
-          });
-        }
-      })
-      .catch(e => console.error("Failed to load captcha config", e));
-  } else if (recaptchaWidgetId !== null && window.grecaptcha) {
-    grecaptcha.reset(recaptchaWidgetId);
-  }
+  loadReCaptcha().then(() => {
+    if (recaptchaWidgetId === null && window.grecaptcha) {
+      const baseUrl = window.ADC_API_BASE ?? (window.location.protocol === "file:" ? "http://localhost:5000" : "");
+      const cleanBaseUrl = baseUrl.replace(/\/$/, "");
+      fetch(`${cleanBaseUrl}/api/config/public`)
+        .then(res => res.json())
+        .then(config => {
+          if (config.recaptchaSiteKey) {
+            recaptchaWidgetId = grecaptcha.render("recaptchaContainer", {
+              sitekey: config.recaptchaSiteKey
+            });
+          }
+        })
+        .catch(e => console.error("Failed to load captcha config", e));
+    } else if (recaptchaWidgetId !== null && window.grecaptcha) {
+      grecaptcha.reset(recaptchaWidgetId);
+    }
+  });
 
   const captchaError = modal.querySelector('[data-field="captcha"] .error-text');
   if (captchaError) captchaError.textContent = "";
@@ -204,6 +206,18 @@ document.addEventListener("click", (event) => {
 
   const modal = document.getElementById("applyModal");
   if (event.target === modal) closeApplyModal();
+
+  const filterBtn = event.target.closest("[data-action='filter-dept']");
+  if (filterBtn) {
+    setDept(filterBtn.dataset.dept);
+    return;
+  }
+
+  const toggleBtn = event.target.closest("[data-action='toggle-job']");
+  if (toggleBtn) {
+    toggleJob(Number(toggleBtn.dataset.id));
+    return;
+  }
 });
 
 document.addEventListener("keydown", (event) => {

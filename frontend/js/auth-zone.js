@@ -7,18 +7,34 @@ if (localStorage.getItem("adcAdminToken")) {
   window.location.href = "admin.html";
 }
 
-fetch(`${API_BASE}/api/config/public`)
-  .then(res => res.json())
-  .then(config => {
-    if (config.recaptchaSiteKey && window.grecaptcha) {
-      grecaptcha.ready(function() {
+function loadReCaptcha() {
+  if (window.grecaptcha) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      if (window.grecaptcha) window.grecaptcha.ready(resolve);
+      else resolve();
+    };
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+loadReCaptcha().then(() => {
+  fetch(`${API_BASE}/api/config/public`)
+    .then(res => res.json())
+    .then(config => {
+      if (config.recaptchaSiteKey && window.grecaptcha) {
         recaptchaWidgetId = grecaptcha.render("recaptchaContainer", {
           sitekey: config.recaptchaSiteKey
         });
-      });
-    }
-  })
-  .catch(e => console.error("Failed to load captcha config", e));
+      }
+    })
+    .catch(e => console.error("Failed to load captcha config", e));
+});
 
 if (localStorage.getItem("adcAdminToken")) {
   window.location.href = "admin.html";

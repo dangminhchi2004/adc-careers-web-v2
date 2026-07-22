@@ -268,3 +268,28 @@
         image.src = imageUrl;
       });
     }
+
+    let recaptchaLoadPromise = null;
+    function loadReCaptcha() {
+      if (window.grecaptcha) return Promise.resolve();
+      if (recaptchaLoadPromise) return recaptchaLoadPromise;
+
+      recaptchaLoadPromise = new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+          if (window.grecaptcha) {
+            window.grecaptcha.ready(resolve);
+          } else {
+            resolve();
+          }
+        };
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+      return recaptchaLoadPromise;
+    }
+    window.loadReCaptcha = loadReCaptcha;
+
