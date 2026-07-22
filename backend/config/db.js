@@ -12,6 +12,11 @@ const dbConfig = {
   user: envValue("DB_USER"),
   password: envValue("DB_PASSWORD"),
   database: envValue("DB_NAME"),
+  // The DB server stores TIMESTAMP/DATETIME values in UTC. Without this, mysql2
+  // parses those raw values as if they were already in the Node process's local
+  // timezone, silently shifting every timestamp (applied_at, created_at, ...) by
+  // the local UTC offset (e.g. -7h for Vietnam) instead of representing the real UTC instant.
+  timezone: "Z",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0

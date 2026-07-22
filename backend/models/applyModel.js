@@ -67,6 +67,11 @@ const Application = {
   updateStatus: async (id, status) => {
     await db.query("UPDATE applications SET status = ? WHERE id = ?", [status, id]);
     return Application.getById(id);
+  },
+
+  remove: async (id) => {
+    const [result] = await db.query("DELETE FROM applications WHERE id = ?", [id]);
+    return result.affectedRows > 0;
   }
 };
 

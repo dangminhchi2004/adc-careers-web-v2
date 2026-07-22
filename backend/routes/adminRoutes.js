@@ -5,6 +5,7 @@ const {
   deleteJob,
   downloadApplicationCv,
   exportApplications,
+  getApplicationCvLink,
   getApplications,
   getJobs,
   updateApplicationStatus,
@@ -23,5 +24,6 @@ router.get("/applications", getApplications);
 router.get("/applications/export", exportApplications);
 router.put("/applications/:id/status", updateApplicationStatus);
 router.get("/applications/:id/cv", downloadApplicationCv);
+router.get("/applications/:id/cv-link", getApplicationCvLink);
 
 module.exports = router;

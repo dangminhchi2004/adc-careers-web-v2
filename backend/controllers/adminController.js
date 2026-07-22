@@ -1,6 +1,6 @@
 const Application = require("../models/applyModel");
 const Job = require("../models/jobModel");
-const { loadCv } = require("../services/cvStorageService");
+const { buildCvViewUrl, loadCv } = require("../services/cvStorageService");
 const auditService = require("../services/auditService");
 
 async function getJobs(req, res) {
@@ -67,7 +67,13 @@ async function deleteJob(req, res) {
 async function getApplications(req, res) {
   try {
     const applications = await Application.getAll();
-    res.json({ success: true, data: applications });
+    const data = applications.map((application) => ({
+      ...application,
+      cvViewUrl: application.cvStorageProvider === "sharepoint_relay" && application.cvFileName
+        ? `/api/admin/applications/${application.id}/cv-link`
+        : null
+    }));
+    res.json({ success: true, data });
   } catch (error) {
     console.error("GET /api/admin/applications failed:", error);
     res.status(500).json({ success: false, message: "Khong the tai ho so ung vien." });
@@ -159,6 +165,26 @@ async function downloadApplicationCv(req, res) {
   }
 }
 
+async function getApplicationCvLink(req, res) {
+  try {
+    const application = await Application.getById(req.params.id);
+    if (!application || application.cvStorageProvider !== "sharepoint_relay" || !application.cvFileName) {
+      return res.status(404).json({ success: false, message: "Khong tim thay file CV." });
+    }
+
+    const url = buildCvViewUrl(application.cvFileName);
+    if (!url) {
+      return res.status(500).json({ success: false, message: "Chua cau hinh CV_VIEW_BASE_URL." });
+    }
+
+    auditService.logAction(req, "VIEW_CV_LINK", "APPLICATION", application.id, { fileName: application.cvFileName });
+    return res.json({ success: true, url });
+  } catch (error) {
+    console.error("GET /api/admin/applications/:id/cv-link failed:", error);
+    return res.status(500).json({ success: false, message: "Khong the mo lien ket CV." });
+  }
+}
+
 function validateJob(job) {
   const requiredFields = ["title", "vn", "dept", "level", "report"];
   const missingField = requiredFields.find((field) => !job[field] || !String(job[field]).trim());
@@ -180,6 +206,7 @@ module.exports = {
   deleteJob,
   downloadApplicationCv,
   exportApplications,
+  getApplicationCvLink,
   getApplications,
   getJobs,
   updateApplicationStatus,

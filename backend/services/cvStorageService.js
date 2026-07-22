@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
+const { getGraphToken, parseGraphResponse, graphError } = require("./msGraphAuth");
 
 function safeUUID() {
   return crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString("hex");
@@ -13,7 +14,6 @@ const GOOGLE_DRIVE_BASE_URL = "https://www.googleapis.com/drive/v3";
 const GOOGLE_DRIVE_UPLOAD_URL = "https://www.googleapis.com/upload/drive/v3";
 const TOKEN_SKEW_MS = 60 * 1000;
 
-let cachedGraphToken = null;
 let cachedGoogleToken = null;
 
 function isOneDriveEnabled() {
@@ -29,7 +29,15 @@ function isSharePointEnabled() {
   return String(process.env.CV_STORAGE || "").trim().toLowerCase() === "sharepoint";
 }
 
+function isMailRelayEnabled() {
+  return String(process.env.CV_STORAGE || "").trim().toLowerCase() === "mail_relay";
+}
+
 async function storeCv(file) {
+  if (isMailRelayEnabled()) {
+    return prepareCvForMailRelay(file);
+  }
+
   if (isOneDriveEnabled()) {
     return uploadToOneDrive(file);
   }
@@ -43,6 +51,26 @@ async function storeCv(file) {
   }
 
   return saveToLocalDisk(file);
+}
+
+async function prepareCvForMailRelay(file) {
+  const fileName = buildFileName(file.originalname);
+
+  return {
+    provider: "sharepoint_relay",
+    fileName,
+    filePath: null,
+    originalName: file.originalname,
+    mimeType: file.mimetype,
+    size: file.size,
+    storagePath: fileName
+  };
+}
+
+function buildCvViewUrl(fileName) {
+  const baseUrl = String(process.env.CV_VIEW_BASE_URL || "").replace(/\/+$/, "");
+  if (!baseUrl || !fileName) return null;
+  return `${baseUrl}/${encodeURIComponent(fileName)}`;
 }
 
 async function deleteStoredCv(storage) {
@@ -66,6 +94,12 @@ async function deleteStoredCv(storage) {
 }
 
 async function loadCv(application) {
+  if (application.cvStorageProvider === "sharepoint_relay") {
+    const error = new Error("CV_NOT_DOWNLOADABLE_VIA_BACKEND");
+    error.statusCode = 409;
+    throw error;
+  }
+
   if (application.cvStorageProvider === "onedrive") {
     return downloadFromOneDrive(application);
   }
@@ -573,40 +607,6 @@ async function getGraphDriveItemByPath(token, driveId, itemPath) {
   return result;
 }
 
-async function getGraphToken() {
-  if (cachedGraphToken && cachedGraphToken.expiresAt > Date.now() + TOKEN_SKEW_MS) {
-    return cachedGraphToken.accessToken;
-  }
-
-  const tokenUrl = `https://login.microsoftonline.com/${encodeURIComponent(process.env.MS_TENANT_ID)}/oauth2/v2.0/token`;
-  const form = new URLSearchParams({
-    client_id: process.env.MS_CLIENT_ID,
-    client_secret: process.env.MS_CLIENT_SECRET,
-    scope: "https://graph.microsoft.com/.default",
-    grant_type: "client_credentials"
-  });
-
-  const response = await fetch(tokenUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: form
-  });
-
-  const result = await parseGraphResponse(response);
-  if (!response.ok) {
-    throw graphError("Could not authenticate with Microsoft Graph", response, result);
-  }
-
-  cachedGraphToken = {
-    accessToken: result.access_token,
-    expiresAt: Date.now() + Number(result.expires_in || 3600) * 1000
-  };
-
-  return cachedGraphToken.accessToken;
-}
-
 async function getGoogleToken() {
   if (cachedGoogleToken && cachedGoogleToken.expiresAt > Date.now() + TOKEN_SKEW_MS) {
     return cachedGoogleToken.accessToken;
@@ -700,27 +700,8 @@ function escapeGoogleDriveQueryValue(value) {
   return String(value).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 }
 
-async function parseGraphResponse(response) {
-  const text = await response.text();
-  if (!text) return {};
-
-  try {
-    return JSON.parse(text);
-  } catch (error) {
-    return { raw: text };
-  }
-}
-
-function graphError(message, response, result) {
-  const detail = result && result.error
-    ? result.error.message || result.error.code || result.error
-    : result.error_description || result.raw || response.statusText;
-  const error = new Error(`${message}: ${detail}`);
-  error.statusCode = response.status;
-  return error;
-}
-
 module.exports = {
+  buildCvViewUrl,
   deleteStoredCv,
   loadCv,
   storeCv

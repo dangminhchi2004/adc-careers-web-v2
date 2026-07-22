@@ -1,5 +1,6 @@
 const Application = require("../models/applyModel");
 const { deleteStoredCv, storeCv } = require("../services/cvStorageService");
+const { sendApplicationEmails } = require("../services/mailService");
 const fileType = require("file-type");
 
 const ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx"];
@@ -89,6 +90,25 @@ async function submitApplication(req, res) {
     } catch (error) {
       await deleteStoredCv(cvStorage);
       throw error;
+    }
+
+    const cvIsMailRelay = cvStorage.provider === "sharepoint_relay";
+
+    if (cvIsMailRelay) {
+      try {
+        await sendApplicationEmails(application, cvFile, cvStorage);
+      } catch (error) {
+        console.error("Critical: CV mail-relay delivery failed, rolling back application:", error);
+        await Application.remove(application.id);
+        return res.status(502).json({
+          success: false,
+          message: "Khong the gui ho so ung tuyen luc nay. Vui long thu lai sau it phut."
+        });
+      }
+    } else {
+      sendApplicationEmails(application, cvFile, cvStorage).catch((error) => {
+        console.error("Failed to send application emails:", error);
+      });
     }
 
     res.status(201).json({

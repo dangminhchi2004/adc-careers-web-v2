@@ -230,8 +230,37 @@ function formatJobStatus(status) {
 }
 
 function renderCvLink(application) {
+  if (application.cvViewUrl) {
+    return `<a class="cv-link" href="#" data-action="view-cv-link" data-id="${application.id}">${escapeHtml(application.cvOriginalName || "Xem CV")}</a>`;
+  }
   if (!application.cvOriginalName && !application.cvFilePath) return "Không có CV";
   return `<a class="cv-link" href="#" data-action="download-cv" data-id="${application.id}">${escapeHtml(application.cvOriginalName || "Tải CV")}</a>`;
+}
+
+async function viewCvLink(event, applicationId) {
+  event.preventDefault();
+
+  try {
+    const response = await fetch(`${API_BASE}/api/admin/applications/${applicationId}/cv-link`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (response.status === 401) {
+      logout();
+      return;
+    }
+
+    const result = await response.json();
+    if (!response.ok || !result.success || !result.url) {
+      throw new Error(result.message || "Không thể mở CV.");
+    }
+
+    window.open(result.url, "_blank", "noopener");
+  } catch (error) {
+    window.alert(error.message || "Không thể mở CV.");
+  }
 }
 
 async function downloadCv(event, applicationId) {
@@ -756,6 +785,8 @@ document.addEventListener("click", (e) => {
     deleteJob(id);
   } else if (action === "download-cv") {
     downloadCv(e, id);
+  } else if (action === "view-cv-link") {
+    viewCvLink(e, id);
   }
 });
 
