@@ -165,7 +165,11 @@ function normalizeJobPayload(job) {
     level: String(job.level || "").trim(),
     report: String(job.report || "").trim(),
     urgent: job.urgent ? 1 : 0,
-    color: job.color || "#2196F3",
+    // Frontend interpolates this straight into inline style="" attributes without
+    // escaping, so an unvalidated value here would be a stored-XSS vector on every
+    // public job listing page. Enforce strict #RRGGBB and fall back to the default
+    // for anything else.
+    color: /^#[0-9A-Fa-f]{6}$/.test(String(job.color || "")) ? job.color : "#2196F3",
     reqs: parseList(job.reqs),
     slug: emptyToNull(job.slug) || slugify(job.vn || job.title),
     summary: emptyToNull(job.summary),

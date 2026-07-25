@@ -2,6 +2,7 @@ const Application = require("../models/applyModel");
 const Job = require("../models/jobModel");
 const { buildCvViewUrl, loadCv } = require("../services/cvStorageService");
 const auditService = require("../services/auditService");
+const AuditLog = require("../models/auditModel");
 
 async function getJobs(req, res) {
   try {
@@ -185,6 +186,20 @@ async function getApplicationCvLink(req, res) {
   }
 }
 
+async function getAuditLogs(req, res) {
+  try {
+    // Cap page size so a caller can't force an unbounded table scan/response.
+    const limit = Math.min(Math.max(Number(req.query.limit) || 100, 1), 200);
+    const offset = Math.max(Number(req.query.offset) || 0, 0);
+
+    const logs = await AuditLog.getAll(limit, offset);
+    res.json({ success: true, data: logs });
+  } catch (error) {
+    console.error("GET /api/admin/audit-logs failed:", error);
+    res.status(500).json({ success: false, message: "Khong the tai audit log." });
+  }
+}
+
 function validateJob(job) {
   const requiredFields = ["title", "vn", "dept", "level", "report"];
   const missingField = requiredFields.find((field) => !job[field] || !String(job[field]).trim());
@@ -208,6 +223,7 @@ module.exports = {
   exportApplications,
   getApplicationCvLink,
   getApplications,
+  getAuditLogs,
   getJobs,
   updateApplicationStatus,
   updateJob

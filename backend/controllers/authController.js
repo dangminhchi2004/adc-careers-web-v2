@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const auditService = require("../services/auditService");
 const Admin = require("../models/adminModel");
+const { validatePasswordStrength } = require("../utils/passwordPolicy");
 
 async function login(req, res) {
   try {
@@ -70,7 +71,7 @@ async function login(req, res) {
         tokenVersion: admin.token_version || 0
       },
       process.env.JWT_SECRET,
-      { expiresIn: "8h" }
+      { algorithm: "HS256", expiresIn: "8h" }
     );
 
     req.user = { username }; // Set req.user manually for auditService
@@ -94,9 +95,18 @@ async function changePassword(req, res) {
   try {
     const { oldPassword, newPassword } = req.body;
     const username = req.user.username; // set by authMiddleware
-    
-    if (!oldPassword || !newPassword || newPassword.length < 6) {
-      return res.status(400).json({ success: false, message: "Mat khau moi phai co it nhat 6 ky tu." });
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: "Vui long nhap day du mat khau." });
+    }
+
+    const strengthError = validatePasswordStrength(newPassword, username);
+    if (strengthError) {
+      return res.status(400).json({ success: false, message: strengthError });
+    }
+
+    if (newPassword === oldPassword) {
+      return res.status(400).json({ success: false, message: "Mat khau moi phai khac mat khau hien tai." });
     }
 
     const admin = await Admin.getByUsername(username);

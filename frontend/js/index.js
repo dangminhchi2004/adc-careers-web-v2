@@ -61,29 +61,30 @@ function renderJobs() {
   list.innerHTML = filtered.map(job => {
     const isOpen = expandedJob === job.id;
     const detailUrl = jobUrl(job); // from shared.js
+    const safeColor = escapeAttribute(job.color || "#2196F3");
     return `
-<div class="demo-job-card animate-on-scroll" data-job-id="${job.id}" style="--job-color:${job.color};border-left-color:${job.color}">
+<div class="demo-job-card animate-on-scroll" data-job-id="${job.id}" style="--job-color:${safeColor};border-left-color:${safeColor}">
 <div class="demo-job-header" data-action="toggle-job" data-id="${job.id}">
 <div class="demo-job-meta">
           ${job.urgent ? `<span class="demo-urgent-badge">URGENT</span>` : ''}
 <div>
 <div class="demo-job-title">${escapeHtml(job.title)}</div>
-<div class="demo-job-vn" style="color:${job.color}">${escapeHtml(job.vn)}</div>
+<div class="demo-job-vn" style="color:${safeColor}">${escapeHtml(job.vn)}</div>
 </div>
 </div>
 <div class="demo-job-right">
 <span class="demo-job-dept-badge">${escapeHtml(job.dept)}</span>
-<span class="demo-job-arrow" style="color:${job.color};transform:${isOpen ? 'rotate(180deg)' : 'rotate(0)'}">▾</span>
+<span class="demo-job-arrow" style="color:${safeColor};transform:${isOpen ? 'rotate(180deg)' : 'rotate(0)'}">▾</span>
 </div>
 </div>
-<div class="demo-job-body${isOpen ? '' : ' hidden'}" style="border-top-color:${job.color}18">
+<div class="demo-job-body${isOpen ? '' : ' hidden'}" style="border-top-color:${safeColor}18">
 <div class="demo-job-body-inner">
 <div>
-<div class="demo-reqs-label" style="color:${job.color}">YÊU CẦU CHÍNH</div>
+<div class="demo-reqs-label" style="color:${safeColor}">YÊU CẦU CHÍNH</div>
             ${job.reqs.map(r => `<div class="demo-req-item">${escapeHtml(r)}</div>`).join("")}
 </div>
 <div>
-<div class="demo-info-label" style="color:${job.color}">THÔNG TIN</div>
+<div class="demo-info-label" style="color:${safeColor}">THÔNG TIN</div>
 <div class="demo-info-list">
 <div>📍 ${escapeHtml(job.workLocation || "KCN Tân Tạo, Q. Bình Tân, TP.HCM")}</div>
 <div>👤 Báo cáo: ${escapeHtml(job.report || "P&O")}</div>
@@ -94,7 +95,7 @@ function renderJobs() {
 </div>
 <div class="demo-job-actions">
 <a href="${detailUrl}" class="demo-detail-btn">XEM CHI TIẾT</a>
-<button class="demo-apply-btn" type="button" data-open-apply data-apply-job="${escapeAttribute(job.vn || job.title)}" data-job-id="${job.id}" style="background:${job.color}">ỨNG TUYỂN NGAY →</button>
+<button class="demo-apply-btn" type="button" data-open-apply data-apply-job="${escapeAttribute(job.vn || job.title)}" data-job-id="${job.id}" style="background:${safeColor}">ỨNG TUYỂN NGAY →</button>
 </div>
 </div>
 </div>`;

@@ -13,7 +13,10 @@ async function requireAdmin(req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Pin the accepted algorithm explicitly — without this, jsonwebtoken will
+    // accept whatever algorithm the token's header claims, which is how
+    // algorithm-confusion attacks (e.g. RS256/HS256 key confusion) work.
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
 
     // Compare against the account's current token_version so that changing the
     // password immediately invalidates any token issued before the change,

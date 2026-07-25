@@ -63,7 +63,7 @@
         emptyState.classList.toggle("visible", filtered.length === 0);
 
         jobList.innerHTML = filtered.map((job, index) => `
-          <a class="job-card" style="--job-color:${job.color}; --item-index:${index}" href="${jobUrl(job)}">
+          <a class="job-card" style="--job-color:${escapeAttribute(job.color || "#2196F3")}; --item-index:${index}" href="${jobUrl(job)}">
             <span class="job-header">
               <span class="job-main">
                 ${job.urgent ? '<span class="urgent-badge">Urgent</span>' : ""}

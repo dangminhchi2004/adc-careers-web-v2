@@ -1,9 +1,18 @@
 const Application = require("../models/applyModel");
 const { deleteStoredCv, storeCv } = require("../services/cvStorageService");
 const { sendApplicationEmails } = require("../services/mailService");
-const fileType = require("file-type");
 
 const ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx"];
+
+// file-type@22+ is ESM-only, so it can't be required() from this CommonJS
+// module — load it once via dynamic import() and reuse the cached promise.
+let fileTypeFromBufferPromise;
+function getFileTypeFromBuffer() {
+  if (!fileTypeFromBufferPromise) {
+    fileTypeFromBufferPromise = import("file-type").then((mod) => mod.fileTypeFromBuffer);
+  }
+  return fileTypeFromBufferPromise;
+}
 
 async function submitApplication(req, res) {
   try {
@@ -58,7 +67,8 @@ async function submitApplication(req, res) {
     }
 
     if (cvFile && cvFile.buffer) {
-      const type = await fileType.fromBuffer(cvFile.buffer);
+      const fileTypeFromBuffer = await getFileTypeFromBuffer();
+      const type = await fileTypeFromBuffer(cvFile.buffer);
       const lowerName = cvFile.originalname.toLowerCase();
 
       if (lowerName.endsWith(".pdf") && (!type || type.ext !== "pdf")) {
