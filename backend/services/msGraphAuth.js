@@ -48,9 +48,16 @@ async function parseGraphResponse(response) {
 }
 
 function graphError(message, response, result) {
-  const detail = result && result.error
-    ? result.error.message || result.error.code || result.error
-    : result.error_description || result.raw || response.statusText;
+  // Two different error shapes share this path: Graph API errors nest as
+  // { error: { code, message } }, while the AAD token endpoint returns
+  // { error: "short_code", error_description: "AADSTS...: the real reason" }.
+  // Checking error_description first stops the token-endpoint case from
+  // masking the actual AADSTS diagnostic behind just "unauthorized_client".
+  const detail = result && result.error_description
+    ? result.error_description
+    : result && result.error
+      ? result.error.message || result.error.code || result.error
+      : result.raw || response.statusText;
   const error = new Error(`${message}: ${detail}`);
   error.statusCode = response.status;
   return error;

@@ -84,6 +84,7 @@ async function ensureSchema() {
       id INT AUTO_INCREMENT PRIMARY KEY,
       username VARCHAR(255) UNIQUE NOT NULL,
       password_hash VARCHAR(255) NOT NULL,
+      token_version INT DEFAULT 0,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -130,6 +131,7 @@ async function ensureSchema() {
   await addColumnIfMissing("applications", "cv_external_url", "VARCHAR(1000)");
   await addColumnIfMissing("applications", "cv_storage_path", "VARCHAR(1000)");
   await addColumnIfMissing("applications", "status", "VARCHAR(40) DEFAULT 'new'");
+  await addColumnIfMissing("admins", "token_version", "INT DEFAULT 0");
 }
 
 async function addColumnIfMissing(tableName, columnName, definition) {

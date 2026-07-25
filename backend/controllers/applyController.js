@@ -19,23 +19,27 @@ async function submitApplication(req, res) {
 
     try {
       const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-      if (secretKey) {
-        const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
-        const verifyResponse = await fetch(verifyUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `secret=${secretKey}&response=${captchaToken}`
+      if (!secretKey) {
+        console.error("RECAPTCHA_SECRET_KEY is not configured. Refusing apply request.");
+        return res.status(500).json({
+          success: false,
+          message: "Loi cau hinh may chu. Vui long thu lai sau."
         });
-        const verifyData = await verifyResponse.json();
-        
-        if (!verifyData.success) {
-          return res.status(400).json({
-            success: false,
-            message: "Xác thực CAPTCHA thất bại. Vui lòng thử lại."
-          });
-        }
-      } else {
-        console.warn("RECAPTCHA_SECRET_KEY is not defined. Skipping CAPTCHA validation on server.");
+      }
+
+      const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
+      const verifyResponse = await fetch(verifyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `secret=${secretKey}&response=${captchaToken}`
+      });
+      const verifyData = await verifyResponse.json();
+
+      if (!verifyData.success) {
+        return res.status(400).json({
+          success: false,
+          message: "Xác thực CAPTCHA thất bại. Vui lòng thử lại."
+        });
       }
     } catch (e) {
       console.error("CAPTCHA validation error:", e);
@@ -55,12 +59,29 @@ async function submitApplication(req, res) {
 
     if (cvFile && cvFile.buffer) {
       const type = await fileType.fromBuffer(cvFile.buffer);
-      
       const lowerName = cvFile.originalname.toLowerCase();
+
       if (lowerName.endsWith(".pdf") && (!type || type.ext !== "pdf")) {
         return res.status(400).json({
           success: false,
           message: "Hệ thống phát hiện file PDF không hợp lệ hoặc có dấu hiệu giả mạo."
+        });
+      }
+
+      // .doc/.docx signature checks only fire on a definite mismatch — file-type
+      // can't always resolve older .doc's OLE subtype, and we don't want to
+      // reject a legitimate file just because detection came back empty.
+      if (lowerName.endsWith(".docx") && type && type.ext !== "docx") {
+        return res.status(400).json({
+          success: false,
+          message: "Hệ thống phát hiện file DOCX không hợp lệ hoặc có dấu hiệu giả mạo."
+        });
+      }
+
+      if (lowerName.endsWith(".doc") && type && type.ext !== "doc" && type.ext !== "cfb") {
+        return res.status(400).json({
+          success: false,
+          message: "Hệ thống phát hiện file DOC không hợp lệ hoặc có dấu hiệu giả mạo."
         });
       }
 

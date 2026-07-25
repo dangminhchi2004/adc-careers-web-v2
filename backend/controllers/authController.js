@@ -16,21 +16,27 @@ async function login(req, res) {
 
     try {
       const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-      if (secretKey) {
-        const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
-        const verifyResponse = await fetch(verifyUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `secret=${secretKey}&response=${captchaToken}`
+      if (!secretKey) {
+        console.error("RECAPTCHA_SECRET_KEY is not configured. Refusing login request.");
+        return res.status(500).json({
+          success: false,
+          message: "Loi cau hinh may chu. Vui long thu lai sau."
         });
-        const verifyData = await verifyResponse.json();
-        
-        if (!verifyData.success) {
-          return res.status(400).json({
-            success: false,
-            message: "Xác thực CAPTCHA thất bại. Vui lòng thử lại."
-          });
-        }
+      }
+
+      const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
+      const verifyResponse = await fetch(verifyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `secret=${secretKey}&response=${captchaToken}`
+      });
+      const verifyData = await verifyResponse.json();
+
+      if (!verifyData.success) {
+        return res.status(400).json({
+          success: false,
+          message: "Xác thực CAPTCHA thất bại. Vui lòng thử lại."
+        });
       }
     } catch (e) {
       console.error("CAPTCHA validation error:", e);
@@ -60,9 +66,10 @@ async function login(req, res) {
     const token = jwt.sign(
       {
         username,
-        role: "admin"
+        role: "admin",
+        tokenVersion: admin.token_version || 0
       },
-      process.env.JWT_SECRET || "adc_careers_local_secret",
+      process.env.JWT_SECRET,
       { expiresIn: "8h" }
     );
 

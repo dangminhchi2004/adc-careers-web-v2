@@ -11,6 +11,11 @@ const authRoutes = require("./routes/authRoutes");
 const jobRoutes = require("./routes/jobRoutes");
 const { ensureSchema } = require("./config/schema");
 
+if (!process.env.JWT_SECRET) {
+  console.error("JWT_SECRET is not set. Refusing to start with a guessable/default signing secret.");
+  process.exit(1);
+}
+
 const app = express();
 const port = process.env.PORT || 5000;
 const frontendDir = path.join(__dirname, "..", "frontend");
@@ -18,6 +23,11 @@ const htmlDemoFile = path.join(__dirname, "..", "htmldemo.html");
 const uploadsDir = path.join(__dirname, "uploads", "cvs");
 
 fs.mkdirSync(uploadsDir, { recursive: true });
+
+// Render (and most PaaS hosts) sit behind a reverse proxy, so req.ip must come
+// from X-Forwarded-For or every request/rate-limit bucket collapses onto the
+// proxy's own address instead of the real client IP.
+app.set("trust proxy", 1);
 
 app.use(cors());
 app.use(helmet({

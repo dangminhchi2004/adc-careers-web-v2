@@ -222,6 +222,12 @@ function buildContentDisposition(fileName, mimeType) {
 }
 
 function csvCell(value) {
-  const text = String(value ?? "");
+  let text = String(value ?? "");
+  // Neutralize formula injection: a cell starting with =, +, -, @, tab or CR
+  // is interpreted as a formula by Excel/Sheets when the export is opened,
+  // letting an applicant's name/note run code or exfiltrate data from HR's machine.
+  if (/^[=+\-@\t\r]/.test(text)) {
+    text = `'${text}`;
+  }
   return `"${text.replace(/"/g, '""')}"`;
 }

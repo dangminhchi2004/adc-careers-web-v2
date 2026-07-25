@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
+const Admin = require("../models/adminModel");
 
-function requireAdmin(req, res, next) {
+async function requireAdmin(req, res, next) {
   const authHeader = req.headers.authorization || "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
 
@@ -12,7 +13,20 @@ function requireAdmin(req, res, next) {
   }
 
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET || "adc_careers_local_secret");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Compare against the account's current token_version so that changing the
+    // password immediately invalidates any token issued before the change,
+    // instead of leaving a stolen token valid until its 8h expiry.
+    const admin = await Admin.getByUsername(decoded.username);
+    if (!admin || (admin.token_version || 0) !== (decoded.tokenVersion || 0)) {
+      return res.status(401).json({
+        success: false,
+        message: "Phien dang nhap da het han."
+      });
+    }
+
+    req.user = decoded;
     return next();
   } catch (error) {
     return res.status(401).json({

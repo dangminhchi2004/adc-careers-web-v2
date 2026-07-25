@@ -7,7 +7,12 @@ const Admin = {
   },
   
   updatePassword: async (username, passwordHash) => {
-    await db.query("UPDATE admins SET password_hash = ? WHERE username = ?", [passwordHash, username]);
+    // Bumping token_version invalidates every JWT issued before this change,
+    // so a stolen token stops working the moment the password is rotated.
+    await db.query(
+      "UPDATE admins SET password_hash = ?, token_version = token_version + 1 WHERE username = ?",
+      [passwordHash, username]
+    );
   }
 };
 
