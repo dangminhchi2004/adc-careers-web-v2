@@ -23,9 +23,18 @@ const dbConfig = {
 };
 
 if (String(envValue("DB_SSL") || "").toLowerCase() === "true") {
+  // Aiven signs with its own CA, which Node doesn't trust out of the box, so
+  // rejectUnauthorized defaults to false here (accepts any cert — no MITM
+  // protection). Download the Aiven CA certificate, set DB_SSL_CA to its path
+  // and DB_SSL_REJECT_UNAUTHORIZED=true to close this gap without breaking
+  // the connection; see ca.pem under the service's Overview tab in Aiven console.
   dbConfig.ssl = {
     rejectUnauthorized: String(envValue("DB_SSL_REJECT_UNAUTHORIZED") || "false").toLowerCase() === "true"
   };
+
+  if (envValue("DB_SSL_CA")) {
+    dbConfig.ssl.ca = require("fs").readFileSync(envValue("DB_SSL_CA"));
+  }
 }
 
 const pool = mysql.createPool(dbConfig);
