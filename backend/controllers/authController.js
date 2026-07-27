@@ -8,6 +8,17 @@ async function login(req, res) {
   try {
     const { username, password, captchaToken } = req.body;
 
+    if (
+      typeof username !== "string" || typeof password !== "string" ||
+      !username.trim() || !password ||
+      username.length > 255 || password.length > 255
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Sai tai khoan hoac mat khau."
+      });
+    }
+
     if (!captchaToken) {
       return res.status(400).json({
         success: false,
@@ -96,8 +107,12 @@ async function changePassword(req, res) {
     const { oldPassword, newPassword } = req.body;
     const username = req.user.username; // set by authMiddleware
 
-    if (!oldPassword || !newPassword) {
+    if (typeof oldPassword !== "string" || typeof newPassword !== "string" || !oldPassword || !newPassword) {
       return res.status(400).json({ success: false, message: "Vui long nhap day du mat khau." });
+    }
+
+    if (oldPassword.length > 128) {
+      return res.status(400).json({ success: false, message: "Mat khau hien tai khong dung." });
     }
 
     const strengthError = validatePasswordStrength(newPassword, username);

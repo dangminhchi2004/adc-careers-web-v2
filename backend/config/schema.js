@@ -91,10 +91,13 @@ async function ensureSchema() {
 
   const [adminRows] = await db.query("SELECT COUNT(*) AS count FROM admins");
   if (adminRows[0].count === 0) {
-    const defaultUsername = process.env.ADMIN_USERNAME || "admin";
-    const defaultPassword = process.env.ADMIN_PASSWORD || "admin123";
-    const hash = await bcrypt.hash(defaultPassword, 10);
-    await db.query("INSERT INTO admins (username, password_hash) VALUES (?, ?)", [defaultUsername, hash]);
+    if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD) {
+      throw new Error(
+        "ADMIN_USERNAME and ADMIN_PASSWORD must be set in the environment to seed the initial admin account."
+      );
+    }
+    const hash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+    await db.query("INSERT INTO admins (username, password_hash) VALUES (?, ?)", [process.env.ADMIN_USERNAME, hash]);
     console.log("Seeded default admin user.");
   }
 

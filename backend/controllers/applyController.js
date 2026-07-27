@@ -1,6 +1,7 @@
 const Application = require("../models/applyModel");
 const { deleteStoredCv, storeCv } = require("../services/cvStorageService");
 const { sendApplicationEmails } = require("../services/mailService");
+const { sanitizeText, isTooLong } = require("../utils/validate");
 
 const ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx"];
 
@@ -16,7 +17,13 @@ function getFileTypeFromBuffer() {
 
 async function submitApplication(req, res) {
   try {
-    const { jobId, fullName, email, phone, expectedSalary, note, captchaToken } = req.body;
+    const jobId = req.body.jobId;
+    const fullName = sanitizeText(req.body.fullName);
+    const email = sanitizeText(req.body.email);
+    const phone = sanitizeText(req.body.phone);
+    const expectedSalary = sanitizeText(req.body.expectedSalary);
+    const note = sanitizeText(req.body.note);
+    const captchaToken = req.body.captchaToken;
     const cvFile = req.file;
 
     if (!captchaToken) {
@@ -58,7 +65,7 @@ async function submitApplication(req, res) {
       });
     }
 
-    const validationError = validateApplication({ jobId, fullName, email, phone, cvFile });
+    const validationError = validateApplication({ jobId, fullName, email, phone, expectedSalary, note, cvFile });
     if (validationError) {
       return res.status(400).json({
         success: false,
@@ -110,11 +117,11 @@ async function submitApplication(req, res) {
     try {
       application = await Application.create({
         jobId: Number(jobId),
-        fullName: fullName.trim(),
-        email: email.trim(),
-        phone: phone.trim(),
-        expectedSalary: expectedSalary ? expectedSalary.trim() : null,
-        note: note ? note.trim() : null,
+        fullName,
+        email,
+        phone,
+        expectedSalary: expectedSalary || null,
+        note: note || null,
         cvFile,
         cvStorage
       });
@@ -156,11 +163,15 @@ async function submitApplication(req, res) {
   }
 }
 
-function validateApplication({ jobId, fullName, email, phone, cvFile }) {
+function validateApplication({ jobId, fullName, email, phone, expectedSalary, note, cvFile }) {
   if (!jobId || Number.isNaN(Number(jobId))) return "Vui long chon vi tri ung tuyen.";
-  if (!fullName || !fullName.trim()) return "Vui long nhap ho va ten.";
+  if (!fullName) return "Vui long nhap ho va ten.";
+  if (isTooLong(fullName, 255)) return "Ho va ten qua dai.";
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Email chua hop le.";
+  if (isTooLong(email, 255)) return "Email qua dai.";
   if (!phone || !/^[0-9+\-\s().]{8,18}$/.test(phone)) return "So dien thoai chua hop le.";
+  if (isTooLong(expectedSalary, 100)) return "Muc luong ky vong qua dai.";
+  if (isTooLong(note, 3000)) return "Ghi chu qua dai (toi da 3000 ky tu).";
   if (!cvFile) return "Vui long dinh kem CV.";
 
   const lowerName = cvFile.originalname.toLowerCase();

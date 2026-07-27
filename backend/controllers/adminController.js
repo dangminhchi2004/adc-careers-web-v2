@@ -3,6 +3,36 @@ const Job = require("../models/jobModel");
 const { buildCvViewUrl, loadCv } = require("../services/cvStorageService");
 const auditService = require("../services/auditService");
 const AuditLog = require("../models/auditModel");
+const { isTooLong, toItemsArray, itemTextLength } = require("../utils/validate");
+
+// Mirrors the VARCHAR/TEXT column widths in backend/config/schema.js so an
+// oversized field is rejected with a clean 400 instead of crashing the insert
+// with a DB-level ER_DATA_TOO_LONG (500).
+const TEXT_FIELD_LIMITS = {
+  title: 255,
+  vn: 255,
+  dept: 100,
+  level: 100,
+  report: 100,
+  summary: 5000,
+  employmentType: 80,
+  workLocation: 255,
+  locationShort: 100,
+  salaryText: 255,
+  ageRange: 50,
+  gender: 50,
+  experienceText: 255,
+  industry: 255,
+  slug: 180
+};
+
+const LIST_FIELD_LIMITS = {
+  reqs: { maxItems: 50, maxItemLength: 500 },
+  responsibilities: { maxItems: 50, maxItemLength: 500 },
+  requirementsDetail: { maxItems: 50, maxItemLength: 500 },
+  benefits: { maxItems: 30, maxItemLength: 500 },
+  environmentSections: { maxItems: 20, maxItemLength: 4000 }
+};
 
 async function getJobs(req, res) {
   try {
@@ -205,13 +235,29 @@ function validateJob(job) {
   const missingField = requiredFields.find((field) => !job[field] || !String(job[field]).trim());
   if (missingField) return "Vui long nhap day du thong tin vi tri.";
 
-  const reqs = Array.isArray(job.reqs)
-    ? job.reqs
-    : String(job.reqs || "")
-        .split(/\r?\n/)
-        .map((item) => item.trim())
-        .filter(Boolean);
+  for (const [field, max] of Object.entries(TEXT_FIELD_LIMITS)) {
+    if (job[field] !== undefined && job[field] !== null && typeof job[field] !== "string") {
+      return `Truong ${field} khong hop le.`;
+    }
+    if (isTooLong(job[field], max)) return `Truong ${field} qua dai (toi da ${max} ky tu).`;
+  }
 
+  for (const [field, { maxItems, maxItemLength }] of Object.entries(LIST_FIELD_LIMITS)) {
+    const items = toItemsArray(job[field]);
+    if (items.length > maxItems) return `Truong ${field} co qua nhieu muc (toi da ${maxItems}).`;
+    if (items.some((item) => itemTextLength(item) > maxItemLength)) {
+      return `Mot muc trong ${field} qua dai (toi da ${maxItemLength} ky tu).`;
+    }
+  }
+
+  if (job.quantity !== undefined && job.quantity !== null && job.quantity !== "") {
+    const quantity = Number(job.quantity);
+    if (!Number.isFinite(quantity) || quantity < 0 || quantity > 9999) {
+      return "So luong tuyen khong hop le.";
+    }
+  }
+
+  const reqs = toItemsArray(job.reqs);
   if (reqs.length === 0) return "Vui long nhap it nhat mot yeu cau.";
   return "";
 }

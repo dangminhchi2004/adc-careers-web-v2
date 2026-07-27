@@ -4,8 +4,11 @@ const bcrypt = require("bcryptjs");
 
 async function resetAdmin() {
   try {
-    const defaultUsername = process.env.ADMIN_USERNAME || "admin";
-    const defaultPassword = process.env.ADMIN_PASSWORD || "admin123";
+    if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD) {
+      throw new Error("ADMIN_USERNAME and ADMIN_PASSWORD must be set in the environment.");
+    }
+    const defaultUsername = process.env.ADMIN_USERNAME;
+    const defaultPassword = process.env.ADMIN_PASSWORD;
 
     console.log(`Resetting password for admin user: ${defaultUsername}...`);
     

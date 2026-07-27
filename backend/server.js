@@ -84,8 +84,11 @@ app.use(helmet({
     action: "sameorigin",
   }
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Explicit body-size caps (default is 100kb, but stated here intentionally):
+// admin job payloads bundle several free-text fields plus small JSON arrays,
+// so 300kb gives headroom while still rejecting abusive oversized requests.
+app.use(express.json({ limit: "300kb" }));
+app.use(express.urlencoded({ extended: true, limit: "300kb", parameterLimit: 200 }));
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/jobs", jobRoutes);
@@ -157,6 +160,17 @@ app.use((err, req, res, next) => {
   if (err && err.message === "Not allowed by CORS") {
     console.warn(`CORS blocked ${req.method} ${req.originalUrl} from origin: ${req.headers.origin || "(none)"}`);
     return res.status(403).json({ success: false, message: "Origin khong duoc phep." });
+  }
+
+  // Oversized/malformed bodies come from express.json()/urlencoded() as
+  // thrown errors before any route handler runs — surface them as clean
+  // 4xx responses instead of falling through to the generic 500 below.
+  if (err && (err.type === "entity.too.large" || err.status === 413)) {
+    return res.status(413).json({ success: false, message: "Du lieu gui len qua lon." });
+  }
+
+  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    return res.status(400).json({ success: false, message: "Du lieu gui len khong dung dinh dang." });
   }
 
   console.error("Unhandled error:", err);

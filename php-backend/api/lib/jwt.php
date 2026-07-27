@@ -16,9 +16,21 @@ function jwt_base64url_decode(string $value): string
     return base64_decode(strtr($value, '-_', '+/')) ?: '';
 }
 
+function jwt_secret_or_fail(): string
+{
+    $secret = env_value('JWT_SECRET');
+    if (!$secret) {
+        http_response_code(500);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Server misconfigured: JWT_SECRET is not set.']);
+        exit;
+    }
+    return $secret;
+}
+
 function jwt_sign(array $payload, int $ttlSeconds = 28800): string
 {
-    $secret = env_value('JWT_SECRET', 'adc_careers_local_secret');
+    $secret = jwt_secret_or_fail();
     $header = ['alg' => 'HS256', 'typ' => 'JWT'];
     $payload['iat'] = time();
     $payload['exp'] = time() + $ttlSeconds;
@@ -36,7 +48,7 @@ function jwt_verify(string $token): ?array
     }
 
     [$header, $payload, $signature] = $parts;
-    $secret = env_value('JWT_SECRET', 'adc_careers_local_secret');
+    $secret = jwt_secret_or_fail();
     $expected = jwt_base64url_encode(hash_hmac('sha256', $header . '.' . $payload, $secret, true));
     if (!hash_equals($expected, $signature)) {
         return null;

@@ -97,8 +97,12 @@ function login_admin(): void
     $payload = read_json_body();
     $username = $payload['username'] ?? '';
     $password = $payload['password'] ?? '';
-    $expectedUsername = env_value('ADMIN_USERNAME', 'admin');
-    $expectedPassword = env_value('ADMIN_PASSWORD', 'admin123');
+    $expectedUsername = env_value('ADMIN_USERNAME');
+    $expectedPassword = env_value('ADMIN_PASSWORD');
+
+    if (!$expectedUsername || !$expectedPassword) {
+        json_response(['success' => false, 'message' => 'Server misconfigured: ADMIN_USERNAME/ADMIN_PASSWORD not set.'], 500);
+    }
 
     if ($username !== $expectedUsername || $password !== $expectedPassword) {
         json_response(['success' => false, 'message' => 'Sai tai khoan hoac mat khau.'], 401);

@@ -14,13 +14,26 @@ const applyLimiter = rateLimit({
 });
 
 // Giới hạn API đăng nhập (login)
-// Chống Brute Force: Tối đa 10 lần thử trong 30 phút
+// Chống Brute Force: Tối đa 5 lần thử trong 15 phút
 const loginLimiter = rateLimit({
-  windowMs: 30 * 60 * 1000, // 30 phút
-  max: 10,
+  windowMs: 15 * 60 * 1000, // 15 phút
+  max: 5,
   message: {
     success: false,
-    message: "Bạn đã nhập sai mật khẩu quá nhiều lần. Vui lòng thử lại sau 30 phút."
+    message: "Bạn đã nhập sai mật khẩu quá nhiều lần. Vui lòng thử lại sau 15 phút."
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Giới hạn API đổi mật khẩu (change password)
+// Chống Brute Force: Tối đa 5 lần thử trong 15 phút
+const changePasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 phút
+  max: 5,
+  message: {
+    success: false,
+    message: "Bạn đã thử đổi mật khẩu quá nhiều lần. Vui lòng thử lại sau 15 phút."
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -28,5 +41,6 @@ const loginLimiter = rateLimit({
 
 module.exports = {
   applyLimiter,
-  loginLimiter
+  loginLimiter,
+  changePasswordLimiter
 };
