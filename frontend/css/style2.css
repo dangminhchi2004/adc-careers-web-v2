@@ -1390,7 +1390,23 @@ body.detail-mode>main>section:not(#jobDetailSection) {
   color: #fff;
 }
 
+.apply-submit:disabled,
+.btn-primary:disabled,
+button[type="submit"]:disabled {
+  opacity: 0.55 !important;
+  cursor: default !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+
+.apply-submit:disabled::after,
+.btn-primary:disabled::after {
+  display: none !important;
+}
+
 .apply-btn {
+
   border: 0;
   cursor: pointer;
   display: inline-block;

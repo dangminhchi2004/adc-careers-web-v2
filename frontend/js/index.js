@@ -34,6 +34,17 @@ function checkPolicyScroll() {
   }
 }
 
+function updateSubmitButtonState() {
+
+  const form = document.getElementById("demoApplyForm");
+  if (!form) return;
+  const consentCheckbox = document.getElementById("demoConsent");
+  const submitBtn = form.querySelector('.apply-submit');
+  if (submitBtn) {
+    submitBtn.disabled = !consentCheckbox || !consentCheckbox.checked;
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const policyBody = document.getElementById("policyModalBody");
   if (policyBody) policyBody.addEventListener("scroll", checkPolicyScroll);
@@ -46,8 +57,11 @@ document.addEventListener("DOMContentLoaded", () => {
         openPolicyModal();
       }
     });
+    consentCheckbox.addEventListener("change", updateSubmitButtonState);
   }
+  updateSubmitButtonState();
 });
+
 
 const params = new URLSearchParams(window.location.search);
 const detailJobId = Number(params.get("id"));
@@ -197,6 +211,8 @@ function openApplyModal(jobName = "ADC Careers", jobId = null) {
   if (consentTalentPoolCheckbox) {
     consentTalentPoolCheckbox.checked = false;
   }
+  updateSubmitButtonState();
+
 
   if (policyHint) {
     policyHint.textContent = "Vui lòng cuộn xuống hết nội dung để có thể tick đồng ý.";

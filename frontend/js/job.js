@@ -44,12 +44,22 @@
 
     policyModalBody.addEventListener("scroll", checkPolicyScroll);
 
+    function updateSubmitButtonState() {
+      const submitBtn = applyForm ? applyForm.querySelector('button[type="submit"]') : null;
+      if (submitBtn) {
+        submitBtn.disabled = !consentCheckbox || !consentCheckbox.checked;
+      }
+    }
+
     consentCheckbox.addEventListener("click", (event) => {
       if (!policyRead) {
         event.preventDefault();
         openPolicyModal();
       }
     });
+    consentCheckbox.addEventListener("change", updateSubmitButtonState);
+    updateSubmitButtonState();
+
 
     async function init() {
       allJobs = await fetchJobs();
@@ -354,7 +364,9 @@
 
       policyRead = false;
       consentCheckbox.checked = false;
+      updateSubmitButtonState();
       policyHint.textContent = "Vui lòng cuộn xuống hết nội dung để có thể tick đồng ý.";
+
       policyHint.classList.remove("done");
 
       if (recaptchaWidgetId === null && window.grecaptcha) {

@@ -2055,6 +2055,22 @@ footer>* {
   margin-top: 2px;
 }
 
+.apply-submit:disabled,
+.btn-primary:disabled,
+button[type="submit"]:disabled {
+  opacity: 0.55 !important;
+  cursor: default !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+
+.apply-submit:disabled::after,
+.btn-primary:disabled::after {
+  display: none !important;
+}
+
+
 @media (max-width: 900px) {
   .hero {
     min-height: 720px;
