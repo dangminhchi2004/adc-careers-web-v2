@@ -95,7 +95,7 @@ Chúng tôi có thể cung cấp dữ liệu khi có yêu cầu hợp pháp bằ
 
 Có. Vì chúng tôi dùng hạ tầng đám mây của Microsoft và Google, dữ liệu của bạn có thể được lưu trữ và xử lý tại máy chủ đặt ngoài lãnh thổ Việt Nam. Khu vực lưu trữ hiện tại: ……………………………………
 
-Đây là hoạt động chuyển dữ liệu cá nhân xuyên biên giới. Chúng tôi đã lập Hồ sơ đánh giá tác động chuyển dữ liệu cá nhân xuyên biên giới và gửi tới Cơ quan chuyên trách bảo vệ dữ liệu cá nhân thuộc Bộ Công an theo quy định, đồng thời cập nhật hồ sơ này định kỳ.
+
 
 ## 9. Chúng tôi giữ dữ liệu bao lâu
 
