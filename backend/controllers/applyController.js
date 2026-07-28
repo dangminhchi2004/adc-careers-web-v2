@@ -1,9 +1,25 @@
 const Application = require("../models/applyModel");
+const Job = require("../models/jobModel");
 const { deleteStoredCv, storeCv } = require("../services/cvStorageService");
 const { sendApplicationEmails } = require("../services/mailService");
 const { sanitizeText, isTooLong } = require("../utils/validate");
+const { PRIVACY_POLICY_VERSION, POLICY_CODE } = require("../config/policy");
+
+// multer parses checkbox fields as the string "true"/"on" when checked, and
+// simply omits the field (or sends "false") when unchecked — never a boolean.
+const CONSENT_TRUE_VALUES = new Set(["true", "on", "1"]);
 
 const ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx"];
+
+// multer's file.mimetype is the client-declared multipart Content-Type — fully
+// attacker-controlled and never itself checked against the magic-byte scan
+// below. Never trust it for storage/serving; derive the type we persist from
+// the (already extension- and magic-byte-validated) file extension instead.
+const SAFE_MIME_TYPES = {
+  ".pdf": "application/pdf",
+  ".doc": "application/msword",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+};
 
 // file-type@22+ is ESM-only, so it can't be required() from this CommonJS
 // module — load it once via dynamic import() and reuse the cached promise.
@@ -24,6 +40,8 @@ async function submitApplication(req, res) {
     const expectedSalary = sanitizeText(req.body.expectedSalary);
     const note = sanitizeText(req.body.note);
     const captchaToken = req.body.captchaToken;
+    const purposeCore = CONSENT_TRUE_VALUES.has(String(req.body.purposeCore || req.body.consent || "").toLowerCase());
+    const purposeTalentPool = CONSENT_TRUE_VALUES.has(String(req.body.purposeTalentPool || "").toLowerCase());
     const cvFile = req.file;
 
     if (!captchaToken) {
@@ -65,11 +83,22 @@ async function submitApplication(req, res) {
       });
     }
 
-    const validationError = validateApplication({ jobId, fullName, email, phone, expectedSalary, note, cvFile });
+    const validationError = validateApplication({ jobId, fullName, email, phone, expectedSalary, note, cvFile, consent: purposeCore });
     if (validationError) {
       return res.status(400).json({
         success: false,
         message: validationError
+      });
+    }
+
+    // The DB has a FK on applications.job_id, but that only rejects a
+    // nonexistent job with an opaque 500 — and doesn't stop applying to a
+    // job that's been closed (status != active). Check both explicitly.
+    const job = await Job.getById(Number(jobId));
+    if (!job || job.status !== "active") {
+      return res.status(400).json({
+        success: false,
+        message: "Vi tri ung tuyen khong ton tai hoac da ngung tuyen."
       });
     }
 
@@ -109,6 +138,9 @@ async function submitApplication(req, res) {
           message: "File tải lên chứa định dạng thực thi nguy hiểm. Yêu cầu bị từ chối."
         });
       }
+
+      const ext = ALLOWED_EXTENSIONS.find((extension) => lowerName.endsWith(extension));
+      cvFile.mimetype = SAFE_MIME_TYPES[ext] || "application/octet-stream";
     }
 
     const cvStorage = await storeCv(cvFile);
@@ -123,12 +155,19 @@ async function submitApplication(req, res) {
         expectedSalary: expectedSalary || null,
         note: note || null,
         cvFile,
-        cvStorage
+        cvStorage,
+        consentAcceptedAt: new Date(),
+        consentPolicyVersion: PRIVACY_POLICY_VERSION,
+        policyCode: POLICY_CODE,
+        consentIp: req.ip,
+        purposeCore,
+        purposeTalentPool
       });
     } catch (error) {
       await deleteStoredCv(cvStorage);
       throw error;
     }
+
 
     const cvIsMailRelay = cvStorage.provider === "sharepoint_relay";
 
@@ -163,8 +202,9 @@ async function submitApplication(req, res) {
   }
 }
 
-function validateApplication({ jobId, fullName, email, phone, expectedSalary, note, cvFile }) {
+function validateApplication({ jobId, fullName, email, phone, expectedSalary, note, cvFile, consent }) {
   if (!jobId || Number.isNaN(Number(jobId))) return "Vui long chon vi tri ung tuyen.";
+  if (!consent) return "Vui long dong y voi Quy dinh Bao mat truoc khi gui ho so.";
   if (!fullName) return "Vui long nhap ho va ten.";
   if (isTooLong(fullName, 255)) return "Ho va ten qua dai.";
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Email chua hop le.";

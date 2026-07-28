@@ -15,7 +15,9 @@ services:
       - key: DB_SSL
         value: true
       - key: DB_SSL_REJECT_UNAUTHORIZED
-        value: false
+        value: true
+      - key: DB_SSL_CA
+        value: ./certs/ca.pem
       - key: DB_USER
         sync: false
       - key: DB_PASSWORD

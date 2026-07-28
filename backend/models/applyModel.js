@@ -1,7 +1,28 @@
 const db = require("../config/db");
 
 const Application = {
-  create: async ({ jobId, fullName, email, phone, expectedSalary, note, cvFile, cvStorage }) => {
+  create: async ({
+    jobId,
+    fullName,
+    email,
+    phone,
+    expectedSalary,
+    note,
+    cvFile,
+    cvStorage,
+    consentAcceptedAt,
+    consentPolicyVersion,
+    policyCode,
+    consentIp,
+    purposeCore,
+    purposeTalentPool
+  }) => {
+    const policyVer = consentPolicyVersion || "3.0";
+    const polCode = policyCode || "ADC.IFR.PO.CS.01";
+    const isPurposeCore = purposeCore ? 1 : 1;
+    const isPurposeTalentPool = purposeTalentPool ? 1 : 0;
+    const timestamp = consentAcceptedAt || new Date();
+
     const [result] = await db.query(
       `INSERT INTO applications
         (
@@ -24,9 +45,15 @@ const Application = {
           cv_external_id,
           cv_external_parent_id,
           cv_external_url,
-          cv_storage_path
+          cv_storage_path,
+          consent_accepted_at,
+          consent_policy_version,
+          policy_code,
+          purpose_core,
+          purpose_talent_pool,
+          consent_ip
         )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         jobId,
         fullName,
@@ -47,11 +74,41 @@ const Application = {
         cvStorage ? cvStorage.externalId : null,
         cvStorage ? cvStorage.externalParentId : null,
         cvStorage ? cvStorage.externalUrl : null,
-        cvStorage ? cvStorage.storagePath : null
+        cvStorage ? cvStorage.storagePath : null,
+        timestamp,
+        policyVer,
+        polCode,
+        isPurposeCore,
+        isPurposeTalentPool,
+        consentIp || null
       ]
     );
 
-    return Application.getById(result.insertId);
+    const insertedId = result.insertId;
+
+    // Independent consent record for dispute evidence & audit compliance (Law 91/2025/QH15 & Decree 356/2025/ND-CP)
+    try {
+      await db.query(
+        `INSERT INTO consent_logs
+          (application_id, applicant_email, applicant_name, consent_timestamp, consent_ip, policy_code, policy_version, purpose_core, purpose_talent_pool)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          insertedId,
+          email,
+          fullName,
+          timestamp,
+          consentIp || null,
+          polCode,
+          policyVer,
+          isPurposeCore,
+          isPurposeTalentPool
+        ]
+      );
+    } catch (e) {
+      console.error("Failed to insert independent consent_log:", e);
+    }
+
+    return Application.getById(insertedId);
   },
 
   getById: async (id) => {
@@ -100,6 +157,11 @@ function applicationSelectSql(tailSql) {
       a.cv_external_url AS cvExternalUrl,
       a.cv_storage_path AS cvStoragePath,
       a.status,
+      a.consent_accepted_at AS consentAcceptedAt,
+      a.consent_policy_version AS consentPolicyVersion,
+      a.policy_code AS policyCode,
+      a.purpose_core AS purposeCore,
+      a.purpose_talent_pool AS purposeTalentPool,
       a.applied_at AS appliedAt,
       j.title AS jobTitle,
       j.vn AS jobTitleVn,
@@ -111,3 +173,4 @@ function applicationSelectSql(tailSql) {
 }
 
 module.exports = Application;
+

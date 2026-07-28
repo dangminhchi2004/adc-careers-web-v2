@@ -2,8 +2,13 @@ const jwt = require("jsonwebtoken");
 const Admin = require("../models/adminModel");
 
 async function requireAdmin(req, res, next) {
+  // Browser flows now rely on the httpOnly cookie set at login (JS can't read
+  // it, so an XSS can't exfiltrate it); the Authorization header is kept as a
+  // fallback purely for non-browser tooling (curl/Postman) that read the
+  // Set-Cookie value directly — it doesn't reopen the cookie's XSS protection.
   const authHeader = req.headers.authorization || "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  const headerToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  const token = headerToken || (req.cookies && req.cookies.adcAdminToken) || "";
 
   if (!token) {
     return res.status(401).json({

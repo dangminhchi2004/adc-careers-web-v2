@@ -4,6 +4,29 @@ const auditService = require("../services/auditService");
 const Admin = require("../models/adminModel");
 const { validatePasswordStrength } = require("../utils/passwordPolicy");
 
+// Precomputed at startup so a nonexistent-username login still pays the same
+// bcrypt cost as a real one below — otherwise the fast-path early-return for
+// "no such admin" is a timing side-channel that lets an attacker enumerate
+// valid usernames by measuring response time.
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync("timing-attack-mitigation-dummy", 10);
+
+const SESSION_COOKIE = "adcAdminToken";
+const SESSION_MAX_AGE_MS = 8 * 60 * 60 * 1000; // keep in sync with the JWT's own 8h expiresIn
+
+// httpOnly so client-side JS (and therefore any XSS) can never read the
+// token; sameSite=strict plus the existing Origin-allowlist check in
+// server.js together cover CSRF without needing a separate token exchange.
+// secure is derived from req.secure (trust proxy is set) rather than a fixed
+// env check, so it works both over plain http in local dev and https in prod.
+function cookieOptions(req) {
+  return {
+    httpOnly: true,
+    secure: req.secure,
+    sameSite: "strict",
+    path: "/"
+  };
+}
+
 async function login(req, res) {
   try {
     const { username, password, captchaToken } = req.body;
@@ -60,15 +83,11 @@ async function login(req, res) {
 
     const admin = await Admin.getByUsername(username);
 
-    if (!admin) {
-      return res.status(401).json({
-        success: false,
-        message: "Sai tai khoan hoac mat khau."
-      });
-    }
+    // Always run bcrypt against a real hash — dummy when the account doesn't
+    // exist — so response timing doesn't reveal whether the username is valid.
+    const isValid = await bcrypt.compare(password, admin ? admin.password_hash : DUMMY_PASSWORD_HASH);
 
-    const isValid = await bcrypt.compare(password, admin.password_hash);
-    if (!isValid) {
+    if (!admin || !isValid) {
       return res.status(401).json({
         success: false,
         message: "Sai tai khoan hoac mat khau."
@@ -88,9 +107,9 @@ async function login(req, res) {
     req.user = { username }; // Set req.user manually for auditService
     auditService.logAction(req, "LOGIN", "USER", null, { message: "Admin login successful" });
 
+    res.cookie(SESSION_COOKIE, token, { ...cookieOptions(req), maxAge: SESSION_MAX_AGE_MS });
     res.json({
       success: true,
-      token,
       user: {
         username,
         role: "admin"
@@ -146,7 +165,31 @@ async function changePassword(req, res) {
   }
 }
 
+async function logout(req, res) {
+  try {
+    const username = req.user.username; // set by authMiddleware
+
+    await Admin.bumpTokenVersion(username);
+    auditService.logAction(req, "LOGOUT", "USER", null, { message: "Admin logout" });
+
+    res.clearCookie(SESSION_COOKIE, cookieOptions(req));
+    res.json({ success: true, message: "Da dang xuat." });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({ success: false, message: "Loi he thong." });
+  }
+}
+
+function me(req, res) {
+  // Lets the frontend ask "am I logged in" without being able to read the
+  // httpOnly session cookie itself — used by auth-zone.js to skip the login
+  // form when a valid session already exists.
+  res.json({ success: true, user: { username: req.user.username, role: "admin" } });
+}
+
 module.exports = {
   login,
-  changePassword
+  changePassword,
+  logout,
+  me
 };

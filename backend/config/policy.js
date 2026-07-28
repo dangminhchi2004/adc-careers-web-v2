@@ -1,0 +1,8 @@
+const PRIVACY_POLICY_VERSION = "3.0";
+const POLICY_CODE = "ADC.IFR.PO.CS.01";
+
+module.exports = {
+  PRIVACY_POLICY_VERSION,
+  POLICY_CODE
+};
+

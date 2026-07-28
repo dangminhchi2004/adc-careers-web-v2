@@ -1,4 +1,5 @@
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const express = require("express");
 const helmet = require("helmet");
 const fs = require("fs");
@@ -61,9 +62,17 @@ app.use((req, res, next) => {
         return callback(null, true);
       }
       return callback(new Error("Not allowed by CORS"));
-    }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    // The admin session now travels as an httpOnly cookie, so cross-origin
+    // requests need the browser's permission to attach it — safe to enable
+    // because the origin callback above never allows "*", only the explicit
+    // whitelist/same-Host, which credentials:true requires anyway.
+    credentials: true
   })(req, res, next);
 });
+app.use(cookieParser());
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -73,7 +82,13 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       frameSrc: ["'self'", "https://www.google.com/recaptcha/"],
-      imgSrc: ["'self'", "data:"]
+      imgSrc: ["'self'", "data:"],
+      // frame-ancestors doesn't fall back to default-src like other fetch
+      // directives, so without it clickjacking protection relies solely on
+      // the legacy X-Frame-Options header below (frameguard) — set both.
+      frameAncestors: ["'self'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"]
     }
   },
   hsts: {
@@ -137,6 +152,10 @@ app.get(["/thank-you", "/thank-you.html"], (req, res) => {
   res.sendFile(path.join(frontendDir, "thank-you.html"));
 });
 
+app.get(["/quy-dinh-bao-mat", "/privacy-policy", "/privacy-policy.html"], (req, res) => {
+  res.sendFile(path.join(frontendDir, "privacy-policy.html"));
+});
+
 app.get(["/demo", "/htmldemo", "/htmldemo.html"], (req, res) => {
   res.sendFile(htmlDemoFile);
 });
@@ -177,8 +196,16 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: "Loi he thong." });
 });
 
+const { runRetentionCleanup } = require("./services/retentionCleanupService");
+
 async function startServer() {
   await ensureSchema();
+
+  // Run periodic retention cleanup on startup and schedule every 24 hours
+  runRetentionCleanup().catch((err) => console.error("Initial retention cleanup error:", err));
+  setInterval(() => {
+    runRetentionCleanup().catch((err) => console.error("Scheduled retention cleanup error:", err));
+  }, 24 * 60 * 60 * 1000);
 
   const server = app.listen(port, "0.0.0.0", () => {
     console.log(`ADC Careers server running at http://localhost:${port}`);
@@ -193,3 +220,4 @@ startServer().catch((error) => {
   console.error("Failed to start ADC Careers server:", error);
   process.exit(1);
 });
+

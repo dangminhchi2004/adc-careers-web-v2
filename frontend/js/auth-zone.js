@@ -3,9 +3,13 @@ const loginForm = document.getElementById("loginForm");
 const loginMessage = document.getElementById("loginMessage");
 let recaptchaWidgetId = null;
 
-if (localStorage.getItem("adcAdminToken")) {
-  window.location.href = "admin.html";
-}
+// The session now lives in an httpOnly cookie, invisible to JS, so we can't
+// check "already logged in" via localStorage anymore — ask the server instead.
+fetch(`${API_BASE}/api/auth/me`, { credentials: "include" })
+  .then((res) => {
+    if (res.ok) window.location.href = "admin.html";
+  })
+  .catch(() => {});
 
 function loadReCaptcha() {
   if (window.grecaptcha) return Promise.resolve();
@@ -36,10 +40,6 @@ loadReCaptcha().then(() => {
     .catch(e => console.error("Failed to load captcha config", e));
 });
 
-if (localStorage.getItem("adcAdminToken")) {
-  window.location.href = "admin.html";
-}
-
 loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -63,6 +63,7 @@ loginForm.addEventListener("submit", async (event) => {
 
     const response = await fetch(`${API_BASE}/api/auth/login`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json"
       },
@@ -74,7 +75,8 @@ loginForm.addEventListener("submit", async (event) => {
       throw new Error(result.message || "Không thể đăng nhập.");
     }
 
-    localStorage.setItem("adcAdminToken", result.token);
+    // The session token itself is now an httpOnly cookie set by the server —
+    // only non-sensitive display info is kept client-side.
     localStorage.setItem("adcAdminUser", JSON.stringify(result.user));
     window.location.href = "admin.html";
   } catch (error) {

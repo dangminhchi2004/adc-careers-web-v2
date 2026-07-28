@@ -56,6 +56,45 @@
   text-transform: uppercase;
 }
 
+.policy-content ul,
+.apply-policy-body ul {
+  list-style: none !important;
+  margin: 12px 0 16px 0 !important;
+  padding-left: 20px !important;
+}
+
+.policy-content ul li,
+.apply-policy-body ul li {
+  color: #24364a !important;
+  line-height: 1.7 !important;
+  margin-bottom: 6px !important;
+  padding-left: 18px !important;
+  position: relative !important;
+}
+
+.policy-content ul li::before,
+.apply-policy-body ul li::before {
+  color: inherit !important;
+  content: "-" !important;
+  font-weight: 700 !important;
+  left: 0 !important;
+  position: absolute !important;
+  top: 0 !important;
+}
+
+.policy-content ol,
+.apply-policy-body ol {
+  color: #24364a !important;
+  line-height: 1.7 !important;
+  margin: 12px 0 16px !important;
+  padding-left: 28px !important;
+}
+
+.policy-content ol li,
+.apply-policy-body ol li {
+  margin-bottom: 6px !important;
+}
+
 .hero-title-demo {
   font-size: var(--text-h1);
   font-weight: 900;
@@ -1178,8 +1217,11 @@ body.detail-mode>main>section:not(#jobDetailSection) {
   box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
   color: var(--navy);
   max-width: 680px;
-  overflow: hidden;
   width: min(100%, 680px);
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .apply-modal-head {
@@ -1189,14 +1231,15 @@ body.detail-mode>main>section:not(#jobDetailSection) {
   display: flex;
   gap: 16px;
   justify-content: space-between;
-  padding: 22px 24px;
+  padding: 16px 20px;
   border-radius: 14px 14px 0 0;
+  flex: none;
 }
 
 .apply-modal-head h2 {
   font-size: var(--text-h3);
   line-height: 1.2;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .apply-modal-head p {
@@ -1211,26 +1254,64 @@ body.detail-mode>main>section:not(#jobDetailSection) {
   color: #fff;
   cursor: pointer;
   font-size: var(--text-h3);
-  height: 38px;
+  height: 34px;
   line-height: 1;
-  width: 38px;
+  width: 34px;
+  flex: none;
+}
+
+.apply-policy-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 32px);
+}
+
+.apply-policy-body {
+  overflow-y: auto;
+  padding: 22px 24px;
+  flex: 1;
+}
+
+.apply-policy-foot {
+  align-items: center;
+  background: #fff;
+  border-top: 1px solid #e5e9f0;
+  display: flex;
+  flex: none;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 16px 24px;
+}
+
+.apply-policy-hint {
+  color: #697586;
+  font-size: var(--text-sm);
+}
+
+.apply-policy-hint.done {
+  color: #2e7d32;
+  font-weight: 700;
 }
 
 .apply-form {
-  display: grid;
-  gap: 14px;
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .apply-form-grid {
   display: grid;
-  gap: 14px;
+  gap: 10px 14px;
   grid-template-columns: 1fr 1fr;
 }
 
 .apply-field {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .apply-field.full {
@@ -1244,32 +1325,62 @@ body.detail-mode>main>section:not(#jobDetailSection) {
 }
 
 .apply-field input,
+.apply-field select,
 .apply-field textarea {
   border: 1px solid #d8e0e9;
   border-radius: 8px;
   font: inherit;
   font-size: var(--text-sm);
-  padding: 12px 13px;
+  padding: 9px 12px;
   width: 100%;
 }
 
 .apply-field textarea {
-  min-height: 96px;
+  min-height: 60px;
+  max-height: 100px;
   resize: vertical;
 }
 
 .apply-hint {
   color: #697586;
-  font-size: var(--text-sm);
+  font-size: 0.8rem;
+}
+
+.apply-field label.consent-check {
+  align-items: flex-start;
+  color: #24364a;
+  cursor: pointer;
+  display: flex;
+  font-weight: 400;
+  gap: 8px;
+  line-height: 1.4;
+  font-size: 0.85rem;
+}
+
+.apply-field label.consent-check input[type="checkbox"] {
+  accent-color: var(--navy);
+  cursor: pointer;
+  margin-top: 3px;
+  width: auto;
+  flex: none;
+}
+
+.apply-field label.consent-check a,
+.apply-field label.consent-check button.policy-link {
+  color: var(--navy);
+  font-weight: 700;
 }
 
 .apply-form-actions {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
+  margin-top: 6px;
+  flex: none;
 }
 
 .apply-cancel {
+
   background: var(--red);
   color: #fff;
 }

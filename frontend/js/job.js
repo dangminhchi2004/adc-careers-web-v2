@@ -12,8 +12,44 @@
     const applyForm = document.getElementById("applyForm");
     const formMessage = document.getElementById("formMessage");
     const modalJobName = document.getElementById("modalJobName");
+    const policyModal = document.getElementById("policyModal");
+    const policyModalBody = document.getElementById("policyModalBody");
+    const policyHint = document.getElementById("policyHint");
+    const consentCheckbox = document.getElementById("consentPolicy");
     let allJobs = [];
     let recaptchaWidgetId = null;
+    let policyRead = false;
+
+    function openPolicyModal() {
+      policyModal.classList.add("open");
+      policyModal.setAttribute("aria-hidden", "false");
+      checkPolicyScroll();
+    }
+
+    function closePolicyModal() {
+      policyModal.classList.remove("open");
+      policyModal.setAttribute("aria-hidden", "true");
+    }
+
+    function checkPolicyScroll() {
+      if (policyRead) return;
+      const el = policyModalBody;
+      const reachedBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 8;
+      if (reachedBottom) {
+        policyRead = true;
+        policyHint.textContent = "Bạn đã đọc hết nội dung. Vui lòng đóng cửa sổ này và tick đồng ý.";
+        policyHint.classList.add("done");
+      }
+    }
+
+    policyModalBody.addEventListener("scroll", checkPolicyScroll);
+
+    consentCheckbox.addEventListener("click", (event) => {
+      if (!policyRead) {
+        event.preventDefault();
+        openPolicyModal();
+      }
+    });
 
     async function init() {
       allJobs = await fetchJobs();
@@ -316,6 +352,11 @@
       clearFormState();
       applyForm.reset();
 
+      policyRead = false;
+      consentCheckbox.checked = false;
+      policyHint.textContent = "Vui lòng cuộn xuống hết nội dung để có thể tick đồng ý.";
+      policyHint.classList.remove("done");
+
       if (recaptchaWidgetId === null && window.grecaptcha) {
         try {
           const res = await fetch(`${API_BASE}/api/config/public`);
@@ -394,6 +435,16 @@
         }
       }
 
+      if (!consentCheckbox.checked) {
+        setFieldError(
+          "consent",
+          !policyRead
+            ? "Vui lòng mở và đọc hết Tuyên Bố Bảo Mật trước khi đồng ý."
+            : "Vui lòng đồng ý với Tuyên Bố Bảo Mật trước khi gửi hồ sơ."
+        );
+        valid = false;
+      }
+
       if (recaptchaWidgetId !== null && window.grecaptcha) {
         const captchaResponse = grecaptcha.getResponse(recaptchaWidgetId);
         if (!captchaResponse) {
@@ -443,6 +494,11 @@
       formData.append("expectedSalary", payload.expectedSalary);
       formData.append("note", payload.note);
       formData.append("cvFile", payload.cvFile);
+      const consentTalentPool = document.getElementById("consentTalentPool");
+
+      formData.append("purposeCore", document.getElementById("consentPolicy").checked ? "true" : "false");
+      formData.append("purposeTalentPool", consentTalentPool && consentTalentPool.checked ? "true" : "false");
+      formData.append("consent", document.getElementById("consentPolicy").checked ? "true" : "false");
 
       if (recaptchaWidgetId !== null && window.grecaptcha) {
         formData.append("captchaToken", grecaptcha.getResponse(recaptchaWidgetId));
@@ -450,6 +506,7 @@
 
       return formData;
     }
+
 
     function showFormMessage(type, message) {
       formMessage.className = `form-message visible ${type}`;
@@ -511,8 +568,31 @@
       if (event.target === modal) closeApplyModal();
     });
 
+    policyModal.addEventListener("click", (event) => {
+      if (event.target === policyModal) closePolicyModal();
+    });
+
+    document.addEventListener("click", (event) => {
+      if (event.target.closest("[data-open-policy]")) {
+        openPolicyModal();
+        return;
+      }
+      if (event.target.closest("[data-close-policy]")) {
+        closePolicyModal();
+        return;
+      }
+      if (event.target.closest("[data-close-apply]")) {
+        closeApplyModal();
+      }
+    });
+
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && modal.classList.contains("open")) {
+      if (event.key !== "Escape") return;
+      if (policyModal.classList.contains("open")) {
+        closePolicyModal();
+        return;
+      }
+      if (modal.classList.contains("open")) {
         closeApplyModal();
       }
     });

@@ -1,9 +1,9 @@
 const API_BASE = window.ADC_API_BASE ?? (window.location.protocol === "file:" ? "http://localhost:5000" : "");
-const token = localStorage.getItem("adcAdminToken");
-
-if (!token) {
-  window.location.href = "auth-zone.html";
-}
+// Auth now travels as an httpOnly cookie (sent automatically via
+// credentials:"include" on every request below) rather than a token read
+// from localStorage — there's nothing to check client-side up front; an
+// unauthenticated visitor is caught by the first API call's 401 in
+// requestJson(), which redirects to the login page via logout().
 
 let jobs = [];
 let applications = [];
@@ -116,11 +116,8 @@ async function loadDashboard() {
 
 async function requestJson(url, options) {
   const requestOptions = {
-    ...(options || {}),
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...((options && options.headers) || {})
-    }
+    credentials: "include",
+    ...(options || {})
   };
   const response = await fetch(url, requestOptions);
   const result = await response.json();
@@ -135,8 +132,21 @@ async function requestJson(url, options) {
 }
 
 function logout() {
+  // Cleanup for any leftover data from before auth moved to an httpOnly
+  // cookie — harmless no-ops once migrated, but clears stale tokens from
+  // browsers that logged in under the old scheme.
   localStorage.removeItem("adcAdminToken");
   localStorage.removeItem("adcAdminUser");
+
+  // Best-effort: invalidate the session cookie server-side (bumps
+  // token_version and clears the cookie) so it can't be replayed even if it
+  // leaked. Don't block the redirect on this — the user is logged out
+  // client-side regardless of whether the call succeeds.
+  fetch(`${API_BASE}/api/auth/logout`, {
+    method: "POST",
+    credentials: "include"
+  }).catch(() => {});
+
   window.location.href = "auth-zone.html";
 }
 
@@ -242,9 +252,7 @@ async function viewCvLink(event, applicationId) {
 
   try {
     const response = await fetch(`${API_BASE}/api/admin/applications/${applicationId}/cv-link`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      credentials: "include"
     });
 
     if (response.status === 401) {
@@ -268,9 +276,7 @@ async function downloadCv(event, applicationId) {
 
   try {
     const response = await fetch(`${API_BASE}/api/admin/applications/${applicationId}/cv`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      credentials: "include"
     });
 
     if (response.status === 401) {
@@ -748,9 +754,9 @@ if (passwordForm) {
     try {
       const res = await fetch(`${API_BASE}/api/auth/password`, {
         method: "PUT",
+        credentials: "include",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({ oldPassword, newPassword })
       });

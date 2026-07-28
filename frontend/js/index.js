@@ -4,6 +4,50 @@ let expandedJob = null;
 let currentApplyJob = "ADC Careers";
 let currentApplyJobId = null;
 let recaptchaWidgetId = null;
+let policyRead = false;
+
+function openPolicyModal() {
+  const policyModal = document.getElementById("policyModal");
+  if (!policyModal) return;
+  policyModal.classList.add("show");
+  policyModal.setAttribute("aria-hidden", "false");
+  checkPolicyScroll();
+}
+
+function closePolicyModal() {
+  const policyModal = document.getElementById("policyModal");
+  if (!policyModal) return;
+  policyModal.classList.remove("show");
+  policyModal.setAttribute("aria-hidden", "true");
+}
+
+function checkPolicyScroll() {
+  if (policyRead) return;
+  const el = document.getElementById("policyModalBody");
+  const policyHint = document.getElementById("policyHint");
+  if (!el || !policyHint) return;
+  const reachedBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 8;
+  if (reachedBottom) {
+    policyRead = true;
+    policyHint.textContent = "Bạn đã đọc hết nội dung. Vui lòng đóng cửa sổ này và tick đồng ý.";
+    policyHint.classList.add("done");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const policyBody = document.getElementById("policyModalBody");
+  if (policyBody) policyBody.addEventListener("scroll", checkPolicyScroll);
+
+  const consentCheckbox = document.getElementById("demoConsent");
+  if (consentCheckbox) {
+    consentCheckbox.addEventListener("click", (event) => {
+      if (!policyRead) {
+        event.preventDefault();
+        openPolicyModal();
+      }
+    });
+  }
+});
 
 const params = new URLSearchParams(window.location.search);
 const detailJobId = Number(params.get("id"));
@@ -143,6 +187,22 @@ function openApplyModal(jobName = "ADC Careers", jobId = null) {
   currentApplyJobId = jobId;
   jobLabel.textContent = currentApplyJob;
 
+  policyRead = false;
+  const consentCheckbox = document.getElementById("demoConsent");
+  const consentTalentPoolCheckbox = document.getElementById("demoConsentTalentPool");
+  const policyHint = document.getElementById("policyHint");
+  if (consentCheckbox) {
+    consentCheckbox.checked = false;
+  }
+  if (consentTalentPoolCheckbox) {
+    consentTalentPoolCheckbox.checked = false;
+  }
+
+  if (policyHint) {
+    policyHint.textContent = "Vui lòng cuộn xuống hết nội dung để có thể tick đồng ý.";
+    policyHint.classList.remove("done");
+  }
+
   loadReCaptcha().then(() => {
     if (recaptchaWidgetId === null && window.grecaptcha) {
       const baseUrl = window.ADC_API_BASE ?? (window.location.protocol === "file:" ? "http://localhost:5000" : "");
@@ -205,8 +265,23 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  if (event.target.closest("[data-open-policy]")) {
+    event.preventDefault();
+    openPolicyModal();
+    return;
+  }
+
+  if (event.target.closest("[data-close-policy]")) {
+    event.preventDefault();
+    closePolicyModal();
+    return;
+  }
+
   const modal = document.getElementById("applyModal");
   if (event.target === modal) closeApplyModal();
+
+  const policyModal = document.getElementById("policyModal");
+  if (event.target === policyModal) closePolicyModal();
 
   const filterBtn = event.target.closest("[data-action='filter-dept']");
   if (filterBtn) {
@@ -222,7 +297,13 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") closeApplyModal();
+  if (event.key !== "Escape") return;
+  const policyModal = document.getElementById("policyModal");
+  if (policyModal && policyModal.classList.contains("show")) {
+    closePolicyModal();
+    return;
+  }
+  closeApplyModal();
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -234,6 +315,18 @@ document.addEventListener("DOMContentLoaded", () => {
       event.preventDefault();
       const currentTarget = event.currentTarget;
       if (!currentTarget.reportValidity()) return;
+
+      const consentCheckbox = currentTarget.querySelector("#demoConsent");
+      const consentError = currentTarget.querySelector('[data-field="consent"] .error-text');
+      if (consentError) consentError.textContent = "";
+      if (consentCheckbox && !consentCheckbox.checked) {
+        if (consentError) {
+          consentError.textContent = !policyRead
+            ? "Vui lòng mở và đọc hết Tuyên Bố Bảo Mật trước khi đồng ý."
+            : "Vui lòng đồng ý với Tuyên Bố Bảo Mật trước khi gửi hồ sơ.";
+        }
+        return;
+      }
 
       const submitBtn = currentTarget.querySelector('.apply-submit');
       const originalText = submitBtn.textContent;

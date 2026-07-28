@@ -5,6 +5,22 @@ const auditService = require("../services/auditService");
 const AuditLog = require("../models/auditModel");
 const { isTooLong, toItemsArray, itemTextLength } = require("../utils/validate");
 
+// The stored cv_mime_type can hold an attacker-declared value from before this
+// was locked down at upload time (backend/controllers/applyController.js), so
+// never trust it for the response header — derive Content-Type strictly from
+// the file extension against this fixed whitelist instead.
+const SAFE_CV_MIME_TYPES = {
+  ".pdf": "application/pdf",
+  ".doc": "application/msword",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+};
+
+function safeCvContentType(fileName) {
+  const match = /\.[a-z0-9]+$/i.exec(String(fileName || ""));
+  const ext = match ? match[0].toLowerCase() : "";
+  return SAFE_CV_MIME_TYPES[ext] || "application/octet-stream";
+}
+
 // Mirrors the VARCHAR/TEXT column widths in backend/config/schema.js so an
 // oversized field is rejected with a clean 400 instead of crashing the insert
 // with a DB-level ER_DATA_TOO_LONG (500).
@@ -182,9 +198,10 @@ async function downloadApplicationCv(req, res) {
     const cv = await loadCv(application);
     auditService.logAction(req, "DOWNLOAD_CV", "APPLICATION", application.id, { fileName: cv.fileName });
 
-    res.setHeader("Content-Type", cv.mimeType);
+    const contentType = safeCvContentType(cv.fileName);
+    res.setHeader("Content-Type", contentType);
     res.setHeader("Content-Length", cv.buffer.length);
-    res.setHeader("Content-Disposition", buildContentDisposition(cv.fileName, cv.mimeType));
+    res.setHeader("Content-Disposition", buildContentDisposition(cv.fileName, contentType));
     return res.send(cv.buffer);
   } catch (error) {
     console.error("GET /api/admin/applications/:id/cv failed:", error);

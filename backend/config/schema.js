@@ -59,6 +59,9 @@ async function ensureSchema() {
       cv_external_url VARCHAR(1000),
       cv_storage_path VARCHAR(1000),
       status VARCHAR(40) DEFAULT 'new',
+      consent_accepted_at TIMESTAMP NULL,
+      consent_policy_version VARCHAR(20),
+      consent_ip VARCHAR(50),
       applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
     )
@@ -134,8 +137,31 @@ async function ensureSchema() {
   await addColumnIfMissing("applications", "cv_external_url", "VARCHAR(1000)");
   await addColumnIfMissing("applications", "cv_storage_path", "VARCHAR(1000)");
   await addColumnIfMissing("applications", "status", "VARCHAR(40) DEFAULT 'new'");
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS consent_logs (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      application_id INT NULL,
+      applicant_email VARCHAR(255) NOT NULL,
+      applicant_name VARCHAR(255) NOT NULL,
+      consent_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      consent_ip VARCHAR(50),
+      policy_code VARCHAR(50) DEFAULT 'ADC.IFR.PO.CS.01',
+      policy_version VARCHAR(20) DEFAULT '3.0',
+      purpose_core TINYINT(1) NOT NULL DEFAULT 1,
+      purpose_talent_pool TINYINT(1) NOT NULL DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await addColumnIfMissing("applications", "policy_code", "VARCHAR(50) DEFAULT 'ADC.IFR.PO.CS.01'");
+  await addColumnIfMissing("applications", "purpose_core", "TINYINT(1) DEFAULT 1");
+  await addColumnIfMissing("applications", "purpose_talent_pool", "TINYINT(1) DEFAULT 0");
+  await addColumnIfMissing("applications", "consent_accepted_at", "TIMESTAMP NULL");
+  await addColumnIfMissing("applications", "consent_policy_version", "VARCHAR(20)");
+  await addColumnIfMissing("applications", "consent_ip", "VARCHAR(50)");
   await addColumnIfMissing("admins", "token_version", "INT DEFAULT 0");
 }
+
 
 async function addColumnIfMissing(tableName, columnName, definition) {
   const [rows] = await db.query(
