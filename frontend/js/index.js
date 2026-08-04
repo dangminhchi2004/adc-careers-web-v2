@@ -608,14 +608,4 @@ window.initScrollAnimations = function () {
 
 document.addEventListener("DOMContentLoaded", () => {
   if (window.initScrollAnimations) window.initScrollAnimations();
-
-  // CTA Section Color Picker Logic
-  const ctaSection = document.querySelector(".demo-cta-section");
-  const ctaColorPicker = document.getElementById("ctaColorPicker");
-
-  if (ctaSection && ctaColorPicker) {
-    ctaColorPicker.addEventListener("input", (e) => {
-      ctaSection.style.background = e.target.value;
-    });
-  }
 });
