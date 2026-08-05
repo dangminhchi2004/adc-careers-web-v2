@@ -114,6 +114,10 @@ ALTER TABLE `jobs`
   ADD COLUMN `requirements_detail` json DEFAULT NULL,
   ADD COLUMN `benefits` json DEFAULT NULL,
   ADD COLUMN `environment_sections` json DEFAULT NULL,
+  ADD COLUMN `display_mode` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'standard',
+  ADD COLUMN `poster_image` longblob DEFAULT NULL,
+  ADD COLUMN `poster_mime_type` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  ADD COLUMN `poster_size` int DEFAULT NULL,
   ADD UNIQUE KEY `slug` (`slug`);
 
 UPDATE `jobs`

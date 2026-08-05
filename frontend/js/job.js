@@ -85,6 +85,11 @@
       document.title = `ADC Careers | ${job.title}`;
       document.getElementById("pageTitle").textContent = `ADC Careers | ${job.title}`;
 
+      if (job.displayMode === "poster" && job.hasPoster) {
+        renderPosterJob();
+        return;
+      }
+
       detailCard.innerHTML = `
         <a class="back-link back-link-inline" href="index.html#co-hoi">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
@@ -171,6 +176,27 @@
       });
     }
 
+    function renderPosterJob() {
+      detailCard.innerHTML = `
+        <a class="back-link back-link-inline" href="index.html#co-hoi">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+          Quay lại danh sách vị trí
+        </a>
+
+        <div class="job-detail-poster-wrap">
+          <img class="job-detail-poster" src="${API_BASE}/api/jobs/${job.id}/poster" alt="${escapeHtml(job.vn || job.title)}" />
+        </div>
+
+        <div class="job-detail-actions job-detail-poster-actions">
+          <button class="btn apply-btn" type="button" data-apply-trigger>Ứng tuyển ngay</button>
+        </div>
+      `;
+
+      detailCard.querySelectorAll("[data-apply-trigger]").forEach((button) => {
+        button.addEventListener("click", openApplyModal);
+      });
+    }
+
     function updateSeo() {
       const title = `ADC Careers | ${job.vn || job.title}`;
       const description = job.summary || `Ứng tuyển vị trí ${job.vn || job.title} tại ADC. Địa điểm ${job.workLocation}, hình thức ${job.employmentType}.`;
@@ -190,6 +216,9 @@
         datePosted: toIsoDate(job.publishedAt || job.created_at),
         validThrough: toIsoDate(job.deadline),
         employmentType: job.employmentType || "FULL_TIME",
+        ...(job.displayMode === "poster" && job.hasPoster
+          ? { image: new URL(`${API_BASE}/api/jobs/${job.id}/poster`, window.location.origin).href }
+          : {}),
         hiringOrganization: {
           "@type": "Organization",
           name: "Asia Dragon Capital (ADC)",

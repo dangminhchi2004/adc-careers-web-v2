@@ -298,6 +298,27 @@
             <span>Đánh dấu urgent</span>
           </label>
           <label class="full">
+            <span>Chế độ hiển thị chi tiết</span>
+            <div class="display-mode-toggle" role="group" aria-label="Chế độ hiển thị chi tiết vị trí">
+              <button type="button" class="mode-btn active" data-mode="standard">Chuẩn</button>
+              <button type="button" class="mode-btn" data-mode="poster">Poster</button>
+            </div>
+            <input id="displayMode" name="displayMode" type="hidden" value="standard" />
+          </label>
+          <label class="full">
+            <span>Ảnh poster (dọc A4, ~1240x1754px, tối đa 10MB — JPG/PNG/WebP)</span>
+            <div class="poster-upload">
+              <div class="poster-upload-preview" id="posterPreview">
+                <span class="poster-upload-placeholder">Chưa có ảnh poster</span>
+              </div>
+              <div class="poster-upload-controls">
+                <input id="posterFile" name="posterFile" type="file" accept="image/jpeg,image/png,image/webp" />
+                <button type="button" class="btn btn-secondary" id="removePosterBtn" hidden>Xóa poster hiện tại</button>
+              </div>
+            </div>
+            <div class="error-text" id="posterError" style="color:var(--danger);font-size:0.875rem;margin-top:0.25rem;"></div>
+          </label>
+          <label class="full">
             <span>Yêu cầu chính *</span>
             <textarea id="reqs" name="reqs" required placeholder="Mỗi dòng là một yêu cầu"></textarea>
           </label>
@@ -335,6 +356,19 @@
     .modal-content h2 { margin-top: 0; margin-bottom: 1.5rem; color: var(--heading); }
     .modal-content .form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem; }
     .job-form { border-bottom: none; padding: 0; }
+
+    .display-mode-toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; width: fit-content; }
+    .display-mode-toggle .mode-btn { background: transparent; border: none; color: var(--text); padding: 8px 18px; font-weight: 600; cursor: pointer; }
+    .display-mode-toggle .mode-btn + .mode-btn { border-left: 1px solid var(--border); }
+    .display-mode-toggle .mode-btn.active { background: linear-gradient(135deg, var(--accent), #FFE44D); color: #0b1a2e; }
+
+    .poster-upload { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+    .poster-upload-preview { width: 140px; aspect-ratio: 1240 / 1754; border: 1px dashed var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: rgba(255,255,255,.03); flex-shrink: 0; }
+    .poster-upload-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .poster-upload-placeholder { font-size: 0.75rem; color: var(--muted); text-align: center; padding: 8px; }
+    .poster-upload-controls { display: flex; flex-direction: column; gap: 10px; }
+
+    .jobs-table-poster-badge { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; background: linear-gradient(135deg, var(--accent), #FFE44D); color: #0b1a2e; }
   </style>
 
   <script src="js/config.js"></script>

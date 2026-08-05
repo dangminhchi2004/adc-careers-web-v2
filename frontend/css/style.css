@@ -894,6 +894,25 @@ footer {
   gap: 24px;
 }
 
+.job-detail-poster-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0 0;
+}
+
+.job-detail-poster {
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+.job-detail-poster-actions {
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
 .job-detail-hero {
   align-items: stretch;
   background:
@@ -1855,6 +1874,24 @@ footer>* {
   font-size: var(--text-sm);
 }
 
+.cv-template-link {
+  color: var(--accent);
+  display: inline-block;
+  font-weight: 700;
+  margin-left: 6px;
+  text-decoration: underline;
+}
+
+.cv-template-link:hover {
+  color: var(--text-heading);
+}
+
+.cv-format-notice {
+  color: var(--danger);
+  font-size: var(--text-sm);
+  margin-top: 4px;
+}
+
 .error-text {
   color: var(--danger);
   min-height: 18px;
@@ -1863,6 +1900,59 @@ footer>* {
 .field.invalid input,
 .field.invalid textarea {
   border-color: var(--danger);
+}
+
+.field.invalid .cv-upload {
+  border-color: var(--danger);
+}
+
+.cv-upload {
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  padding: 6px;
+}
+
+.cv-upload-control {
+  align-items: center;
+  display: inline-flex;
+  flex-shrink: 0;
+  min-height: 46px;
+  position: relative;
+}
+
+.cv-upload-btn {
+  background: #eef2f6;
+  border-radius: 6px;
+  color: var(--text-heading);
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 8px 14px;
+  white-space: nowrap;
+}
+
+.cv-upload-input {
+  cursor: pointer;
+  height: 100%;
+  left: 0;
+  margin: 0;
+  opacity: 0;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.cv-upload-filename {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .field label.consent-check {

@@ -91,9 +91,19 @@
             <div class="error-text"></div>
           </div>
           <div class="field full" data-field="cvFile">
-            <label for="cvFile">CV đính kèm *</label>
-            <input id="cvFile" name="cvFile" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
-            <div class="hint">Chấp nhận PDF, DOC, DOCX. Dung lượng tối đa 5MB.</div>
+            <label id="cvFileLabel">CV đính kèm *</label>
+            <div class="cv-upload">
+              <div class="cv-upload-control">
+                <span class="cv-upload-btn">Chọn tệp</span>
+                <input id="cvFile" name="cvFile" type="file" class="cv-upload-input" aria-labelledby="cvFileLabel" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+              </div>
+              <span class="cv-upload-filename">Chưa chọn tệp nào</span>
+            </div>
+            <div class="hint">
+              Chấp nhận PDF, DOC, DOCX. Dung lượng tối đa 5MB.
+              <a class="cv-template-link" href="assets/documents/adc-mau-cv-tham-khao.docx" download>Tải mẫu CV tham khảo</a>
+            </div>
+            <div class="cv-format-notice">Lưu ý: Chúng tôi chỉ tiếp nhận CV được trình bày đúng theo mẫu do công ty cung cấp ở trên. Hồ sơ nộp sai định dạng sẽ bị loại.</div>
             <div class="error-text"></div>
           </div>
           <div class="field full" data-field="note">

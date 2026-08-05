@@ -293,3 +293,17 @@
     }
     window.loadReCaptcha = loadReCaptcha;
 
+    document.addEventListener("change", (event) => {
+      const input = event.target.closest(".cv-upload-input");
+      if (!input) return;
+      const nameEl = input.closest(".cv-upload")?.querySelector(".cv-upload-filename");
+      if (!nameEl) return;
+      nameEl.textContent = input.files && input.files.length ? input.files[0].name : "Chưa chọn tệp nào";
+    });
+
+    document.addEventListener("reset", (event) => {
+      event.target.querySelectorAll(".cv-upload-filename").forEach((nameEl) => {
+        nameEl.textContent = "Chưa chọn tệp nào";
+      });
+    });
+

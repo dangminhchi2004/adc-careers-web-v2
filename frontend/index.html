@@ -361,11 +361,21 @@
             <input id="demoSalary" name="expectedSalary" type="text" placeholder="VD: Thỏa thuận" />
           </div>
           <div class="apply-field full">
-            <label for="demoCv">CV đính kèm *</label>
-            <input id="demoCv" name="cvFile" type="file"
-              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              required />
-            <div class="apply-hint">Chấp nhận PDF, DOC, DOCX. Dung lượng tối đa 5MB.</div>
+            <label id="demoCvLabel">CV đính kèm *</label>
+            <div class="cv-upload">
+              <div class="cv-upload-control">
+                <span class="cv-upload-btn">Chọn tệp</span>
+                <input id="demoCv" name="cvFile" type="file" class="cv-upload-input" aria-labelledby="demoCvLabel"
+                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  required />
+              </div>
+              <span class="cv-upload-filename">Chưa chọn tệp nào</span>
+            </div>
+            <div class="apply-hint">
+              Chấp nhận PDF, DOC, DOCX. Dung lượng tối đa 5MB.
+              <a class="cv-template-link" href="assets/documents/adc-mau-cv-tham-khao.docx" download>Tải mẫu CV tham khảo</a>
+            </div>
+            <div class="cv-format-notice">Lưu ý: Chúng tôi chỉ tiếp nhận CV được trình bày đúng theo mẫu do công ty cung cấp ở trên. Hồ sơ nộp sai định dạng sẽ bị loại.</div>
           </div>
           <div class="apply-field full">
             <label for="demoNote">Ghi chú</label>
@@ -699,7 +709,7 @@
             <li><strong>Đầu mối tiếp nhận:</strong> Phòng Nhân sự (P&amp;O), phối hợp bộ phận bảo vệ dữ liệu cá nhân
             </li>
             <li><strong>Email:</strong> <a href="mailto:tuyendung@asiadragoncordage.com">tuyendung@asiadragoncordage.com</a>
-            </li>
+            </li> 
             <li><strong>Điện thoại:</strong> 0938 882 922</li>
           </ul>
           <p>Ngoài ra, bạn có quyền khiếu nại, tố cáo tới Cơ quan chuyên trách bảo vệ dữ liệu cá nhân thuộc Bộ Công an,

@@ -1,13 +1,33 @@
 const db = require("../config/db");
 
+// Every jobs SELECT must list columns explicitly and exclude poster_image —
+// it's a LONGBLOB that can hold up to ~10MB, and this list backs both the
+// admin table and the public GET /api/jobs response consumed by every
+// visitor. Pulling it in via SELECT * would balloon every job list/detail
+// fetch by however many MB of poster data exist. The actual bytes are only
+// ever served through the dedicated GET /api/jobs/:id/poster route.
+const JOB_COLUMNS_SQL = `
+  id, title, vn, dept, level, report, urgent, color, reqs, slug, summary,
+  employment_type, work_location, location_short, salary_text, deadline,
+  quantity, age_range, gender, experience_text, industry, published_at,
+  responsibilities, requirements_detail, benefits, environment_sections,
+  status, display_mode, poster_mime_type, poster_size, created_at,
+  (poster_image IS NOT NULL) AS has_poster
+`;
+
+const DISPLAY_MODES = ["standard", "poster"];
+
 const Job = {
   getAll: async () => {
-    const [rows] = await db.query("SELECT * FROM jobs ORDER BY created_at DESC");
+    const [rows] = await db.query(`SELECT ${JOB_COLUMNS_SQL} FROM jobs ORDER BY created_at DESC`);
     return rows.map(normalizeJob);
   },
 
   getAllActive: async () => {
-    const [rows] = await db.query("SELECT * FROM jobs WHERE status = ? ORDER BY created_at DESC", ["active"]);
+    const [rows] = await db.query(
+      `SELECT ${JOB_COLUMNS_SQL} FROM jobs WHERE status = ? ORDER BY created_at DESC`,
+      ["active"]
+    );
     return rows.map(normalizeJob);
   },
 
@@ -18,8 +38,8 @@ const Job = {
         (title, vn, dept, level, report, urgent, color, reqs, slug, summary,
          employment_type, work_location, location_short, salary_text, deadline,
          quantity, age_range, gender, experience_text, industry, published_at,
-         responsibilities, requirements_detail, benefits, environment_sections, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         responsibilities, requirements_detail, benefits, environment_sections, status, display_mode)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         normalized.title,
         normalized.vn,
@@ -46,7 +66,8 @@ const Job = {
         JSON.stringify(normalized.requirementsDetail),
         JSON.stringify(normalized.benefits),
         JSON.stringify(normalized.environmentSections),
-        normalized.status
+        normalized.status,
+        normalized.displayMode
       ]
     );
 
@@ -54,7 +75,7 @@ const Job = {
   },
 
   getById: async (id) => {
-    const [rows] = await db.query("SELECT * FROM jobs WHERE id = ?", [id]);
+    const [rows] = await db.query(`SELECT ${JOB_COLUMNS_SQL} FROM jobs WHERE id = ?`, [id]);
     return rows[0] ? normalizeJob(rows[0]) : null;
   },
 
@@ -87,7 +108,8 @@ const Job = {
            requirements_detail = ?,
            benefits = ?,
            environment_sections = ?,
-           status = ?
+           status = ?,
+           display_mode = ?
        WHERE id = ?`,
       [
         normalized.title,
@@ -116,6 +138,7 @@ const Job = {
         JSON.stringify(normalized.benefits),
         JSON.stringify(normalized.environmentSections),
         normalized.status,
+        normalized.displayMode,
         id
       ]
     );
@@ -126,6 +149,31 @@ const Job = {
   remove: async (id) => {
     const [result] = await db.query("DELETE FROM jobs WHERE id = ?", [id]);
     return result.affectedRows > 0;
+  },
+
+  setPoster: async (id, buffer, mimeType, size) => {
+    await db.query(
+      "UPDATE jobs SET poster_image = ?, poster_mime_type = ?, poster_size = ? WHERE id = ?",
+      [buffer, mimeType, size, id]
+    );
+    return Job.getById(id);
+  },
+
+  clearPoster: async (id) => {
+    await db.query(
+      "UPDATE jobs SET poster_image = NULL, poster_mime_type = NULL, poster_size = NULL, display_mode = 'standard' WHERE id = ?",
+      [id]
+    );
+    return Job.getById(id);
+  },
+
+  getPosterById: async (id) => {
+    const [rows] = await db.query(
+      "SELECT poster_image, poster_mime_type FROM jobs WHERE id = ?",
+      [id]
+    );
+    if (!rows[0] || !rows[0].poster_image) return null;
+    return { buffer: rows[0].poster_image, mimeType: rows[0].poster_mime_type };
   }
 };
 
@@ -149,7 +197,9 @@ function normalizeJob(row) {
     environmentSections: parseEnvironmentSections(row.environment_sections),
     urgent: Boolean(row.urgent),
     quantity: Number(row.quantity || 1),
-    reqs
+    reqs,
+    displayMode: row.display_mode || "standard",
+    hasPoster: Boolean(row.has_poster)
   };
 }
 
@@ -188,7 +238,8 @@ function normalizeJobPayload(job) {
     requirementsDetail: parseList(job.requirementsDetail || job.requirements_detail),
     benefits: parseBenefits(job.benefits),
     environmentSections: parseEnvironmentSections(job.environmentSections || job.environment_sections),
-    status: job.status || "active"
+    status: job.status || "active",
+    displayMode: DISPLAY_MODES.includes(job.displayMode || job.display_mode) ? (job.displayMode || job.display_mode) : "standard"
   };
 }
 

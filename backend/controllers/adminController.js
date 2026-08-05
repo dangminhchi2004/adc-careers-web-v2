@@ -1,9 +1,30 @@
+const { imageSize } = require("image-size");
 const Application = require("../models/applyModel");
 const Job = require("../models/jobModel");
 const { buildCvViewUrl, loadCv } = require("../services/cvStorageService");
 const auditService = require("../services/auditService");
 const AuditLog = require("../models/auditModel");
 const { isTooLong, toItemsArray, itemTextLength } = require("../utils/validate");
+
+// file-type@22+ is ESM-only, so it can't be required() from this CommonJS
+// module — load it once via dynamic import() and reuse the cached promise.
+// Mirrors the same pattern already used for CV magic-byte validation in
+// backend/controllers/applyController.js.
+let fileTypeFromBufferPromise;
+function getFileTypeFromBuffer() {
+  if (!fileTypeFromBufferPromise) {
+    fileTypeFromBufferPromise = import("file-type").then((mod) => mod.fileTypeFromBuffer);
+  }
+  return fileTypeFromBufferPromise;
+}
+
+const POSTER_TARGET_RATIO = 1240 / 1754; // ~0.707, A4 portrait
+const POSTER_RATIO_TOLERANCE = 0.02;
+const POSTER_SAFE_MIME_TYPES = {
+  jpg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp"
+};
 
 // The stored cv_mime_type can hold an attacker-declared value from before this
 // was locked down at upload time (backend/controllers/applyController.js), so
@@ -276,12 +297,83 @@ function validateJob(job) {
 
   const reqs = toItemsArray(job.reqs);
   if (reqs.length === 0) return "Vui long nhap it nhat mot yeu cau.";
+
+  if (job.displayMode !== undefined && !["standard", "poster"].includes(job.displayMode)) {
+    return "Che do hien thi khong hop le.";
+  }
+
   return "";
+}
+
+async function uploadJobPoster(req, res) {
+  try {
+    const job = await Job.getById(req.params.id);
+    if (!job) {
+      return res.status(404).json({ success: false, message: "Khong tim thay vi tri." });
+    }
+
+    const posterFile = req.file;
+    if (!posterFile || !posterFile.buffer) {
+      return res.status(400).json({ success: false, message: "Vui long chon anh poster." });
+    }
+
+    const fileTypeFromBuffer = await getFileTypeFromBuffer();
+    const type = await fileTypeFromBuffer(posterFile.buffer);
+    const detectedExt = type ? type.ext : null;
+
+    if (!detectedExt || !POSTER_SAFE_MIME_TYPES[detectedExt]) {
+      return res.status(400).json({
+        success: false,
+        message: "Anh poster khong hop le hoac co dau hieu gia mao dinh dang. Chi chap nhan JPG, PNG hoac WebP."
+      });
+    }
+
+    let dimensions;
+    try {
+      dimensions = imageSize(posterFile.buffer);
+    } catch (error) {
+      return res.status(400).json({ success: false, message: "Khong doc duoc kich thuoc anh poster." });
+    }
+
+    const ratio = dimensions.width / dimensions.height;
+    if (Math.abs(ratio - POSTER_TARGET_RATIO) > POSTER_TARGET_RATIO * POSTER_RATIO_TOLERANCE) {
+      return res.status(400).json({
+        success: false,
+        message: `Ty le khung hinh khong dung chuan (yeu cau ~1240x1754px, ty le doc A4). Anh tai len co kich thuoc ${dimensions.width}x${dimensions.height}px.`
+      });
+    }
+
+    const safeMimeType = POSTER_SAFE_MIME_TYPES[detectedExt];
+    const updated = await Job.setPoster(job.id, posterFile.buffer, safeMimeType, posterFile.buffer.length);
+
+    auditService.logAction(req, "UPLOAD_JOB_POSTER", "JOB", job.id, { size: posterFile.buffer.length });
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    console.error("POST /api/admin/jobs/:id/poster failed:", error);
+    res.status(500).json({ success: false, message: "Khong the tai len anh poster." });
+  }
+}
+
+async function deleteJobPoster(req, res) {
+  try {
+    const job = await Job.getById(req.params.id);
+    if (!job) {
+      return res.status(404).json({ success: false, message: "Khong tim thay vi tri." });
+    }
+
+    const updated = await Job.clearPoster(job.id);
+    auditService.logAction(req, "DELETE_JOB_POSTER", "JOB", job.id);
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    console.error("DELETE /api/admin/jobs/:id/poster failed:", error);
+    res.status(500).json({ success: false, message: "Khong the xoa anh poster." });
+  }
 }
 
 module.exports = {
   createJob,
   deleteJob,
+  deleteJobPoster,
   downloadApplicationCv,
   exportApplications,
   getApplicationCvLink,
@@ -289,7 +381,8 @@ module.exports = {
   getAuditLogs,
   getJobs,
   updateApplicationStatus,
-  updateJob
+  updateJob,
+  uploadJobPoster
 };
 
 function buildContentDisposition(fileName, mimeType) {

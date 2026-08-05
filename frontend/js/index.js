@@ -99,9 +99,9 @@ function renderFilters() {
   if (!bar) return;
   bar.innerHTML = departments().map((d, i) => {
     const label = d === "all" ? "Tất cả" : d;
-    const color = RAINBOW[i % 7];
+    const color = d === "all" ? "#FFD700" : RAINBOW[(i - 1) % 7];
     const isActive = selectedDept === d;
-    return `<button class="demo-filter-btn${isActive ? ' active' : ''}" data-dept="${escapeAttribute(d)}" data-action="filter-dept" style="${isActive ? `--active-color:${color};border-color:${color};color:${color};background:${color}20` : ''}">${escapeHtml(label)}</button>`;
+    return `<button class="demo-filter-btn${isActive ? ' active' : ''}" data-dept="${escapeAttribute(d)}" data-action="filter-dept" style="--filter-color:${color};--filter-color-bg:${color}1a">${escapeHtml(label)}</button>`;
   }).join("");
   setTimeout(() => { if (window.initScrollAnimations) window.initScrollAnimations(); }, 50);
 }
@@ -377,8 +377,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (response.ok && result.success !== false) {
           closeApplyModal();
-          alert(`Hồ sơ ứng tuyển cho ${currentApplyJob} đã được gửi thành công!`);
           currentTarget.reset();
+
+          const appliedJob = positions.find(item => item.id === currentApplyJobId);
+          const thankYouUrl = new URL("/thank-you.html", window.location.origin);
+          thankYouUrl.searchParams.set("job", currentApplyJob);
+          thankYouUrl.searchParams.set("slug", appliedJob ? appliedJob.slug : "");
+          window.location.href = thankYouUrl.href;
         } else {
           alert(`Lỗi: ${result.message || 'Không thể gửi hồ sơ. Vui lòng kiểm tra lại kích thước hoặc định dạng file.'}`);
           if (recaptchaWidgetId !== null && window.grecaptcha) grecaptcha.reset(recaptchaWidgetId);
@@ -426,9 +431,26 @@ function renderDetailPage() {
 
   document.title = `ADC Careers | ${job.title}`;
   card.style.setProperty("--detail-color", job.color || "#2196F3");
-  card.innerHTML = buildDetailCard(job);
+  card.innerHTML = job.displayMode === "poster" && job.hasPoster
+    ? buildPosterDetailCard(job)
+    : buildDetailCard(job);
 
   card.hidden = false;
+}
+
+function buildPosterDetailCard(job) {
+  const apiBaseUrl = typeof API_BASE !== 'undefined' ? API_BASE : (window.ADC_API_BASE ?? (window.location.protocol === "file:" ? "http://localhost:5000" : ""));
+  const cleanBaseUrl = apiBaseUrl.replace(/\/$/, "");
+
+  return `
+<div class="detail-poster-wrap">
+  <img class="detail-poster" src="${cleanBaseUrl}/api/jobs/${job.id}/poster" alt="${escapeHtml(job.vn || job.title)}" />
+</div>
+<div class="detail-actions detail-poster-actions">
+  <button class="detail-primary" type="button" data-open-apply data-apply-job="${escapeAttribute(job.vn || job.title)}" data-job-id="${job.id}">Ứng tuyển ngay</button>
+  <a class="detail-secondary" href="${DEMO_PAGE}#co-hoi">Xem vị trí khác</a>
+</div>
+`;
 }
 
 function buildDetailCard(job) {

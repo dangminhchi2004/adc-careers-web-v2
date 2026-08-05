@@ -105,6 +105,10 @@ CALL add_column_if_missing('jobs', 'requirements_detail', 'JSON NULL');
 CALL add_column_if_missing('jobs', 'benefits', 'JSON NULL');
 CALL add_column_if_missing('jobs', 'environment_sections', 'JSON NULL');
 CALL add_column_if_missing('jobs', 'status', 'VARCHAR(20) DEFAULT ''active''');
+CALL add_column_if_missing('jobs', 'display_mode', 'VARCHAR(20) NOT NULL DEFAULT ''standard''');
+CALL add_column_if_missing('jobs', 'poster_image', 'LONGBLOB NULL');
+CALL add_column_if_missing('jobs', 'poster_mime_type', 'VARCHAR(100) NULL');
+CALL add_column_if_missing('jobs', 'poster_size', 'INT NULL');
 CALL add_index_if_missing('jobs', 'slug', 'UNIQUE KEY `slug` (`slug`)');
 
 CALL add_column_if_missing('applications', 'note', 'TEXT NULL');

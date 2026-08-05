@@ -42,6 +42,73 @@ const applicationDateTo = document.getElementById("applicationDateTo");
 const exportApplicationsBtn = document.getElementById("exportApplicationsBtn");
 const jobModal = document.getElementById("jobModal");
 const closeJobModalBtn = document.getElementById("closeJobModalBtn");
+const displayModeInput = document.getElementById("displayMode");
+const displayModeToggle = document.querySelector(".display-mode-toggle");
+const posterFileInput = document.getElementById("posterFile");
+const posterPreview = document.getElementById("posterPreview");
+const removePosterBtn = document.getElementById("removePosterBtn");
+const posterError = document.getElementById("posterError");
+
+const POSTER_ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const POSTER_MAX_BYTES = 10 * 1024 * 1024;
+let pendingPosterFile = null;
+let editingJobHasPoster = false;
+
+displayModeToggle.addEventListener("click", (event) => {
+  const button = event.target.closest(".mode-btn");
+  if (!button) return;
+  setDisplayMode(button.dataset.mode);
+});
+
+function setDisplayMode(mode) {
+  displayModeInput.value = mode;
+  displayModeToggle.querySelectorAll(".mode-btn").forEach((button) => {
+    button.classList.toggle("active", button.dataset.mode === mode);
+  });
+}
+
+posterFileInput.addEventListener("change", () => {
+  posterError.textContent = "";
+  const file = posterFileInput.files[0];
+  if (!file) return;
+
+  if (!POSTER_ALLOWED_TYPES.includes(file.type)) {
+    posterError.textContent = "Ảnh poster chỉ chấp nhận JPG, PNG hoặc WebP.";
+    posterFileInput.value = "";
+    return;
+  }
+  if (file.size > POSTER_MAX_BYTES) {
+    posterError.textContent = "Ảnh poster cần nhỏ hơn hoặc bằng 10MB.";
+    posterFileInput.value = "";
+    return;
+  }
+
+  pendingPosterFile = file;
+  const previewUrl = URL.createObjectURL(file);
+  posterPreview.innerHTML = `<img src="${previewUrl}" alt="Xem trước poster" />`;
+});
+
+removePosterBtn.addEventListener("click", async () => {
+  const jobId = document.getElementById("jobId").value;
+  if (!jobId) return;
+  const confirmed = window.confirm("Xóa ảnh poster hiện tại của vị trí này?");
+  if (!confirmed) return;
+
+  try {
+    const result = await requestJson(`${API_BASE}/api/admin/jobs/${jobId}/poster`, { method: "DELETE" });
+    if (!result.success) throw new Error(result.message || "Không thể xóa ảnh poster.");
+
+    jobs = jobs.map((item) => item.id === result.data.id ? result.data : item);
+    editingJobHasPoster = false;
+    pendingPosterFile = null;
+    posterFileInput.value = "";
+    posterPreview.innerHTML = '<span class="poster-upload-placeholder">Chưa có ảnh poster</span>';
+    removePosterBtn.hidden = true;
+    setDisplayMode("standard");
+  } catch (error) {
+    posterError.textContent = error.message || "Không thể xóa ảnh poster.";
+  }
+});
 
 document.getElementById("refreshBtn").addEventListener("click", loadDashboard);
 document.getElementById("resetJobFormBtn").addEventListener("click", () => {
@@ -60,6 +127,12 @@ document.querySelectorAll("[data-tab-target]").forEach((button) => {
   button.addEventListener("click", () => setActiveTab(button.dataset.tabTarget));
 });
 
+setActiveTab(window.location.hash.slice(1));
+
+window.addEventListener("hashchange", () => {
+  setActiveTab(window.location.hash.slice(1), { updateHash: false });
+});
+
 applicationFilters.addEventListener("input", renderApplications);
 applicationFilters.addEventListener("change", renderApplications);
 
@@ -68,6 +141,12 @@ jobForm.addEventListener("submit", async (event) => {
 
   const payload = getJobPayload();
   const jobId = document.getElementById("jobId").value;
+
+  if (payload.displayMode === "poster" && !editingJobHasPoster && !pendingPosterFile) {
+    showJobMessage("error", "Vui lòng tải ảnh poster trước khi bật chế độ Poster.");
+    return;
+  }
+
   const url = jobId ? `${API_BASE}/api/admin/jobs/${jobId}` : `${API_BASE}/api/admin/jobs`;
   const method = jobId ? "PUT" : "POST";
 
@@ -80,6 +159,17 @@ jobForm.addEventListener("submit", async (event) => {
     });
 
     if (!result.success) throw new Error(result.message || "Không thể lưu vị trí.");
+
+    if (pendingPosterFile) {
+      const posterFormData = new FormData();
+      posterFormData.append("poster", pendingPosterFile);
+      const posterResult = await requestJson(`${API_BASE}/api/admin/jobs/${result.data.id}/poster`, {
+        method: "POST",
+        body: posterFormData
+      });
+      if (!posterResult.success) throw new Error(posterResult.message || "Không thể tải lên ảnh poster.");
+      pendingPosterFile = null;
+    }
 
     showJobMessage("success", jobId ? "Đã cập nhật vị trí." : "Đã tạo vị trí mới.");
     setTimeout(() => {
@@ -170,7 +260,10 @@ function renderJobs() {
       </td>
       <td data-label="Phòng ban">${escapeHtml(job.dept)}</td>
       <td data-label="Cấp bậc">${escapeHtml(job.level)}</td>
-      <td data-label="Trạng thái"><span class="pill ${escapeAttribute(job.status)}">${escapeHtml(formatJobStatus(job.status))}</span></td>
+      <td data-label="Trạng thái">
+        <span class="pill ${escapeAttribute(job.status)}">${escapeHtml(formatJobStatus(job.status))}</span>
+        ${job.displayMode === "poster" ? '<span class="jobs-table-poster-badge">Poster</span>' : ""}
+      </td>
       <td data-label="Thao tác">
         <div class="row-actions">
           <button class="btn btn-secondary" type="button" data-action="edit-job" data-id="${job.id}">Sửa</button>
@@ -418,6 +511,20 @@ function editJob(id) {
   document.getElementById("requirementsDetail").value = arrayToLines(job.requirementsDetail);
   document.getElementById("benefits").value = benefitsToLines(job.benefits);
   document.getElementById("environmentSections").value = environmentSectionsToLines(job.environmentSections);
+
+  pendingPosterFile = null;
+  posterFileInput.value = "";
+  posterError.textContent = "";
+  editingJobHasPoster = Boolean(job.hasPoster);
+  setDisplayMode(job.displayMode || "standard");
+  if (job.hasPoster) {
+    posterPreview.innerHTML = `<img src="${API_BASE}/api/jobs/${job.id}/poster" alt="Poster vị trí" />`;
+    removePosterBtn.hidden = false;
+  } else {
+    posterPreview.innerHTML = '<span class="poster-upload-placeholder">Chưa có ảnh poster</span>';
+    removePosterBtn.hidden = true;
+  }
+
   showJobMessage("success", "Đang chỉnh sửa vị trí. Bấm Lưu để cập nhật.");
   jobModal.hidden = false;
 }
@@ -459,6 +566,7 @@ function getJobPayload() {
     urgent: document.getElementById("urgent").checked,
     color: document.getElementById("color").value,
     status: document.getElementById("status").value,
+    displayMode: displayModeInput.value,
     reqs: document.getElementById("reqs").value
       .split(/\r?\n/)
       .map((item) => item.trim())
@@ -482,6 +590,14 @@ function resetJobForm() {
   document.getElementById("quantity").value = "1";
   jobFormMessage.className = "form-message";
   jobFormMessage.textContent = "";
+
+  pendingPosterFile = null;
+  editingJobHasPoster = false;
+  posterFileInput.value = "";
+  posterError.textContent = "";
+  posterPreview.innerHTML = '<span class="poster-upload-placeholder">Chưa có ảnh poster</span>';
+  removePosterBtn.hidden = true;
+  setDisplayMode("standard");
 }
 
 function linesToArray(value) {
@@ -550,20 +666,32 @@ function showJobMessage(type, message) {
   jobFormMessage.textContent = message;
 }
 
-function setActiveTab(tabName) {
-  document.querySelectorAll("[data-tab-panel]").forEach((panel) => {
-    const isActive = panel.dataset.tabPanel === tabName;
+function setActiveTab(tabName, { updateHash = true } = {}) {
+  const panels = document.querySelectorAll("[data-tab-panel]");
+  const validTab = Array.from(panels).some((panel) => panel.dataset.tabPanel === tabName)
+    ? tabName
+    : "jobs";
+
+  panels.forEach((panel) => {
+    const isActive = panel.dataset.tabPanel === validTab;
     panel.hidden = !isActive;
     panel.classList.toggle("active", isActive);
   });
 
   document.querySelectorAll("[data-tab-target]").forEach((button) => {
-    const isActive = button.dataset.tabTarget === tabName;
+    const isActive = button.dataset.tabTarget === validTab;
     button.classList.toggle("active", isActive);
     if (button.getAttribute("role") === "tab") {
       button.setAttribute("aria-selected", String(isActive));
     }
   });
+
+  if (updateHash) {
+    const newHash = `#${validTab}`;
+    if (window.location.hash !== newHash) {
+      history.replaceState(null, "", newHash);
+    }
+  }
 }
 
 function renderApplicationFilterOptions() {

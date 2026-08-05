@@ -31,6 +31,10 @@ async function ensureSchema() {
       benefits JSON,
       environment_sections JSON,
       status VARCHAR(20) DEFAULT 'active',
+      display_mode VARCHAR(20) NOT NULL DEFAULT 'standard',
+      poster_image LONGBLOB NULL,
+      poster_mime_type VARCHAR(100) NULL,
+      poster_size INT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -121,6 +125,10 @@ async function ensureSchema() {
   await addColumnIfMissing("jobs", "requirements_detail", "JSON");
   await addColumnIfMissing("jobs", "benefits", "JSON");
   await addColumnIfMissing("jobs", "environment_sections", "JSON");
+  await addColumnIfMissing("jobs", "display_mode", "VARCHAR(20) NOT NULL DEFAULT 'standard'");
+  await addColumnIfMissing("jobs", "poster_image", "LONGBLOB NULL");
+  await addColumnIfMissing("jobs", "poster_mime_type", "VARCHAR(100) NULL");
+  await addColumnIfMissing("jobs", "poster_size", "INT NULL");
   await addColumnIfMissing("applications", "note", "TEXT");
   await addColumnIfMissing("applications", "cv_original_name", "VARCHAR(255)");
   await addColumnIfMissing("applications", "cv_file_name", "VARCHAR(255)");
