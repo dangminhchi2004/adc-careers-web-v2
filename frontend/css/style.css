@@ -1737,6 +1737,37 @@ footer>* {
   margin-top: 16px;
 }
 
+.footer-social {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 22px;
+}
+
+.footer-social-link {
+  align-items: center;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(216, 163, 41, .28);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, .78);
+  display: flex;
+  height: 38px;
+  justify-content: center;
+  transition: var(--transition);
+  width: 38px;
+}
+
+.footer-social-link svg {
+  height: 18px;
+  width: 18px;
+}
+
+.footer-social-link:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1e3c5a;
+}
+
 .modal {
   align-items: center;
   background: rgba(30, 60, 90, .72);
