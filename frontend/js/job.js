@@ -184,7 +184,7 @@
         </a>
 
         <div class="job-detail-poster-wrap">
-          <img class="job-detail-poster" src="${API_BASE}/api/jobs/${job.id}/poster" alt="${escapeHtml(job.vn || job.title)}" />
+          <img class="job-detail-poster" src="${API_BASE}/api/jobs/${job.id}/poster?v=${job.poster_size || 0}" alt="${escapeHtml(job.vn || job.title)}" />
         </div>
 
         <div class="job-detail-actions job-detail-poster-actions">
@@ -217,7 +217,7 @@
         validThrough: toIsoDate(job.deadline),
         employmentType: job.employmentType || "FULL_TIME",
         ...(job.displayMode === "poster" && job.hasPoster
-          ? { image: new URL(`${API_BASE}/api/jobs/${job.id}/poster`, window.location.origin).href }
+          ? { image: new URL(`${API_BASE}/api/jobs/${job.id}/poster?v=${job.poster_size || 0}`, window.location.origin).href }
           : {}),
         hiringOrganization: {
           "@type": "Organization",

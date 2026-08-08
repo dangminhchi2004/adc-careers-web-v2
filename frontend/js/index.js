@@ -122,7 +122,7 @@ function renderJobs() {
     const safeColor = escapeAttribute(job.color || "#2196F3");
     return `
 <div class="demo-job-card animate-on-scroll" data-job-id="${job.id}" style="--job-color:${safeColor};border-left-color:${safeColor}">
-<div class="demo-job-header" data-action="toggle-job" data-id="${job.id}">
+<div class="demo-job-header" data-action="toggle-job" data-id="${job.id}" data-href="${escapeAttribute(detailUrl)}">
 <div class="demo-job-meta">
           ${job.urgent ? `<span class="demo-urgent-badge">URGENT</span>` : ''}
 <div>
@@ -307,7 +307,7 @@ document.addEventListener("click", (event) => {
 
   const toggleBtn = event.target.closest("[data-action='toggle-job']");
   if (toggleBtn) {
-    toggleJob(Number(toggleBtn.dataset.id));
+    window.location.href = toggleBtn.dataset.href;
     return;
   }
 });
@@ -444,7 +444,7 @@ function buildPosterDetailCard(job) {
 
   return `
 <div class="detail-poster-wrap">
-  <img class="detail-poster" src="${cleanBaseUrl}/api/jobs/${job.id}/poster" alt="${escapeHtml(job.vn || job.title)}" />
+  <img class="detail-poster" src="${cleanBaseUrl}/api/jobs/${job.id}/poster?v=${job.poster_size || 0}" alt="${escapeHtml(job.vn || job.title)}" />
 </div>
 <div class="detail-actions detail-poster-actions">
   <button class="detail-primary" type="button" data-open-apply data-apply-job="${escapeAttribute(job.vn || job.title)}" data-job-id="${job.id}">Ứng tuyển ngay</button>

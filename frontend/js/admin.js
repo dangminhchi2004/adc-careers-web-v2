@@ -518,7 +518,7 @@ function editJob(id) {
   editingJobHasPoster = Boolean(job.hasPoster);
   setDisplayMode(job.displayMode || "standard");
   if (job.hasPoster) {
-    posterPreview.innerHTML = `<img src="${API_BASE}/api/jobs/${job.id}/poster" alt="Poster vị trí" />`;
+    posterPreview.innerHTML = `<img src="${API_BASE}/api/jobs/${job.id}/poster?v=${job.poster_size || 0}" alt="Poster vị trí" />`;
     removePosterBtn.hidden = false;
   } else {
     posterPreview.innerHTML = '<span class="poster-upload-placeholder">Chưa có ảnh poster</span>';
