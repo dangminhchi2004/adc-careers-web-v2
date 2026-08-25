@@ -1,6 +1,8 @@
 const { imageSize } = require("image-size");
 const Application = require("../models/applyModel");
 const Job = require("../models/jobModel");
+const Department = require("../models/departmentModel");
+const JobLevel = require("../models/jobLevelModel");
 const { buildCvViewUrl, loadCv } = require("../services/cvStorageService");
 const auditService = require("../services/auditService");
 const AuditLog = require("../models/auditModel");
@@ -269,9 +271,18 @@ async function getAuditLogs(req, res) {
 }
 
 function validateJob(job) {
-  const requiredFields = ["title", "vn", "dept", "level", "report"];
+  const isPoster = job.displayMode === "poster";
+  const requiredFields = isPoster
+    ? ["title", "vn", "dept", "level"]
+    : ["title", "vn", "dept", "level", "report"];
   const missingField = requiredFields.find((field) => !job[field] || !String(job[field]).trim());
   if (missingField) return "Vui long nhap day du thong tin vi tri.";
+
+  if (isPoster) {
+    if (!job.report || !String(job.report).trim()) job.report = "P&O";
+    const currentReqs = toItemsArray(job.reqs);
+    if (currentReqs.length === 0) job.reqs = ["Xem chi tiet tren poster"];
+  }
 
   for (const [field, max] of Object.entries(TEXT_FIELD_LIMITS)) {
     if (job[field] !== undefined && job[field] !== null && typeof job[field] !== "string") {
@@ -296,7 +307,7 @@ function validateJob(job) {
   }
 
   const reqs = toItemsArray(job.reqs);
-  if (reqs.length === 0) return "Vui long nhap it nhat mot yeu cau.";
+  if (!isPoster && reqs.length === 0) return "Vui long nhap it nhat mot yeu cau.";
 
   if (job.displayMode !== undefined && !["standard", "poster"].includes(job.displayMode)) {
     return "Che do hien thi khong hop le.";
@@ -370,6 +381,146 @@ async function deleteJobPoster(req, res) {
   }
 }
 
+// --- Department Management ---
+async function getDepartments(req, res) {
+  try {
+    const data = await Department.getAll();
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error("GET /api/admin/departments failed:", error);
+    res.status(500).json({ success: false, message: "Khong the tai danh sach phong ban." });
+  }
+}
+
+async function createDepartment(req, res) {
+  try {
+    const { name, description } = req.body || {};
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: "Ten phong ban khong duoc de trong." });
+    }
+    const existing = await Department.getByName(name.trim());
+    if (existing) {
+      return res.status(400).json({ success: false, message: "Phong ban nay da ton tai." });
+    }
+    const created = await Department.create({ name, description });
+    auditService.logAction(req, "CREATE_DEPARTMENT", "DEPARTMENT", created.id, { name: created.name });
+    res.status(201).json({ success: true, data: created });
+  } catch (error) {
+    console.error("POST /api/admin/departments failed:", error);
+    res.status(500).json({ success: false, message: "Khong the tao phong ban." });
+  }
+}
+
+async function updateDepartment(req, res) {
+  try {
+    const id = Number(req.params.id);
+    const { name, description } = req.body || {};
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: "Ten phong ban khong duoc de trong." });
+    }
+    const existing = await Department.getById(id);
+    if (!existing) {
+      return res.status(404).json({ success: false, message: "Khong tim thay phong ban." });
+    }
+    const sameName = await Department.getByName(name.trim());
+    if (sameName && sameName.id !== id) {
+      return res.status(400).json({ success: false, message: "Ten phong ban da bi trung lap." });
+    }
+    const updated = await Department.update(id, { name, description });
+    auditService.logAction(req, "UPDATE_DEPARTMENT", "DEPARTMENT", id, { name: updated.name });
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    console.error("PUT /api/admin/departments/:id failed:", error);
+    res.status(500).json({ success: false, message: "Khong the cap nhat phong ban." });
+  }
+}
+
+async function deleteDepartment(req, res) {
+  try {
+    const id = Number(req.params.id);
+    const existing = await Department.getById(id);
+    if (!existing) {
+      return res.status(404).json({ success: false, message: "Khong tim thay phong ban." });
+    }
+    await Department.delete(id);
+    auditService.logAction(req, "DELETE_DEPARTMENT", "DEPARTMENT", id, { name: existing.name });
+    res.json({ success: true, message: "Da xoa phong ban thanh cong." });
+  } catch (error) {
+    console.error("DELETE /api/admin/departments/:id failed:", error);
+    res.status(500).json({ success: false, message: "Khong the xoa phong ban." });
+  }
+}
+
+// --- Job Level Management ---
+async function getJobLevels(req, res) {
+  try {
+    const data = await JobLevel.getAll();
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error("GET /api/admin/levels failed:", error);
+    res.status(500).json({ success: false, message: "Khong the tai danh sach cap bac." });
+  }
+}
+
+async function createJobLevel(req, res) {
+  try {
+    const { name, description } = req.body || {};
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: "Ten cap bac khong duoc de trong." });
+    }
+    const existing = await JobLevel.getByName(name.trim());
+    if (existing) {
+      return res.status(400).json({ success: false, message: "Cap bac nay da ton tai." });
+    }
+    const created = await JobLevel.create({ name, description });
+    auditService.logAction(req, "CREATE_JOB_LEVEL", "JOB_LEVEL", created.id, { name: created.name });
+    res.status(201).json({ success: true, data: created });
+  } catch (error) {
+    console.error("POST /api/admin/levels failed:", error);
+    res.status(500).json({ success: false, message: "Khong the tao cap bac." });
+  }
+}
+
+async function updateJobLevel(req, res) {
+  try {
+    const id = Number(req.params.id);
+    const { name, description } = req.body || {};
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: "Ten cap bac khong duoc de trong." });
+    }
+    const existing = await JobLevel.getById(id);
+    if (!existing) {
+      return res.status(404).json({ success: false, message: "Khong tim thay cap bac." });
+    }
+    const sameName = await JobLevel.getByName(name.trim());
+    if (sameName && sameName.id !== id) {
+      return res.status(400).json({ success: false, message: "Ten cap bac da bi trung lap." });
+    }
+    const updated = await JobLevel.update(id, { name, description });
+    auditService.logAction(req, "UPDATE_JOB_LEVEL", "JOB_LEVEL", id, { name: updated.name });
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    console.error("PUT /api/admin/levels/:id failed:", error);
+    res.status(500).json({ success: false, message: "Khong the cap nhat cap bac." });
+  }
+}
+
+async function deleteJobLevel(req, res) {
+  try {
+    const id = Number(req.params.id);
+    const existing = await JobLevel.getById(id);
+    if (!existing) {
+      return res.status(404).json({ success: false, message: "Khong tim thay cap bac." });
+    }
+    await JobLevel.delete(id);
+    auditService.logAction(req, "DELETE_JOB_LEVEL", "JOB_LEVEL", id, { name: existing.name });
+    res.json({ success: true, message: "Da xoa cap bac thanh cong." });
+  } catch (error) {
+    console.error("DELETE /api/admin/levels/:id failed:", error);
+    res.status(500).json({ success: false, message: "Khong the xoa cap bac." });
+  }
+}
+
 module.exports = {
   createJob,
   deleteJob,
@@ -382,7 +533,15 @@ module.exports = {
   getJobs,
   updateApplicationStatus,
   updateJob,
-  uploadJobPoster
+  uploadJobPoster,
+  getDepartments,
+  createDepartment,
+  updateDepartment,
+  deleteDepartment,
+  getJobLevels,
+  createJobLevel,
+  updateJobLevel,
+  deleteJobLevel
 };
 
 function buildContentDisposition(fileName, mimeType) {

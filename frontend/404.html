@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 — Trang không tìm thấy | ADC Careers</title>
+  <meta name="description" content="Trang bạn tìm kiếm không tồn tại. Quay về trang chủ ADC Careers để xem các cơ hội việc làm." />
+  <meta name="robots" content="noindex, follow" />
+  <meta name="theme-color" content="#e8363a" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="assets/images/sitelogomini.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-dark: #102d66;
+      --accent: #d8a329;
+      --red: #e8363a;
+      --bg-main: #fbf7ee;
+      --text-main: #3f4656;
+      --text-heading: #243f88;
+      --text-muted: #7c7469;
+      --border: #ece1cc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      background: var(--bg-main);
+      color: var(--text-main);
+      font-family: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      max-width: 560px;
+    }
+
+    .logo-wrap {
+      margin-bottom: 2.5rem;
+    }
+
+    .logo-wrap img {
+      height: 48px;
+      opacity: .85;
+    }
+
+    .error-code {
+      font-size: clamp(6rem, 20vw, 10rem);
+      font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--red) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -4px;
+      margin-bottom: .5rem;
+    }
+
+    h1 {
+      font-size: clamp(1.25rem, 4vw, 1.75rem);
+      font-weight: 700;
+      color: var(--text-heading);
+      margin-bottom: 1rem;
+    }
+
+    p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      max-width: 420px;
+      margin-inline: auto;
+    }
+
+    .actions {
+      display: flex;
+      gap: .75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .7rem 1.5rem;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .2s ease;
+      border: 2px solid transparent;
+    }
+
+    .btn-primary {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #c42e31;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(232,54,58,.35);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text-heading);
+      border-color: var(--border);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .divider {
+      width: 48px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--red), var(--accent));
+      border-radius: 99px;
+      margin: 1.5rem auto;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: #0f1523; color: #c9cfe0; }
+      h1 { color: #d4e0ff; }
+      .btn-outline { color: #c9cfe0; border-color: #2a3550; }
+      .btn-outline:hover { border-color: var(--accent); color: #fff; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Background orbs -->
+  <div class="orb" style="width:500px;height:500px;top:-100px;right:-150px;background:radial-gradient(circle,rgba(232,54,58,.07),transparent 70%)"></div>
+  <div class="orb" style="width:400px;height:400px;bottom:-80px;left:-100px;background:radial-gradient(circle,rgba(216,163,41,.07),transparent 70%)"></div>
+
+  <div class="content">
+    <div class="logo-wrap">
+      <a href="/" aria-label="ADC Careers — Trang chủ">
+        <img src="assets/images/sitelogo.png" alt="Asia Dragon Capital" />
+      </a>
+    </div>
+
+    <div class="error-code" aria-hidden="true">404</div>
+
+    <h1>Trang không tìm thấy</h1>
+
+    <div class="divider"></div>
+
+    <p>Trang bạn đang tìm kiếm không tồn tại hoặc đã được di chuyển.
+      Hãy quay về trang chủ để xem các cơ hội việc làm tại ADC.</p>
+
+    <nav class="actions" aria-label="Điều hướng gợi ý">
+      <a href="/" class="btn btn-primary">
+        ← Về trang chủ
+      </a>
+      <a href="/#co-hoi" class="btn btn-outline">
+        Xem vị trí tuyển dụng
+      </a>
+    </nav>
+  </div>
+</body>
+
+</html>
+

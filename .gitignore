@@ -17,3 +17,5 @@ php-backend/api/uploads/cvs/*
 Thumbs.db
 .agents/
 skills-lock.json
+scratch/
+report.json

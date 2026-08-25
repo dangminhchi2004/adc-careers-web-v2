@@ -14,7 +14,15 @@ const {
   getJobs,
   updateApplicationStatus,
   updateJob,
-  uploadJobPoster
+  uploadJobPoster,
+  getDepartments,
+  createDepartment,
+  updateDepartment,
+  deleteDepartment,
+  getJobLevels,
+  createJobLevel,
+  updateJobLevel,
+  deleteJobLevel
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -76,5 +84,17 @@ router.put("/applications/:id/status", updateApplicationStatus);
 router.get("/applications/:id/cv", downloadApplicationCv);
 router.get("/applications/:id/cv-link", getApplicationCvLink);
 router.get("/audit-logs", getAuditLogs);
+
+// Departments
+router.get("/departments", getDepartments);
+router.post("/departments", createDepartment);
+router.put("/departments/:id", updateDepartment);
+router.delete("/departments/:id", deleteDepartment);
+
+// Job Levels
+router.get("/levels", getJobLevels);
+router.post("/levels", createJobLevel);
+router.put("/levels/:id", updateJobLevel);
+router.delete("/levels/:id", deleteJobLevel);
 
 module.exports = router;

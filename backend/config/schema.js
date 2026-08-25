@@ -168,6 +168,48 @@ async function ensureSchema() {
   await addColumnIfMissing("applications", "consent_policy_version", "VARCHAR(20)");
   await addColumnIfMissing("applications", "consent_ip", "VARCHAR(50)");
   await addColumnIfMissing("admins", "token_version", "INT DEFAULT 0");
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS departments (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(100) UNIQUE NOT NULL,
+      description VARCHAR(255) NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS job_levels (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(100) UNIQUE NOT NULL,
+      description VARCHAR(255) NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  const [deptRows] = await db.query("SELECT COUNT(*) AS count FROM departments");
+  if (deptRows[0].count === 0) {
+    await db.query(`
+      INSERT IGNORE INTO departments (name)
+      SELECT DISTINCT dept FROM jobs WHERE dept IS NOT NULL AND dept != ''
+    `);
+    const defaultDepts = ['Khối Vận hành', 'People & Organization', 'Kinh doanh', 'Kỹ thuật', 'Tài chính - Kế toán', 'Chuỗi Cung ứng'];
+    for (const d of defaultDepts) {
+      await db.query("INSERT IGNORE INTO departments (name) VALUES (?)", [d]);
+    }
+  }
+
+  const [levelRows] = await db.query("SELECT COUNT(*) AS count FROM job_levels");
+  if (levelRows[0].count === 0) {
+    await db.query(`
+      INSERT IGNORE INTO job_levels (name)
+      SELECT DISTINCT level FROM jobs WHERE level IS NOT NULL AND level != ''
+    `);
+    const defaultLevels = ['Senior Leadership', 'Management', 'Specialist', 'Senior', 'Staff / Entry'];
+    for (const l of defaultLevels) {
+      await db.query("INSERT IGNORE INTO job_levels (name) VALUES (?)", [l]);
+    }
+  }
 }
 
 

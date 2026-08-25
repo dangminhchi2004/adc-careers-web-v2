@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
+<body class="job-page">
   <div class="tech-bar"></div>
 
   <nav class="site-nav" aria-label="Điều hướng chính">
@@ -35,15 +35,15 @@
   <main id="top">
     <section class="section positions job-detail" data-bg-image="assets/images/bg-co-hoi.png">
       <div class="section-inner">
-        <div id="jobDetailLoading" class="job-detail-state">Đang tải thông tin vị trí...</div>
+        <div id="detailLoading" class="job-detail-state">Đang tải thông tin vị trí...</div>
 
-        <div id="jobDetailNotFound" class="job-detail-state" hidden>
+        <div id="detailNotFound" class="job-detail-state" hidden>
           Không tìm thấy vị trí này hoặc vị trí đã ngừng tuyển.
           <br />
           <a href="index.html#co-hoi">Xem tất cả vị trí đang tuyển</a>
         </div>
 
-        <article id="jobDetail" class="job-detail-card rich-job-detail" hidden></article>
+        <article id="detailCard" class="job-detail-card rich-job-detail" hidden></article>
       </div>
     </section>
   </main>
@@ -58,118 +58,133 @@
     <div class="footer-motto">Beauty · Strength · Wealth</div>
   </footer>
 
-  <div id="applyModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
-    <div class="modal-panel">
-      <div class="modal-head">
+  <div class="apply-modal" id="applyModal" role="dialog" aria-modal="true" aria-labelledby="applyModalTitle"
+    aria-hidden="true">
+    <div class="apply-modal-panel">
+      <div class="apply-modal-head">
         <div>
-          <div class="eyebrow">Application Form</div>
-          <h2 id="modalTitle">Ứng tuyển vị trí</h2>
-          <p id="modalJobName">ADC Careers</p>
+          <h2 id="applyModalTitle">Ứng tuyển vị trí</h2>
+          <p id="applyModalJob">ADC Careers</p>
         </div>
-        <button class="icon-btn" type="button" aria-label="Đóng form" onclick="closeApplyModal()">×</button>
+        <button class="apply-close" type="button" data-close-apply aria-label="Đóng form">×</button>
       </div>
-      <form id="applyForm" class="apply-form" novalidate>
-        <div class="form-grid">
-          <div class="field" data-field="fullName">
-            <label for="fullName">Họ và tên *</label>
-            <input id="fullName" name="fullName" type="text" autocomplete="name" />
-            <div class="error-text"></div>
+      <form class="apply-form" id="demoApplyForm">
+        <div class="apply-form-grid">
+          <div class="apply-field full" id="genericJobSelect" style="display: none;">
+            <label for="demoJobId">Vị trí ứng tuyển *</label>
+            <select id="demoJobId" name="jobId"></select>
           </div>
-          <div class="field" data-field="email">
-            <label for="email">Email *</label>
-            <input id="email" name="email" type="email" autocomplete="email" />
-            <div class="error-text"></div>
+          <div class="apply-field">
+            <label for="demoFullName">Họ và tên *</label>
+            <input id="demoFullName" name="fullName" type="text" autocomplete="name" required />
           </div>
-          <div class="field" data-field="phone">
-            <label for="phone">Số điện thoại *</label>
-            <input id="phone" name="phone" type="tel" autocomplete="tel" />
-            <div class="error-text"></div>
+          <div class="apply-field">
+            <label for="demoEmail">Email *</label>
+            <input id="demoEmail" name="email" type="email" autocomplete="email" required />
           </div>
-          <div class="field" data-field="expectedSalary">
-            <label for="expectedSalary">Lương kỳ vọng</label>
-            <input id="expectedSalary" name="expectedSalary" type="text" placeholder="VD: Thỏa thuận" />
-            <div class="error-text"></div>
+          <div class="apply-field">
+            <label for="demoPhone">Số điện thoại *</label>
+            <input id="demoPhone" name="phone" type="tel" autocomplete="tel" required />
           </div>
-          <div class="field full" data-field="cvFile">
-            <label id="cvFileLabel">CV đính kèm *</label>
+          <div class="apply-field">
+            <label for="demoSalary">Lương kỳ vọng</label>
+            <input id="demoSalary" name="expectedSalary" type="text" placeholder="VD: Thỏa thuận" />
+          </div>
+          <div class="apply-field full">
+            <label id="demoCvLabel">CV đính kèm *</label>
             <div class="cv-upload">
               <div class="cv-upload-control">
                 <span class="cv-upload-btn">Chọn tệp</span>
-                <input id="cvFile" name="cvFile" type="file" class="cv-upload-input" aria-labelledby="cvFileLabel" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                <input id="demoCv" name="cvFile" type="file" class="cv-upload-input" aria-labelledby="demoCvLabel"
+                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  required />
               </div>
               <span class="cv-upload-filename">Chưa chọn tệp nào</span>
             </div>
-            <div class="hint">
+            <div class="apply-hint">
               Chấp nhận PDF, DOC, DOCX. Dung lượng tối đa 5MB.
               <a class="cv-template-link" href="assets/documents/adc-mau-cv-tham-khao.docx" download>Tải mẫu CV tham khảo</a>
             </div>
             <div class="cv-format-notice">Lưu ý: Chúng tôi chỉ tiếp nhận CV được trình bày đúng theo mẫu do công ty cung cấp ở trên. Hồ sơ nộp sai định dạng sẽ bị loại.</div>
-            <div class="error-text"></div>
           </div>
-          <div class="field full" data-field="note">
-            <label for="note">Ghi chú</label>
-            <textarea id="note" name="note" placeholder="Bạn có thể chia sẻ thời gian có thể bắt đầu, portfolio hoặc thông tin bổ sung."></textarea>
-            <div class="error-text"></div>
+          <div class="apply-field full">
+            <label for="demoNote">Ghi chú</label>
+            <textarea id="demoNote" name="note"
+              placeholder="Thời gian có thể bắt đầu, portfolio hoặc thông tin bổ sung."></textarea>
           </div>
-          <div class="field full" data-field="consent">
-            <label class="consent-check" for="consentPolicy" style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;cursor:pointer;">
-              <input type="checkbox" id="consentPolicy" name="purposeCore" style="margin-top:4px;" />
-              <span>Tôi đã đọc, hiểu và đồng ý cho ADC thu thập, sử dụng và lưu trữ dữ liệu cá nhân của tôi nhằm mục đích xác minh, liên hệ và đánh giá hồ sơ ứng tuyển cho vị trí tôi đang ứng tuyển, theo <button type="button" class="policy-link" onclick="openPolicyModal()" style="background:none;border:none;color:var(--navy);text-decoration:underline;cursor:pointer;padding:0;font:inherit;font-weight:700;">Quy định Bảo mật Dữ liệu cá nhân Ứng viên</button> phiên bản 3.0. *</span>
+          <div class="apply-field full" data-field="consent">
+            <label class="consent-check" for="demoConsent"
+              style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;cursor:pointer;">
+              <input type="checkbox" id="demoConsent" name="purposeCore" style="margin-top:4px;" />
+              <span>Tôi đã đọc, hiểu và đồng ý cho ADC thu thập, sử dụng và lưu trữ dữ liệu cá nhân của tôi nhằm mục
+                đích xác minh, liên hệ và đánh giá hồ sơ ứng tuyển cho vị trí tôi đang ứng tuyển, theo <button
+                  type="button" class="policy-link" data-open-policy
+                  style="background:none;border:none;color:var(--blue);text-decoration:underline;cursor:pointer;padding:0;font:inherit;">Quy
+                  định Bảo mật Dữ liệu cá nhân Ứng viên</button> phiên bản 3.0. *</span>
             </label>
-            <label class="consent-check" for="consentTalentPool" style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;cursor:pointer;">
-              <input type="checkbox" id="consentTalentPool" name="purposeTalentPool" style="margin-top:4px;" />
-              <span>Tôi đồng ý cho ADC tiếp tục lưu trữ hồ sơ của tôi trong 12 tháng kể từ ngày nộp để xem xét cho các cơ hội tuyển dụng phù hợp khác. Nếu tôi không chọn mục này, hồ sơ của tôi sẽ được xóa sau khi kết thúc đợt tuyển dụng.</span>
+            <label class="consent-check" for="demoConsentTalentPool"
+              style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;cursor:pointer;">
+              <input type="checkbox" id="demoConsentTalentPool" name="purposeTalentPool" style="margin-top:4px;" />
+              <span>Tôi đồng ý cho ADC tiếp tục lưu trữ hồ sơ của tôi trong 12 tháng kể từ ngày nộp để xem xét cho các
+                cơ hội tuyển dụng phù hợp khác. Nếu tôi không chọn mục này, hồ sơ của tôi sẽ được xóa sau khi kết thúc
+                đợt tuyển dụng.</span>
             </label>
-            <div class="error-text"></div>
+            <div class="error-text" style="color:var(--red);font-size:0.875rem;margin-top:0.25rem;"></div>
           </div>
-          <div class="field full" data-field="captcha">
+          <div class="apply-field full" data-field="captcha">
             <div id="recaptchaContainer"></div>
-            <div class="error-text"></div>
+            <div class="error-text" style="color:var(--red);font-size:0.875rem;margin-top:0.25rem;"></div>
           </div>
         </div>
         <p class="apply-footnote" style="font-size:0.8rem;color:var(--text-muted);margin:12px 0 0;line-height:1.4;">
-          Website sử dụng Google reCAPTCHA để xác thực người dùng thật và chống gửi hồ sơ tự động. Bạn có thể rút lại sự đồng ý bất kỳ lúc nào; khi đó hồ sơ của bạn sẽ được loại khỏi quy trình tuyển dụng và bị xóa khỏi hệ thống.
+          Website sử dụng Google reCAPTCHA để xác thực người dùng thật và chống gửi hồ sơ tự động. Bạn có thể rút lại sự
+          đồng ý bất kỳ lúc nào; khi đó hồ sơ của bạn sẽ được loại khỏi quy trình tuyển dụng và bị xóa khỏi hệ thống.
         </p>
-        <div id="formMessage" class="form-message" role="status"></div>
-        <div class="form-actions">
-          <button class="btn btn-cancel" type="button" onclick="closeApplyModal()">Hủy</button>
-          <button class="btn btn-primary" type="submit">Gửi hồ sơ</button>
+        <div class="apply-form-actions">
+          <button class="apply-btn apply-cancel" type="button" data-close-apply>Hủy</button>
+          <button class="apply-btn apply-submit" type="submit">Gửi hồ sơ</button>
         </div>
       </form>
     </div>
   </div>
 
-  <div class="modal" id="policyModal" role="dialog" aria-modal="true" aria-labelledby="policyModalTitle" aria-hidden="true">
-    <div class="modal-panel policy-modal-panel">
-      <div class="modal-head">
+  <div class="apply-modal" id="policyModal" role="dialog" aria-modal="true" aria-labelledby="policyModalTitle"
+    aria-hidden="true">
+    <div class="apply-modal-panel apply-policy-panel">
+      <div class="apply-modal-head">
         <div>
-          <div class="eyebrow">ADC Careers</div>
           <h2 id="policyModalTitle">Quy Định Bảo Mật Dữ Liệu Cá Nhân Ứng Viên</h2>
         </div>
-        <button class="icon-btn" type="button" aria-label="Đóng" onclick="closePolicyModal()">×</button>
+        <button class="apply-close" type="button" data-close-policy aria-label="Đóng">×</button>
       </div>
-      <div class="policy-modal-body" id="policyModalBody">
+      <div class="apply-policy-body" id="policyModalBody">
         <div class="policy-content">
           <p class="policy-content-meta">Phiên bản 3.0 · Ngày hiệu lực ……/……/2026 · Thay thế phiên bản 2.0</p>
 
-          <p>Trang này giải thích cách Công ty Cổ phần Đầu tư Asia Dragon (ADC) thu thập, sử dụng, lưu trữ và bảo vệ dữ liệu cá nhân của bạn khi bạn nộp hồ sơ ứng tuyển qua Website tuyển dụng ADC Careers.</p>
+          <p>Trang này giải thích cách Công ty Cổ phần Đầu tư Asia Dragon (ADC) thu thập, sử dụng, lưu trữ và bảo vệ dữ
+            liệu cá nhân của bạn khi bạn nộp hồ sơ ứng tuyển qua Website tuyển dụng ADC Careers.</p>
 
           <hr style="margin:16px 0;" />
 
           <h3>Tóm tắt nhanh</h3>
           <ul>
-            <li>Chúng tôi chỉ thu thập những thông tin cần cho việc tuyển dụng: họ tên, email, số điện thoại, vị trí ứng tuyển và CV của bạn.</li>
-            <li>Chúng tôi không bán, không cho thuê, không dùng dữ liệu của bạn để quảng cáo, và không chia sẻ hồ sơ cho bất kỳ nhà tuyển dụng nào khác.</li>
-            <li>Nếu bạn không trúng tuyển, hồ sơ của bạn sẽ được xóa sau khi kết thúc đợt tuyển dụng — trừ khi bạn chủ động chọn cho chúng tôi giữ lại cho các cơ hội sau.</li>
+            <li>Chúng tôi chỉ thu thập những thông tin cần cho việc tuyển dụng: họ tên, email, số điện thoại, vị trí ứng
+              tuyển và CV của bạn.</li>
+            <li>Chúng tôi không bán, không cho thuê, không dùng dữ liệu của bạn để quảng cáo, và không chia sẻ hồ sơ cho
+              bất kỳ nhà tuyển dụng nào khác.</li>
+            <li>Nếu bạn không trúng tuyển, hồ sơ của bạn sẽ được xóa sau khi kết thúc đợt tuyển dụng — trừ khi bạn chủ
+              động chọn cho chúng tôi giữ lại cho các cơ hội sau.</li>
             <li>Bạn có thể xem, sửa, xóa dữ liệu hoặc rút lại sự đồng ý bất kỳ lúc nào bằng một email.</li>
           </ul>
 
           <hr style="margin:16px 0;" />
 
           <h3>1. Chúng tôi là ai</h3>
-          <p>Công ty Cổ phần Đầu tư Asia Dragon ("ADC", "chúng tôi") là bên kiểm soát và xử lý dữ liệu cá nhân của bạn.</p>
+          <p>Công ty Cổ phần Đầu tư Asia Dragon ("ADC", "chúng tôi") là bên kiểm soát và xử lý dữ liệu cá nhân của bạn.
+          </p>
           <p>Địa chỉ: Lô 9C, Đường số 8, Khu công nghiệp Tân Tạo, Phường Tân Tạo, Thành phố Hồ Chí Minh.</p>
-          <p>ADC đã chỉ định bộ phận, nhân sự chuyên trách bảo vệ dữ liệu cá nhân. Thông tin liên hệ của đầu mối này được nêu tại mục 16.</p>
+          <p>ADC đã chỉ định bộ phận, nhân sự chuyên trách bảo vệ dữ liệu cá nhân. Thông tin liên hệ của đầu mối này
+            được nêu tại mục 16.</p>
 
           <h3>2. Chúng tôi thu thập dữ liệu gì</h3>
           <p>Khi bạn nộp hồ sơ qua Website, chúng tôi thu thập:</p>
@@ -180,18 +195,26 @@
             <li>Vị trí ứng tuyển</li>
             <li>Mức lương kỳ vọng (nếu bạn cung cấp)</li>
             <li>Ghi chú, thông tin bổ sung do bạn tự nhập (nếu có)</li>
-            <li>Hồ sơ đính kèm (CV) định dạng PDF, DOC hoặc DOCX. CV có thể chứa thêm thông tin do bạn tự đưa vào như học vấn, kinh nghiệm làm việc, hình ảnh cá nhân. Chúng tôi lưu CV nguyên trạng và không chỉnh sửa nội dung bên trong.</li>
-            <li>Dữ liệu kỹ thuật tự động: địa chỉ IP và thời điểm nộp hồ sơ, dùng để chống thư rác và ghi nhật ký hệ thống</li>
+            <li>Hồ sơ đính kèm (CV) định dạng PDF, DOC hoặc DOCX. CV có thể chứa thêm thông tin do bạn tự đưa vào như
+              học vấn, kinh nghiệm làm việc, hình ảnh cá nhân. Chúng tôi lưu CV nguyên trạng và không chỉnh sửa nội dung
+              bên trong.</li>
+            <li>Dữ liệu kỹ thuật tự động: địa chỉ IP và thời điểm nộp hồ sơ, dùng để chống thư rác và ghi nhật ký hệ
+              thống</li>
           </ul>
           <p>Chúng tôi chỉ yêu cầu những thông tin phục vụ trực tiếp cho mục đích tuyển dụng.</p>
 
           <h3>3. Về dữ liệu nhạy cảm</h3>
-          <p>Biểu mẫu ứng tuyển của chúng tôi không yêu cầu và không thu thập các dữ liệu cá nhân nhạy cảm như: tình trạng sức khỏe; quan điểm chính trị, tôn giáo, tín ngưỡng; nguồn gốc chủng tộc, dân tộc; đời sống riêng tư; dữ liệu sinh trắc học; ảnh chụp căn cước công dân hoặc hộ chiếu; thông tin tài khoản, thẻ ngân hàng.</p>
-          <p><strong>Khuyến nghị:</strong> bạn không nên đưa những thông tin trên vào CV hoặc phần ghi chú. Nếu bạn tự cung cấp, chúng tôi lưu ý rằng đó là dữ liệu cá nhân nhạy cảm; chúng tôi chỉ xử lý trong phạm vi mục đích tuyển dụng và áp dụng phân quyền truy cập chặt chẽ hơn cho loại dữ liệu này.</p>
+          <p>Biểu mẫu ứng tuyển của chúng tôi không yêu cầu và không thu thập các dữ liệu cá nhân nhạy cảm như: tình
+            trạng sức khỏe; quan điểm chính trị, tôn giáo, tín ngưỡng; nguồn gốc chủng tộc, dân tộc; đời sống riêng tư;
+            dữ liệu sinh trắc học; ảnh chụp căn cước công dân hoặc hộ chiếu; thông tin tài khoản, thẻ ngân hàng.</p>
+          <p><strong>Khuyến nghị:</strong> bạn không nên đưa những thông tin trên vào CV hoặc phần ghi chú. Nếu bạn tự
+            cung cấp, chúng tôi lưu ý rằng đó là dữ liệu cá nhân nhạy cảm; chúng tôi chỉ xử lý trong phạm vi mục đích
+            tuyển dụng và áp dụng phân quyền truy cập chặt chẽ hơn cho loại dữ liệu này.</p>
 
           <h3>4. Chúng tôi dùng dữ liệu để làm gì</h3>
           <div style="overflow-x:auto;">
-            <table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse; margin-bottom:16px;">
+            <table border="1" cellpadding="8" cellspacing="0"
+              style="width:100%; border-collapse:collapse; margin-bottom:16px;">
               <thead>
                 <tr style="background:#f1f5f9;">
                   <th>Mục đích</th>
@@ -228,38 +251,56 @@
               </tbody>
             </table>
           </div>
-          <p>Chúng tôi <strong>không</strong> dùng dữ liệu của bạn cho quảng cáo hay tiếp thị, <strong>không</strong> mua bán hoặc cho thuê dữ liệu cá nhân, và <strong>không</strong> chia sẻ hồ sơ ứng viên cho bất kỳ nhà tuyển dụng hoặc tổ chức nào khác ngoài ADC.</p>
+          <p>Chúng tôi <strong>không</strong> dùng dữ liệu của bạn cho quảng cáo hay tiếp thị, <strong>không</strong>
+            mua bán hoặc cho thuê dữ liệu cá nhân, và <strong>không</strong> chia sẻ hồ sơ ứng viên cho bất kỳ nhà tuyển
+            dụng hoặc tổ chức nào khác ngoài ADC.</p>
 
           <h3>5. Sự đồng ý của bạn</h3>
-          <p>Trên biểu mẫu ứng tuyển, bạn đồng ý riêng cho từng mục đích. Các ô chọn không được tích sẵn, và việc bạn không phản hồi không được xem là đồng ý.</p>
-          <p>Hệ thống ghi nhận và lưu lại bằng chứng về sự đồng ý của bạn, gồm: thời điểm đồng ý, địa chỉ IP, phiên bản Quy định này tại thời điểm đó và danh sách các mục đích bạn đã đồng ý.</p>
+          <p>Trên biểu mẫu ứng tuyển, bạn đồng ý riêng cho từng mục đích. Các ô chọn không được tích sẵn, và việc bạn
+            không phản hồi không được xem là đồng ý.</p>
+          <p>Hệ thống ghi nhận và lưu lại bằng chứng về sự đồng ý của bạn, gồm: thời điểm đồng ý, địa chỉ IP, phiên bản
+            Quy định này tại thời điểm đó và danh sách các mục đích bạn đã đồng ý.</p>
           <p><strong>Rút lại sự đồng ý</strong></p>
           <p>Bạn có thể rút lại sự đồng ý bất kỳ lúc nào bằng email gửi tới địa chỉ ở mục 16.</p>
-          <p>Điều gì xảy ra sau khi bạn rút lại: hồ sơ của bạn sẽ được loại khỏi quy trình tuyển dụng đang diễn ra và bị xóa khỏi hệ thống. Chúng tôi sẽ không thể tiếp tục xem xét hoặc liên hệ mời bạn tham gia các bước tiếp theo. Việc rút lại không ảnh hưởng đến tính hợp pháp của những hoạt động xử lý đã thực hiện trước đó.</p>
+          <p>Điều gì xảy ra sau khi bạn rút lại: hồ sơ của bạn sẽ được loại khỏi quy trình tuyển dụng đang diễn ra và bị
+            xóa khỏi hệ thống. Chúng tôi sẽ không thể tiếp tục xem xét hoặc liên hệ mời bạn tham gia các bước tiếp theo.
+            Việc rút lại không ảnh hưởng đến tính hợp pháp của những hoạt động xử lý đã thực hiện trước đó.</p>
 
           <h3>6. Cookie</h3>
-          <p>Website tuyển dụng ADC chỉ dùng một cookie duy nhất, do công cụ Google reCAPTCHA đặt, để xác thực bạn là người dùng thật khi nộp hồ sơ và ngăn chặn thư rác.</p>
-          <p>Chúng tôi không dùng cookie quảng cáo, cookie theo dõi hành vi liên trang, hay công cụ phân tích lưu lượng đối với người dùng thông thường.</p>
-          <p>Bạn có thể kiểm soát hoặc xóa cookie trong cài đặt trình duyệt. Nếu trình duyệt chặn cookie hoặc mã lệnh của Google, chức năng nộp hồ sơ trực tuyến có thể không hoạt động — khi đó bạn vẫn có thể gửi hồ sơ qua email ở mục 16.</p>
+          <p>Website tuyển dụng ADC chỉ dùng một cookie duy nhất, do công cụ Google reCAPTCHA đặt, để xác thực bạn là
+            người dùng thật khi nộp hồ sơ và ngăn chặn thư rác.</p>
+          <p>Chúng tôi không dùng cookie quảng cáo, cookie theo dõi hành vi liên trang, hay công cụ phân tích lưu lượng
+            đối với người dùng thông thường.</p>
+          <p>Bạn có thể kiểm soát hoặc xóa cookie trong cài đặt trình duyệt. Nếu trình duyệt chặn cookie hoặc mã lệnh
+            của Google, chức năng nộp hồ sơ trực tuyến có thể không hoạt động — khi đó bạn vẫn có thể gửi hồ sơ qua
+            email ở mục 16.</p>
 
           <h3>7. Ai được tiếp cận dữ liệu của bạn</h3>
-          <p>Trong nội bộ, chỉ các tài khoản quản trị viên do Phòng Nhân sự cấp quyền mới truy cập được hồ sơ ứng viên.</p>
+          <p>Trong nội bộ, chỉ các tài khoản quản trị viên do Phòng Nhân sự cấp quyền mới truy cập được hồ sơ ứng viên.
+          </p>
           <p>Bên ngoài, dữ liệu được xử lý bởi các nhà cung cấp dịch vụ hoạt động thay mặt chúng tôi:</p>
           <ul>
-            <li><strong>Microsoft</strong> (SharePoint, OneDrive, Microsoft Graph API): lưu trữ hồ sơ và gửi email thông báo</li>
-            <li><strong>Google</strong> (Google Drive): lưu trữ hồ sơ; <strong>Google reCAPTCHA</strong>: xác thực chống thư rác</li>
+            <li><strong>Microsoft</strong> (SharePoint, OneDrive, Microsoft Graph API): lưu trữ hồ sơ và gửi email thông
+              báo</li>
+            <li><strong>Google</strong> (Google Drive): lưu trữ hồ sơ; <strong>Google reCAPTCHA</strong>: xác thực chống
+              thư rác</li>
           </ul>
-          <p>Chúng tôi ký với từng nhà cung cấp hợp đồng hoặc phụ lục xử lý dữ liệu cá nhân, trong đó ràng buộc rõ trách nhiệm tuân thủ pháp luật Việt Nam, biện pháp bảo mật, thời hạn xử lý, yêu cầu xóa dữ liệu và bảo đảm quyền của bạn.</p>
-          <p>Chúng tôi có thể cung cấp dữ liệu khi có yêu cầu hợp pháp bằng văn bản từ cơ quan nhà nước có thẩm quyền.</p>
+          <p>Chúng tôi ký với từng nhà cung cấp hợp đồng hoặc phụ lục xử lý dữ liệu cá nhân, trong đó ràng buộc rõ trách
+            nhiệm tuân thủ pháp luật Việt Nam, biện pháp bảo mật, thời hạn xử lý, yêu cầu xóa dữ liệu và bảo đảm quyền
+            của bạn.</p>
+          <p>Chúng tôi có thể cung cấp dữ liệu khi có yêu cầu hợp pháp bằng văn bản từ cơ quan nhà nước có thẩm quyền.
+          </p>
 
           <h3>8. Dữ liệu có được chuyển ra nước ngoài không</h3>
-          <p>Có. Vì chúng tôi dùng hạ tầng đám mây của Microsoft và Google, dữ liệu của bạn có thể được lưu trữ và xử lý tại máy chủ đặt ngoài lãnh thổ Việt Nam. Khu vực lưu trữ hiện tại: ……………………………………</p>
+          <p>Có. Vì chúng tôi dùng hạ tầng đám mây của Microsoft và Google, dữ liệu của bạn có thể được lưu trữ và xử lý
+            tại máy chủ đặt ngoài lãnh thổ Việt Nam. Khu vực lưu trữ hiện tại: ……………………………………</p>
 
 
 
           <h3>9. Chúng tôi giữ dữ liệu bao lâu</h3>
           <div style="overflow-x:auto;">
-            <table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse; margin-bottom:16px;">
+            <table border="1" cellpadding="8" cellspacing="0"
+              style="width:100%; border-collapse:collapse; margin-bottom:16px;">
               <thead>
                 <tr style="background:#f1f5f9;">
                   <th>Trường hợp</th>
@@ -270,7 +311,8 @@
               <tbody>
                 <tr>
                   <td>Bạn không trúng tuyển và <strong>không</strong> chọn cho giữ hồ sơ</td>
-                  <td>Đến khi kết thúc đợt tuyển dụng của vị trí bạn ứng tuyển, tối đa 30 ngày kể từ ngày có kết quả</td>
+                  <td>Đến khi kết thúc đợt tuyển dụng của vị trí bạn ứng tuyển, tối đa 30 ngày kể từ ngày có kết quả
+                  </td>
                   <td>Xóa toàn bộ hồ sơ khỏi hệ thống</td>
                 </tr>
                 <tr>
@@ -296,7 +338,8 @@
               </tbody>
             </table>
           </div>
-          <p>Việc xóa dữ liệu được thực hiện bằng biện pháp an toàn, ngăn chặn khôi phục trái phép. Nếu vì lý do chính đáng hoặc do pháp luật yêu cầu mà chúng tôi chưa thể xóa, chúng tôi sẽ thông báo để bạn biết.</p>
+          <p>Việc xóa dữ liệu được thực hiện bằng biện pháp an toàn, ngăn chặn khôi phục trái phép. Nếu vì lý do chính
+            đáng hoặc do pháp luật yêu cầu mà chúng tôi chưa thể xóa, chúng tôi sẽ thông báo để bạn biết.</p>
 
           <h3>10. Quyền của bạn</h3>
           <ul>
@@ -311,9 +354,11 @@
           <p>Bạn cũng có nghĩa vụ cung cấp thông tin đầy đủ, chính xác và tôn trọng dữ liệu cá nhân của người khác.</p>
 
           <h3>11. Cách thực hiện quyền và thời hạn xử lý</h3>
-          <p>Website hiện chưa có tài khoản đăng nhập để bạn tự tra cứu hoặc chỉnh sửa hồ sơ. Mọi yêu cầu xin gửi qua email ở mục 16. Chúng tôi xử lý theo thời hạn sau:</p>
+          <p>Website hiện chưa có tài khoản đăng nhập để bạn tự tra cứu hoặc chỉnh sửa hồ sơ. Mọi yêu cầu xin gửi qua
+            email ở mục 16. Chúng tôi xử lý theo thời hạn sau:</p>
           <div style="overflow-x:auto;">
-            <table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse; margin-bottom:16px;">
+            <table border="1" cellpadding="8" cellspacing="0"
+              style="width:100%; border-collapse:collapse; margin-bottom:16px;">
               <thead>
                 <tr style="background:#f1f5f9;">
                   <th>Loại yêu cầu</th>
@@ -345,18 +390,24 @@
               </tbody>
             </table>
           </div>
-          <p>Với những yêu cầu phức tạp, chúng tôi có thể gia hạn tối đa một lần và sẽ thông báo cho bạn lý do gia hạn.</p>
+          <p>Với những yêu cầu phức tạp, chúng tôi có thể gia hạn tối đa một lần và sẽ thông báo cho bạn lý do gia hạn.
+          </p>
 
           <h3>12. Ứng viên chưa đủ 16 tuổi</h3>
-          <p>Khi nộp hồ sơ, bạn xác nhận đáp ứng độ tuổi lao động tối thiểu theo Bộ luật Lao động đối với vị trí ứng tuyển.</p>
-          <p>Nếu bạn chưa đủ 16 tuổi, việc xử lý dữ liệu cá nhân của bạn cần có sự đồng ý của người đại diện theo pháp luật. Trong trường hợp này, vui lòng liên hệ trực tiếp Phòng Nhân sự theo thông tin ở mục 16 để được hướng dẫn, thay vì nộp hồ sơ trực tuyến.</p>
+          <p>Khi nộp hồ sơ, bạn xác nhận đáp ứng độ tuổi lao động tối thiểu theo Bộ luật Lao động đối với vị trí ứng
+            tuyển.</p>
+          <p>Nếu bạn chưa đủ 16 tuổi, việc xử lý dữ liệu cá nhân của bạn cần có sự đồng ý của người đại diện theo pháp
+            luật. Trong trường hợp này, vui lòng liên hệ trực tiếp Phòng Nhân sự theo thông tin ở mục 16 để được hướng
+            dẫn, thay vì nộp hồ sơ trực tuyến.</p>
 
           <h3>13. Chúng tôi bảo vệ dữ liệu thế nào</h3>
-          <p>Không có phương thức truyền tải dữ liệu nào trên Internet an toàn tuyệt đối. Chúng tôi áp dụng các biện pháp sau:</p>
+          <p>Không có phương thức truyền tải dữ liệu nào trên Internet an toàn tuyệt đối. Chúng tôi áp dụng các biện
+            pháp sau:</p>
           <ul>
             <li>Mã hóa TLS cho kết nối và mã hóa dữ liệu ở trạng thái nghỉ trên nền tảng đám mây</li>
             <li>Mật khẩu tài khoản quản trị được mã hóa một chiều; giới hạn số lần đăng nhập sai</li>
-            <li>Kiểm tra định dạng thực tế của tệp CV, không chỉ dựa vào phần mở rộng, để chặn tệp giả mạo hoặc chứa mã độc</li>
+            <li>Kiểm tra định dạng thực tế của tệp CV, không chỉ dựa vào phần mở rộng, để chặn tệp giả mạo hoặc chứa mã
+              độc</li>
             <li>Phân quyền truy cập theo nguyên tắc tối thiểu, chặt chẽ hơn với dữ liệu nhạy cảm</li>
             <li>Ghi nhật ký kiểm toán mọi thao tác truy cập, chỉnh sửa, xuất và xóa hồ sơ ứng viên</li>
             <li>Xác thực CAPTCHA khi nộp hồ sơ</li>
@@ -367,43 +418,51 @@
           <h3>14. Khi xảy ra sự cố</h3>
           <p>Nếu phát hiện sự cố lộ hoặc mất dữ liệu có thể ảnh hưởng đến quyền lợi của bạn, chúng tôi sẽ:</p>
           <ul>
-            <li>Thông báo cho Cơ quan chuyên trách bảo vệ dữ liệu cá nhân thuộc Bộ Công an chậm nhất trong 72 giờ kể từ khi phát hiện</li>
-            <li>Thông báo cho bạn về thời điểm phát hiện, loại dữ liệu bị ảnh hưởng, mức độ rủi ro, biện pháp khắc phục và đầu mối liên hệ</li>
+            <li>Thông báo cho Cơ quan chuyên trách bảo vệ dữ liệu cá nhân thuộc Bộ Công an chậm nhất trong 72 giờ kể từ
+              khi phát hiện</li>
+            <li>Thông báo cho bạn về thời điểm phát hiện, loại dữ liệu bị ảnh hưởng, mức độ rủi ro, biện pháp khắc phục
+              và đầu mối liên hệ</li>
             <li>Áp dụng ngay biện pháp ngăn chặn, khắc phục hậu quả và lưu hồ sơ sự cố</li>
           </ul>
 
           <h3>15. Cập nhật quy định này</h3>
-          <p>Chúng tôi có thể cập nhật Quy định này để phù hợp với pháp luật hiện hành. Phiên bản mới sẽ được đăng tại trang này; số phiên bản và ngày hiệu lực luôn được ghi ở đầu trang.</p>
-          <p>Nếu việc cập nhật làm phát sinh mục đích xử lý mới, chúng tôi sẽ xin lại sự đồng ý của bạn trước khi thực hiện.</p>
+          <p>Chúng tôi có thể cập nhật Quy định này để phù hợp với pháp luật hiện hành. Phiên bản mới sẽ được đăng tại
+            trang này; số phiên bản và ngày hiệu lực luôn được ghi ở đầu trang.</p>
+          <p>Nếu việc cập nhật làm phát sinh mục đích xử lý mới, chúng tôi sẽ xin lại sự đồng ý của bạn trước khi thực
+            hiện.</p>
 
           <h3>16. Liên hệ</h3>
           <p>Nếu bạn có câu hỏi về Quy định này hoặc muốn thực hiện quyền của mình, vui lòng liên hệ:</p>
           <ul>
             <li><strong>Đơn vị:</strong> Công ty Cổ phần Đầu tư Asia Dragon (ADC)</li>
             <li><strong>Địa chỉ:</strong> Lô 9C, Đường số 8, KCN Tân Tạo, Phường Tân Tạo, TP. Hồ Chí Minh</li>
-            <li><strong>Đầu mối tiếp nhận:</strong> Phòng Nhân sự (P&amp;O), phối hợp bộ phận bảo vệ dữ liệu cá nhân</li>
-            <li><strong>Email:</strong> <a href="mailto:adc.hr@asiadragoncordage.com">adc.hr@asiadragoncordage.com</a></li>
-            <li><strong>Điện thoại:</strong> 0908 022 098</li>
+            <li><strong>Đầu mối tiếp nhận:</strong> Phòng Nhân sự (P&amp;O), phối hợp bộ phận bảo vệ dữ liệu cá nhân
+            </li>
+            <li><strong>Email:</strong> <a href="mailto:tuyendung@asiadragoncordage.com">tuyendung@asiadragoncordage.com</a>
+            </li> 
+            <li><strong>Điện thoại:</strong> 0938 882 922</li>
           </ul>
-          <p>Ngoài ra, bạn có quyền khiếu nại, tố cáo tới Cơ quan chuyên trách bảo vệ dữ liệu cá nhân thuộc Bộ Công an, hoặc khởi kiện theo quy định của pháp luật.</p>
+          <p>Ngoài ra, bạn có quyền khiếu nại, tố cáo tới Cơ quan chuyên trách bảo vệ dữ liệu cá nhân thuộc Bộ Công an,
+            hoặc khởi kiện theo quy định của pháp luật.</p>
 
           <hr style="margin:16px 0;" />
 
-          <p style="font-style: italic; font-size: 0.85rem; color: var(--text-muted);">*Quy định này được xây dựng theo Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15 và Nghị định số 356/2025/NĐ-CP ngày 31/12/2025.*</p>
-          <p style="font-style: italic; font-size: 0.85rem; color: var(--text-muted);">*Phiên bản 3.0 · Hiệu lực từ ……/……/2026 · © Công ty Cổ phần Đầu tư Asia Dragon*</p>
+          <p style="font-style: italic; font-size: 0.85rem; color: var(--text-muted);">*Quy định này được xây dựng theo
+            Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15 và Nghị định số 356/2025/NĐ-CP ngày 31/12/2025.*</p>
+          <p style="font-style: italic; font-size: 0.85rem; color: var(--text-muted);">*Phiên bản 3.0 · Hiệu lực từ
+            ……/……/2026 · © Công ty Cổ phần Đầu tư Asia Dragon*</p>
         </div>
       </div>
-      <div class="policy-modal-foot">
-        <span class="policy-hint" id="policyHint">Vui lòng cuộn xuống hết nội dung để có thể tick đồng ý.</span>
-        <button class="btn btn-primary" type="button" onclick="closePolicyModal()">Đóng</button>
+      <div class="apply-policy-foot">
+        <span class="apply-policy-hint" id="policyHint">Vui lòng cuộn xuống hết nội dung để có thể tick đồng ý.</span>
+        <button class="apply-btn apply-submit" type="button" data-close-policy>Đóng</button>
       </div>
     </div>
   </div>
 
-
-  <script src="js/config.js"></script>
-  <script src="js/shared.js"></script>
+  <script src="js/config.js" defer></script>
+  <script src="js/shared.js" defer></script>
   <script id="jobPostingJsonLd" type="application/ld+json"></script>
-  <script src="js/job.js"></script>
+  <script src="js/job.js" defer></script>
 </body>
 </html>

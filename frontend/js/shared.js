@@ -204,7 +204,7 @@
     }
 
     function jobUrl(job) {
-      return job.slug ? `index.html?slug=${encodeURIComponent(job.slug)}` : `index.html?id=${encodeURIComponent(job.id)}`;
+      return job.slug ? `/jobs/${encodeURIComponent(job.slug)}` : `/job.html?id=${encodeURIComponent(job.id)}`;
     }
 
     function slugify(value) {

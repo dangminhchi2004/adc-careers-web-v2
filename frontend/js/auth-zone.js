@@ -5,11 +5,19 @@ let recaptchaWidgetId = null;
 
 // The session now lives in an httpOnly cookie, invisible to JS, so we can't
 // check "already logged in" via localStorage anymore — ask the server instead.
+// Body is hidden via inline <style> in the HTML until this check resolves,
+// preventing a flash of the login form before an immediate redirect.
 fetch(`${API_BASE}/api/auth/me`, { credentials: "include" })
   .then((res) => {
-    if (res.ok) window.location.href = "admin.html";
+    if (res.ok) {
+      window.location.href = "admin.html";
+    } else {
+      document.body.style.visibility = "visible";
+    }
   })
-  .catch(() => {});
+  .catch(() => {
+    document.body.style.visibility = "visible";
+  });
 
 function loadReCaptcha() {
   if (window.grecaptcha) return Promise.resolve();

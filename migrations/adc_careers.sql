@@ -50,7 +50,7 @@ CREATE TABLE `applications` (
   PRIMARY KEY (`id`),
   KEY `job_id` (`job_id`),
   CONSTRAINT `applications_ibfk_1` FOREIGN KEY (`job_id`) REFERENCES `jobs` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -59,7 +59,6 @@ CREATE TABLE `applications` (
 
 LOCK TABLES `applications` WRITE;
 /*!40000 ALTER TABLE `applications` DISABLE KEYS */;
-INSERT INTO `applications` VALUES (1,1,'Chí','chi123@ou.edu.vn','0379038920','100',NULL,'2026-05-25 08:53:44',NULL,'1779699224672-report-y26-w01.pdf.pdf','1779699224672-report-y26-w01.pdf.pdf','/uploads/cvs/1779699224672-report-y26-w01.pdf.pdf','application/pdf',392180,'new','local',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(2,1,'A','dangminh1906@gmail.com','0379038920','19',NULL,'2026-05-26 07:45:19','aaa','ADC-Tqqqemplate PDX.pdf','1779781516513-d9cca5c7-80ce-4b38-9c55-86be9e6d20fd-adc-tqqqemplate-pdx.pdf',NULL,'application/pdf',256786,'new','google_drive',NULL,'1vHQZ_1-lomBKScwJeiuHYiCn-EIlq4bg','https://drive.google.com/file/d/1vHQZ_1-lomBKScwJeiuHYiCn-EIlq4bg/view?usp=drivesdk',NULL,'1vHQZ_1-lomBKScwJeiuHYiCn-EIlq4bg','1pwoFhvx9ZhBl4fqAfbqi9Bx1anpsmTdK','https://drive.google.com/file/d/1vHQZ_1-lomBKScwJeiuHYiCn-EIlq4bg/view?usp=drivesdk','2026/05/1779781516513-d9cca5c7-80ce-4b38-9c55-86be9e6d20fd-adc-tqqqemplate-pdx.pdf'),(3,2,'Chí Đặng Minh','Chi.Dang@asiadragoncordage.com','+84379038920','100000',NULL,'2026-05-26 07:48:20','sjkdhckjáhdjk','ADC-Templ22ate PDX.pdf','1779781697070-3bf9ff5d-62aa-485e-89bd-4c9b2f103bb5-adc-templ22ate-pdx.pdf',NULL,'application/pdf',256801,'new','google_drive',NULL,'1rA5nc_PuOT9DSs5m0Tml84-EgqVBeoTv','https://drive.google.com/file/d/1rA5nc_PuOT9DSs5m0Tml84-EgqVBeoTv/view?usp=drivesdk',NULL,'1rA5nc_PuOT9DSs5m0Tml84-EgqVBeoTv','1pwoFhvx9ZhBl4fqAfbqi9Bx1anpsmTdK','https://drive.google.com/file/d/1rA5nc_PuOT9DSs5m0Tml84-EgqVBeoTv/view?usp=drivesdk','2026/05/1779781697070-3bf9ff5d-62aa-485e-89bd-4c9b2f103bb5-adc-templ22ate-pdx.pdf'),(4,4,'Chi Dang Minh','dangminhchi20041906@gmail.com','+84379038920','100000',NULL,'2026-05-26 08:15:11','ềvsdfv','final_file1.docx','1779783306848-bb955ea0-7d99-409c-9964-90f567589b20-final-file1.docx',NULL,'application/vnd.openxmlformats-officedocument.wordprocessingml.document',33842,'new','google_drive',NULL,'106I-BnCcFswsmbP2IPPpWFiZNISpslBn','https://docs.google.com/document/d/106I-BnCcFswsmbP2IPPpWFiZNISpslBn/edit?usp=drivesdk&ouid=107075406929562545546&rtpof=true&sd=true',NULL,'106I-BnCcFswsmbP2IPPpWFiZNISpslBn','1pwoFhvx9ZhBl4fqAfbqi9Bx1anpsmTdK','https://docs.google.com/document/d/106I-BnCcFswsmbP2IPPpWFiZNISpslBn/edit?usp=drivesdk&ouid=107075406929562545546&rtpof=true&sd=true','2026/05/1779783306848-bb955ea0-7d99-409c-9964-90f567589b20-final-file1.docx');
 /*!40000 ALTER TABLE `applications` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -176,6 +175,34 @@ LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `departments`
+--
+
+DROP TABLE IF EXISTS `departments`;
+CREATE TABLE `departments` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Table structure for table `job_levels`
+--
+
+DROP TABLE IF EXISTS `job_levels`;
+CREATE TABLE `job_levels` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping routines for database 'adc_careers'

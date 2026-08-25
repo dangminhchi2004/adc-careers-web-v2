@@ -19,7 +19,7 @@
       <nav class="admin-nav" aria-label="Điều hướng quản trị">
         <button class="nav-tab active" type="button" data-tab-target="jobs">Vị trí tuyển dụng</button>
         <button class="nav-tab" type="button" data-tab-target="applications">Hồ sơ ứng viên</button>
-        <a href="index.html">Xem trang tuyển dụng</a>
+        <button class="nav-tab" type="button" data-tab-target="categories">Phòng ban & Cấp bậc</button>
         <button id="changePasswordBtn" class="nav-tab" type="button">Đổi mật khẩu</button>
         <button id="logoutBtn" class="nav-logout" type="button">Đăng xuất</button>
       </nav>
@@ -53,6 +53,7 @@
       <div class="admin-tabs animate-slide-up" role="tablist" aria-label="Quản trị ADC Careers" style="--anim-order: 3;">
         <button class="tab-btn active" id="jobsTabBtn" type="button" role="tab" aria-selected="true" aria-controls="jobs" data-tab-target="jobs">Vị trí tuyển dụng</button>
         <button class="tab-btn" id="applicationsTabBtn" type="button" role="tab" aria-selected="false" aria-controls="applications" data-tab-target="applications">Hồ sơ ứng viên</button>
+        <button class="tab-btn" id="categoriesTabBtn" type="button" role="tab" aria-selected="false" aria-controls="categories" data-tab-target="categories">Phòng ban & Cấp bậc</button>
       </div>
 
       <section id="jobs" class="panel tab-panel active animate-slide-up" role="tabpanel" aria-labelledby="jobsTabBtn" data-tab-panel="jobs" style="--anim-order: 4;">
@@ -175,6 +176,57 @@
           </table>
         </div>
       </section>
+    
+      <section id="categories" class="panel tab-panel animate-slide-up" role="tabpanel" aria-labelledby="categoriesTabBtn" data-tab-panel="categories" style="--anim-order: 4;" hidden>
+        <div class="categories-container">
+          <!-- Department Section -->
+          <div class="category-block">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Departments</span>
+                <h2>Phòng ban</h2>
+              </div>
+              <button id="addDepartmentBtn" class="btn btn-primary" type="button">+ Thêm phòng ban</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Tên phòng ban</th>
+                    <th>Mô tả</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="departmentsTable"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Job Level Section -->
+          <div class="category-block">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Job Levels</span>
+                <h2>Cấp bậc</h2>
+              </div>
+              <button id="addJobLevelBtn" class="btn btn-primary" type="button">+ Thêm cấp bậc</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Tên cấp bậc</th>
+                    <th>Mô tả</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="jobLevelsTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -205,82 +257,43 @@
     </div>
   </div>
   <div id="jobModal" class="modal" hidden>
-    <div class="modal-content large-modal">
+    <div class="modal-content large-modal" style="position: relative;">
+      <button type="button" id="closeJobModalIconBtn" class="modal-close-icon" aria-label="Đóng">&times;</button>
       <h2>Thông tin vị trí tuyển dụng</h2>
-      <form id="jobForm" class="job-form">
+      <form id="jobForm" class="job-form mode-poster">
         <input id="jobId" type="hidden" />
         <div class="form-grid">
+          <!-- Always visible fields -->
           <label>
-            <span>Title *</span>
-            <input id="title" name="title" type="text" required placeholder="Head of Production" />
+            <span>Tên vị trí (Tiếng Anh) *</span>
+            <input id="title" name="title" type="text" required />
           </label>
           <label>
             <span>Tên tiếng Việt *</span>
-            <input id="vn" name="vn" type="text" required placeholder="Giám đốc Sản xuất" />
+            <input id="vn" name="vn" type="text" required />
           </label>
           <label>
             <span>Phòng ban *</span>
-            <input id="dept" name="dept" type="text" required placeholder="Khối Vận hành" />
+            <select id="dept" name="dept" required></select>
           </label>
           <label>
             <span>Cấp bậc *</span>
-            <input id="level" name="level" type="text" required placeholder="Senior Leadership" />
-          </label>
-          <label>
-            <span>Báo cáo cho *</span>
-            <input id="report" name="report" type="text" required placeholder="CEO" />
-          </label>
-          <label>
-            <span>Slug</span>
-            <input id="slug" name="slug" type="text" placeholder="automation-engineer" />
+            <select id="level" name="level" required></select>
           </label>
           <label>
             <span>Hình thức làm việc</span>
-            <input id="employmentType" name="employmentType" type="text" placeholder="Full-time" />
-          </label>
-          <label class="full">
-            <span>Mô tả ngắn</span>
-            <textarea id="summary" name="summary" placeholder="Mô tả ngắn hiển thị ở đầu trang chi tiết"></textarea>
-          </label>
-          <label>
-            <span>Địa điểm đầy đủ</span>
-            <input id="workLocation" name="workLocation" type="text" placeholder="KCN Tân Tạo, Bình Tân, TP.HCM" />
+            <select id="employmentType" name="employmentType">
+              <option value="Full-time">Full-time</option>
+              <option value="Part-time">Part-time</option>
+            </select>
           </label>
           <label>
-            <span>Địa điểm ngắn</span>
-            <input id="locationShort" name="locationShort" type="text" placeholder="TP.HCM" />
+            <span>Slug</span>
+            <input id="slug" name="slug" type="text" />
           </label>
           <label>
-            <span>Đãi ngộ / Lương</span>
-            <input id="salaryText" name="salaryText" type="text" placeholder="Thỏa thuận theo năng lực" />
-          </label>
-          <label>
-            <span>Hạn nhận hồ sơ</span>
+            <span>Hạn nhận hồ sơ (dd/mm/yyyy)</span>
             <input id="deadline" name="deadline" type="date" />
-          </label>
-          <label>
-            <span>Số lượng tuyển</span>
-            <input id="quantity" name="quantity" type="number" min="1" value="1" />
-          </label>
-          <label>
-            <span>Độ tuổi</span>
-            <input id="ageRange" name="ageRange" type="text" placeholder="25 - 35" />
-          </label>
-          <label>
-            <span>Giới tính</span>
-            <input id="gender" name="gender" type="text" placeholder="Nam/Nữ/Không yêu cầu" />
-          </label>
-          <label>
-            <span>Kinh nghiệm</span>
-            <input id="experienceText" name="experienceText" type="text" placeholder="3+ năm PLC / SCADA / HMI" />
-          </label>
-          <label>
-            <span>Ngành nghề</span>
-            <input id="industry" name="industry" type="text" placeholder="Kỹ thuật - Tự động hóa" />
-          </label>
-          <label>
-            <span>Ngày đăng hiển thị</span>
-            <input id="publishedAt" name="publishedAt" type="date" />
           </label>
           <label>
             <span>Màu nhận diện</span>
@@ -297,47 +310,103 @@
             <input id="urgent" name="urgent" type="checkbox" />
             <span>Đánh dấu urgent</span>
           </label>
-          <label class="full">
-            <span>Chế độ hiển thị chi tiết</span>
-            <div class="display-mode-toggle" role="group" aria-label="Chế độ hiển thị chi tiết vị trí">
-              <button type="button" class="mode-btn active" data-mode="standard">Chuẩn</button>
-              <button type="button" class="mode-btn" data-mode="poster">Poster</button>
-            </div>
-            <input id="displayMode" name="displayMode" type="hidden" value="standard" />
-          </label>
-          <label class="full">
-            <span>Ảnh poster (dọc A4, ~1240x1754px, tối đa 10MB — JPG/PNG/WebP)</span>
-            <div class="poster-upload">
-              <div class="poster-upload-preview" id="posterPreview">
-                <span class="poster-upload-placeholder">Chưa có ảnh poster</span>
+          <div class="poster-column-mode">
+            <label>
+              <span>Chế độ hiển thị</span>
+              <div class="display-mode-toggle" role="group" aria-label="Chế độ hiển thị chi tiết vị trí">
+                <button type="button" class="mode-btn active" data-mode="poster">Poster</button>
+                <button type="button" class="mode-btn" data-mode="standard">Chuẩn</button>
               </div>
-              <div class="poster-upload-controls">
-                <input id="posterFile" name="posterFile" type="file" accept="image/jpeg,image/png,image/webp" />
-                <button type="button" class="btn btn-secondary" id="removePosterBtn" hidden>Xóa poster hiện tại</button>
+              <input id="displayMode" name="displayMode" type="hidden" value="poster" />
+            </label>
+            <label>
+              <span>Ảnh poster (A4 dọc)</span>
+              <div class="poster-upload">
+                <div class="poster-upload-preview" id="posterPreview">
+                  <span class="poster-upload-placeholder">Chưa có ảnh</span>
+                </div>
+                <div class="poster-upload-controls">
+                  <input id="posterFile" name="posterFile" type="file" accept="image/jpeg,image/png,image/webp" />
+                  <button type="button" class="btn btn-secondary" id="removePosterBtn" hidden>Xóa poster</button>
+                </div>
               </div>
-            </div>
-            <div class="error-text" id="posterError" style="color:var(--danger);font-size:0.875rem;margin-top:0.25rem;"></div>
+              <div class="error-text" id="posterError" style="color:var(--danger);font-size:0.75rem;margin-top:0.2rem;"></div>
+            </label>
+          </div>
+
+          <!-- Standard-only fields (hidden when in Poster mode) -->
+          <label class="standard-only-field">
+            <span>Báo cáo cho *</span>
+            <input id="report" name="report" type="text" list="reportList" />
           </label>
-          <label class="full">
+          <label class="full standard-only-field">
+            <span>Mô tả ngắn</span>
+            <textarea id="summary" name="summary"></textarea>
+          </label>
+          <label class="standard-only-field">
+            <span>Địa điểm đầy đủ</span>
+            <input id="workLocation" name="workLocation" type="text" list="workLocationList" />
+          </label>
+          <label class="standard-only-field">
+            <span>Địa điểm ngắn</span>
+            <input id="locationShort" name="locationShort" type="text" list="locationShortList" />
+          </label>
+          <label class="standard-only-field">
+            <span>Đãi ngộ / Lương</span>
+            <input id="salaryText" name="salaryText" type="text" />
+          </label>
+          <label class="standard-only-field">
+            <span>Số lượng tuyển</span>
+            <input id="quantity" name="quantity" type="number" min="1" value="1" />
+          </label>
+          <label class="standard-only-field">
+            <span>Độ tuổi</span>
+            <input id="ageRange" name="ageRange" type="text" />
+          </label>
+          <label class="standard-only-field">
+            <span>Giới tính</span>
+            <input id="gender" name="gender" type="text" />
+          </label>
+          <label class="standard-only-field">
+            <span>Kinh nghiệm</span>
+            <input id="experienceText" name="experienceText" type="text" />
+          </label>
+          <label class="standard-only-field">
+            <span>Ngành nghề</span>
+            <input id="industry" name="industry" type="text" list="industryList" />
+          </label>
+          <label class="standard-only-field">
+            <span>Ngày đăng hiển thị</span>
+            <input id="publishedAt" name="publishedAt" type="date" />
+          </label>
+          <label class="full standard-only-field">
             <span>Yêu cầu chính *</span>
-            <textarea id="reqs" name="reqs" required placeholder="Mỗi dòng là một yêu cầu"></textarea>
+            <textarea id="reqs" name="reqs"></textarea>
           </label>
-          <label class="full">
+          <label class="full standard-only-field">
             <span>Nhiệm vụ chính</span>
-            <textarea id="responsibilities" name="responsibilities" placeholder="Mỗi dòng là một nhiệm vụ"></textarea>
+            <textarea id="responsibilities" name="responsibilities"></textarea>
           </label>
-          <label class="full">
+          <label class="full standard-only-field">
             <span>Tiêu chí / tiêu chuẩn chi tiết</span>
-            <textarea id="requirementsDetail" name="requirementsDetail" placeholder="Mỗi dòng là một tiêu chí"></textarea>
+            <textarea id="requirementsDetail" name="requirementsDetail"></textarea>
           </label>
-          <label class="full">
+          <label class="full standard-only-field">
             <span>Quyền lợi</span>
-            <textarea id="benefits" name="benefits" placeholder="Mỗi dòng: icon | nội dung. Ví dụ: * | Lương cạnh tranh"></textarea>
+            <textarea id="benefits" name="benefits"></textarea>
           </label>
-          <label class="full">
+          <label class="full standard-only-field">
             <span>Môi trường ADC</span>
-            <textarea id="environmentSections" name="environmentSections" placeholder="Mỗi dòng: Tiêu đề | Nội dung"></textarea>
+            <textarea id="environmentSections" name="environmentSections"></textarea>
           </label>
+        
+          <datalist id="deptList"></datalist>
+          <datalist id="levelList"></datalist>
+          <datalist id="reportList"></datalist>
+          <datalist id="employmentTypeList"></datalist>
+          <datalist id="workLocationList"></datalist>
+          <datalist id="locationShortList"></datalist>
+          <datalist id="industryList"></datalist>
         </div>
         <div id="jobFormMessage" class="form-message" role="status"></div>
         <div class="form-actions">
@@ -353,7 +422,10 @@
     .modal[hidden] { display: none; }
     .modal-content { background: var(--surface); border: 1px solid var(--border); backdrop-filter: blur(12px); padding: 2rem; border-radius: var(--radius); width: 100%; max-width: 440px; box-shadow: var(--shadow); }
     .modal-content.large-modal { max-width: 800px; max-height: 90vh; overflow-y: auto; }
-    .modal-content h2 { margin-top: 0; margin-bottom: 1.5rem; color: var(--heading); }
+    
+    .modal-close-icon { position: absolute; top: 20px; right: 24px; background: transparent; border: none; font-size: 28px; line-height: 1; color: var(--text-light); cursor: pointer; transition: color 0.2s; padding: 0; }
+    .modal-close-icon:hover { color: var(--danger); }
+    .modal-content h2 { margin-top: 0; margin-bottom: 1.5rem; color: var(--heading); padding-right: 30px; }
     .modal-content .form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem; }
     .job-form { border-bottom: none; padding: 0; }
 
@@ -371,7 +443,60 @@
     .jobs-table-poster-badge { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; background: linear-gradient(135deg, var(--accent), #FFE44D); color: #0b1a2e; }
   </style>
 
-  <script src="js/config.js"></script>
-  <script src="js/admin.js"></script>
+  <script src="js/config.js" defer></script>
+  <script src="js/admin.js" defer></script>
+
+  <!-- Department Modal -->
+  <div id="departmentModal" class="modal" hidden>
+    <div class="modal-content" style="position: relative;">
+      <button type="button" id="closeDepartmentModalIconBtn" class="modal-close-icon" aria-label="Đóng">&times;</button>
+      <h2 id="departmentModalTitle">Thêm phòng ban mới</h2>
+      <form id="departmentForm">
+        <input id="departmentId" type="hidden" />
+        <div class="form-grid">
+          <label class="full">
+            <span>Tên phòng ban *</span>
+            <input type="text" id="departmentName" required placeholder="Ví dụ: Khối Vận hành" />
+          </label>
+          <label class="full">
+            <span>Mô tả</span>
+            <input type="text" id="departmentDescription" placeholder="Mô tả chức năng phòng ban" />
+          </label>
+        </div>
+        <div id="departmentFormMessage" class="form-message" role="status"></div>
+        <div class="form-actions">
+          <button class="btn btn-secondary" type="button" id="closeDepartmentModalBtn">Hủy</button>
+          <button class="btn btn-primary" type="submit">Lưu phòng ban</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Job Level Modal -->
+  <div id="jobLevelModal" class="modal" hidden>
+    <div class="modal-content" style="position: relative;">
+      <button type="button" id="closeJobLevelModalIconBtn" class="modal-close-icon" aria-label="Đóng">&times;</button>
+      <h2 id="jobLevelModalTitle">Thêm cấp bậc mới</h2>
+      <form id="jobLevelForm">
+        <input id="jobLevelId" type="hidden" />
+        <div class="form-grid">
+          <label class="full">
+            <span>Tên cấp bậc *</span>
+            <input type="text" id="jobLevelName" required placeholder="Ví dụ: Specialist, Senior, Management..." />
+          </label>
+          <label class="full">
+            <span>Mô tả</span>
+            <input type="text" id="jobLevelDescription" placeholder="Mô tả cấp bậc" />
+          </label>
+        </div>
+        <div id="jobLevelFormMessage" class="form-message" role="status"></div>
+        <div class="form-actions">
+          <button class="btn btn-secondary" type="button" id="closeJobLevelModalBtn">Hủy</button>
+          <button class="btn btn-primary" type="submit">Lưu cấp bậc</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 </body>
 </html>

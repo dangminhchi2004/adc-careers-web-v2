@@ -1,0 +1,8 @@
+﻿User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /auth-zone
+Disallow: /api/
+Disallow: /uploads/
+
+Sitemap: https://adc-careers.onrender.com/sitemap.xml

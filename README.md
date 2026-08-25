@@ -1,12 +1,35 @@
-# ADC Careers
+﻿# ADC Careers
 
-Huong dan khoi chay du an sau khi clone ve may moi.
+[![CI](https://github.com/dangminhchi2004/adc-careers-web/actions/workflows/ci.yml/badge.svg)](https://github.com/dangminhchi2004/adc-careers-web/actions/workflows/ci.yml)
+[![Security Audit](https://github.com/dangminhchi2004/adc-careers-web/actions/workflows/security-audit.yml/badge.svg)](https://github.com/dangminhchi2004/adc-careers-web/actions/workflows/security-audit.yml)
 
-## 1. Yeu cau can co
+Website tuyển dụng nội bộ của **Asia Dragon Capital (ADC)**.
 
-- Node.js 22 hoac phien ban LTS gan nhat.
-- MySQL server.
-- Git.
+**Production:** https://adc-careers.onrender.com
+
+---
+
+## Tech Stack
+
+| Lớp | Công nghệ |
+|-----|-----------|
+| Backend | Node.js 22 + Express.js |
+| Frontend | Vanilla HTML/CSS/JS |
+| Database | MySQL (Aiven Cloud) |
+| Auth | JWT + httpOnly Cookie |
+| Storage | Microsoft Graph (SharePoint / mail-relay) |
+| Email | Microsoft Graph API |
+| Deploy | Render.com |
+
+---
+
+## 1. Yêu cầu cần có
+
+- Node.js 22 hoặc phiên bản LTS gần nhất
+- MySQL server (local) hoặc kết nối cloud (Aiven)
+- Git
+
+---
 
 ## 2. Clone source code
 
@@ -15,123 +38,123 @@ git clone https://github.com/dangminhchi2004/adc-careers-web.git
 cd adc-careers-web
 ```
 
-Neu dang lam viec tren branch hien tai cua du an:
+---
 
-```powershell
-git checkout feature/update-careers-website
-```
-
-## 3. Cai thu vien
+## 3. Cài thư viện
 
 ```powershell
 npm install
 ```
 
-Thu muc `node_modules/` khong duoc luu len GitHub, nen sau khi clone bat buoc phai chay lenh nay.
+---
 
-## 4. Tao file moi can thiet
+## 4. Tạo file môi trường
 
-File `.env` khong duoc luu len GitHub vi chua mat khau database, JWT secret va tai khoan admin.
-
-Tao file `.env` tu file mau:
+File `.env` không được lưu lên GitHub. Tạo từ file mẫu:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Sau do mo `.env` va dien thong tin that:
+Sau đó điền thông tin thật vào `.env`:
 
-```env
-PORT=5000
+| Biến | Mô tả |
+|------|-------|
+| `PORT` | Cổng server (mặc định 5000) |
+| `DB_HOST` | Hostname MySQL |
+| `DB_PORT` | Cổng MySQL (mặc định 3306) |
+| `DB_USER` | Username MySQL |
+| `DB_PASSWORD` | Password MySQL |
+| `DB_NAME` | Tên database |
+| `DB_SSL` | `true` nếu dùng Aiven/cloud, `false` nếu local |
+| `DB_SSL_CA` | Đường dẫn tới CA cert (Aiven: `./certs/ca.pem`) |
+| `JWT_SECRET` | Secret ngẫu nhiên 64+ chars — **KHÔNG dùng default** |
+| `ADMIN_USERNAME` | Tên đăng nhập admin |
+| `ADMIN_PASSWORD` | Mật khẩu admin mạnh (16+ chars) — **KHÔNG dùng default** |
+| `RECAPTCHA_SITE_KEY` | Google reCAPTCHA v2 site key |
+| `RECAPTCHA_SECRET_KEY` | Google reCAPTCHA v2 secret key |
+| `CV_STORAGE` | `local` / `mail_relay` / `sharepoint` / `google_drive` |
+| `MAIL_ENABLED` | `true` để gửi email thông báo |
+| `MAIL_SEND_AS` | Email gửi (phải có quyền sendMail qua Graph API) |
+| `MAIL_HR_TO` | Email nhận thông báo hồ sơ mới |
+| `MS_TENANT_ID` | Azure AD Tenant ID |
+| `MS_CLIENT_ID` | Azure AD Client ID |
+| `MS_CLIENT_SECRET` | Azure AD Client Secret |
+| `PUBLIC_BASE_URL` | URL public của app (vd: `https://adc-careers.onrender.com`) |
 
-DB_HOST=localhost
-DB_PORT=3306
-DB_SSL=false
-DB_SSL_REJECT_UNAUTHORIZED=false
-DB_USER=root
-DB_PASSWORD=your_mysql_password
-DB_NAME=adc_careers
+---
 
-JWT_SECRET=your_strong_secret
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=your_admin_password
+## 5. Tạo database
 
-CV_STORAGE=local
-```
-
-Neu deploy len Render, khong upload `.env`. Hay them cac bien moi truong trong Render Dashboard.
-
-## 5. Tao database
-
-Tao database MySQL ten `adc_careers`, sau do import file:
-
-```text
-adc_careers.sql
-```
-
-Co the import bang MySQL Workbench, phpMyAdmin, hoac command line:
-
-```powershell
-mysql -u root -p adc_careers < adc_careers.sql
-```
-
-Neu database da ton tai tren cloud, chi can dien dung thong tin ket noi vao `.env`.
-
-## 6. Chay project
+Tạo database MySQL tên `adc_careers`, sau đó import:
 
 ```powershell
+mysql -u root -p adc_careers < migrations/adc_careers.sql
+```
+
+> Schema sẽ tự động được migrate khi server khởi động lần đầu qua `ensureSchema()`.
+
+---
+
+## 6. Chạy project
+
+```powershell
+# Development (tự reload khi code thay đổi)
+npm run dev
+
+# Production
 npm start
 ```
 
-Hoac:
+Server chạy tại: `http://localhost:5000`
+
+---
+
+## 7. Các URL chính
+
+| URL | Mô tả |
+|-----|-------|
+| `http://localhost:5000/` | Trang danh sách việc làm |
+| `http://localhost:5000/jobs/:slug` | Chi tiết vị trí |
+| `http://localhost:5000/admin` | Trang quản trị |
+| `http://localhost:5000/auth-zone` | Đăng nhập admin |
+| `http://localhost:5000/health` | Health check |
+| `http://localhost:5000/api/jobs` | API danh sách jobs |
+
+---
+
+## 8. Scripts
 
 ```powershell
-npm run dev
+npm start          # Chạy server production
+npm run dev        # Dev mode với nodemon (tự reload)
+npm run lint       # Kiểm tra lỗi code với ESLint
+npm run seed       # Seed dữ liệu mẫu
+npm run reset-admin # Reset mật khẩu admin
 ```
 
-Mac dinh server chay tai:
+---
 
-```text
-http://localhost:5000
-```
+## 9. Files không có trên GitHub
 
-## 7. Cac URL can kiem tra
+| File/Thư mục | Lý do |
+|-------------|-------|
+| `.env` | Chứa credentials nhạy cảm |
+| `node_modules/` | Cài lại bằng `npm install` |
+| `backend/uploads/` | File CV upload (lưu ngoài git) |
+| `backend/logs/` | Log files runtime |
 
-```text
-http://localhost:5000/
-http://localhost:5000/htmldemo.html
-http://localhost:5000/login
-http://localhost:5000/admin
-http://localhost:5000/api/jobs
-```
+---
 
-## 8. Cac file/thu muc khong co tren GitHub
+## 10. Deploy lên Render
 
-Nhung file/thu muc sau khong duoc luu len GitHub va can tao/cau hinh lai tren may moi neu can:
+Render dùng cấu hình từ `render.yaml` (có sẵn trong repo).
 
-- `.env`
-- `node_modules/`
-- `backend/uploads/`
-- `backend/logs/`
+**Build command:** `npm install`
+**Start command:** `npm start`
 
-Day la hanh vi dung. Khong commit `.env` len GitHub.
+Cần set các biến môi trường trong **Render Dashboard** (xem bảng ở mục 4).
 
-## 9. Deploy Render
+> ⚠️ **Không upload file `.env` lên Render** — dùng Environment Variables trong Dashboard.
 
-Render dung cau hinh:
-
-```text
-Build command: npm install
-Start command: npm start
-```
-
-Can set bien moi truong tren Render Dashboard tuong ung voi `.env.example`.
-
-Sau khi deploy co the truy cap:
-
-```text
-https://adc-careers.onrender.com/
-https://adc-careers.onrender.com/htmldemo.html
-https://adc-careers.onrender.com/login
-https://adc-careers.onrender.com/admin
-```
+Production: https://adc-careers.onrender.com

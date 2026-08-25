@@ -463,7 +463,7 @@ tr:last-child td {
 
 .row-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
   justify-content: flex-end;
 }
@@ -807,4 +807,155 @@ tr:last-child td {
   animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
   animation-delay: calc(var(--anim-order, 0) * 0.08s);
+}
+
+
+.job-row .row-actions {
+  display: none !important;
+}
+.job-row.selected .row-actions {
+  display: flex !important;
+}
+.job-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.job-row.selected {
+  background-color: rgba(33, 150, 243, 0.08) !important;
+}
+
+
+/* Categories Panel Layout */
+.categories-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 900px) {
+  .categories-container {
+    grid-template-columns: 1fr;
+  }
+}
+.category-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.category-block .panel-head {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+
+/* Poster Mode field toggle */
+.job-form.mode-poster .standard-only-field {
+  display: none !important;
+}
+
+
+/* Compact Modal Layout - Zero Scroll Fit */
+.modal-content.large-modal {
+  max-width: 980px !important;
+  max-height: 94vh !important;
+  padding: 1.25rem 1.75rem !important;
+  overflow-y: auto;
+}
+
+.modal-content.large-modal h2 {
+  font-size: 1.25rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.job-form.mode-poster .form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) 280px;
+  gap: 8px 14px;
+  align-items: start;
+}
+
+.job-form.mode-poster label {
+  gap: 4px;
+}
+
+.job-form.mode-poster label span {
+  font-size: 12px;
+}
+
+.job-form.mode-poster input,
+.job-form.mode-poster select {
+  min-height: 36px !important;
+  padding: 6px 10px !important;
+  font-size: 13px !important;
+}
+
+.job-form.mode-poster .check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.job-form.mode-poster .check-row input {
+  min-height: 18px !important;
+  width: 18px !important;
+}
+
+/* Poster column (right side) */
+.job-form.mode-poster .poster-column-mode {
+  grid-column: 4;
+  grid-row: 1 / span 4;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+
+.job-form.mode-poster .poster-upload {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+}
+
+.job-form.mode-poster .poster-upload-preview {
+  width: 80px !important;
+  height: 113px !important;
+  border-radius: 6px;
+}
+
+.job-form.mode-poster .poster-upload-controls {
+  flex: 1;
+  gap: 6px;
+}
+
+.job-form.mode-poster .poster-upload-controls input {
+  font-size: 11px !important;
+  padding: 4px !important;
+  min-height: 32px !important;
+}
+
+.job-form.mode-poster .poster-upload-controls .btn {
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.modal-content.large-modal .form-actions {
+  margin-top: 0.5rem !important;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 900px) {
+  .job-form.mode-poster .form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .job-form.mode-poster .poster-column-mode {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
 }

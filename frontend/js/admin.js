@@ -6,6 +6,8 @@ const API_BASE = window.ADC_API_BASE ?? (window.location.protocol === "file:" ? 
 // requestJson(), which redirects to the login page via logout().
 
 let jobs = [];
+let departments = [];
+let jobLevels = [];
 let applications = [];
 
 const APPLICATION_STATUSES = [
@@ -65,6 +67,13 @@ function setDisplayMode(mode) {
   displayModeToggle.querySelectorAll(".mode-btn").forEach((button) => {
     button.classList.toggle("active", button.dataset.mode === mode);
   });
+  if (jobForm) {
+    jobForm.classList.toggle("mode-poster", mode === "poster");
+    const reportInput = document.getElementById("report");
+    const reqsTextarea = document.getElementById("reqs");
+    if (reportInput) reportInput.required = mode !== "poster";
+    if (reqsTextarea) reqsTextarea.required = mode !== "poster";
+  }
 }
 
 posterFileInput.addEventListener("change", () => {
@@ -104,7 +113,7 @@ removePosterBtn.addEventListener("click", async () => {
     posterFileInput.value = "";
     posterPreview.innerHTML = '<span class="poster-upload-placeholder">Chưa có ảnh poster</span>';
     removePosterBtn.hidden = true;
-    setDisplayMode("standard");
+    setDisplayMode("poster");
   } catch (error) {
     posterError.textContent = error.message || "Không thể xóa ảnh poster.";
   }
@@ -117,6 +126,12 @@ document.getElementById("resetJobFormBtn").addEventListener("click", () => {
 });
 if (closeJobModalBtn) {
   closeJobModalBtn.addEventListener("click", () => {
+    jobModal.hidden = true;
+  });
+}
+const closeJobModalIconBtn = document.getElementById("closeJobModalIconBtn");
+if (closeJobModalIconBtn) {
+  closeJobModalIconBtn.addEventListener("click", () => {
     jobModal.hidden = true;
   });
 }
@@ -184,17 +199,25 @@ jobForm.addEventListener("submit", async (event) => {
 
 async function loadDashboard() {
   try {
-    const [jobsResult, applicationsResult] = await Promise.all([
+    const [jobsResult, applicationsResult, departmentsResult, levelsResult] = await Promise.all([
       requestJson(`${API_BASE}/api/admin/jobs`),
-      requestJson(`${API_BASE}/api/admin/applications`)
+      requestJson(`${API_BASE}/api/admin/applications`),
+      requestJson(`${API_BASE}/api/admin/departments`).catch(() => ({ success: true, data: [] })),
+      requestJson(`${API_BASE}/api/admin/levels`).catch(() => ({ success: true, data: [] }))
     ]);
 
     jobs = jobsResult.data || [];
     applications = applicationsResult.data || [];
+    departments = departmentsResult.data || [];
+    jobLevels = levelsResult.data || [];
+
     renderMetrics();
     renderJobs();
+    renderDepartments();
+    renderJobLevels();
     renderApplicationFilterOptions();
     renderApplications();
+    updateDatalists();
   } catch (error) {
     const message = error instanceof TypeError
       ? "Không kết nối được backend. Hãy kiểm tra server đang chạy."
@@ -253,7 +276,7 @@ function renderJobs() {
   }
 
   jobsTable.innerHTML = jobs.map((job, index) => `
-    <tr class="animate-slide-up" style="--anim-order: ${index + 5};">
+    <tr class="animate-slide-up job-row" style="--anim-order: ${index + 5};">
       <td data-label="Vị trí">
         <div class="table-title">${escapeHtml(job.title)}</div>
         <div class="table-sub">${escapeHtml(job.vn)}</div>
@@ -267,6 +290,7 @@ function renderJobs() {
       <td data-label="Thao tác">
         <div class="row-actions">
           <button class="btn btn-secondary" type="button" data-action="edit-job" data-id="${job.id}">Sửa</button>
+          <button class="btn btn-secondary" type="button" data-action="clone-job" data-id="${job.id}">Nhân bản</button>
           <button class="btn btn-danger" type="button" data-action="delete-job" data-id="${job.id}">Xóa</button>
         </div>
       </td>
@@ -549,7 +573,7 @@ function getJobPayload() {
     vn: document.getElementById("vn").value.trim(),
     dept: document.getElementById("dept").value.trim(),
     level: document.getElementById("level").value.trim(),
-    report: document.getElementById("report").value.trim(),
+    report: document.getElementById("report").value.trim() || (displayModeInput.value === "poster" ? "P&O" : ""),
     slug: document.getElementById("slug").value.trim(),
     summary: document.getElementById("summary").value.trim(),
     employmentType: document.getElementById("employmentType").value.trim(),
@@ -588,6 +612,16 @@ function resetJobForm() {
   document.getElementById("locationShort").value = "TP.HCM";
   document.getElementById("salaryText").value = "Thỏa thuận theo năng lực";
   document.getElementById("quantity").value = "1";
+  document.getElementById("publishedAt").value = toDateInputValue(new Date().toISOString());
+  
+  document.getElementById("benefits").value = 
+`💰 | Thưởng tháng 13 & KPIs theo kết quả kinh doanh
+🏥 | Bảo hiểm sức khỏe & khám sức khỏe định kỳ
+✈️ | Du lịch & Team building hàng năm`;
+  document.getElementById("environmentSections").value = 
+`Văn hóa làm việc | Môi trường năng động, tôn trọng sự khác biệt và thúc đẩy sáng tạo.
+Phát triển nghề nghiệp | Liên tục được đào tạo nâng cao nghiệp vụ và cơ hội thăng tiến rõ ràng.`;
+  
   jobFormMessage.className = "form-message";
   jobFormMessage.textContent = "";
 
@@ -597,7 +631,7 @@ function resetJobForm() {
   posterError.textContent = "";
   posterPreview.innerHTML = '<span class="poster-upload-placeholder">Chưa có ảnh poster</span>';
   removePosterBtn.hidden = true;
-  setDisplayMode("standard");
+  setDisplayMode("poster");
 }
 
 function linesToArray(value) {
@@ -915,6 +949,8 @@ document.addEventListener("click", (e) => {
 
   if (action === "edit-job") {
     editJob(id);
+  } else if (action === "clone-job") {
+    cloneJob(id);
   } else if (action === "delete-job") {
     deleteJob(id);
   } else if (action === "download-cv") {
@@ -931,4 +967,271 @@ document.addEventListener("change", (e) => {
   updateApplicationStatus(id, target.value);
 });
 
+// --- Smart Defaults & Utilities ---
+
+function cloneJob(id) {
+  editJob(id);
+  document.getElementById("jobId").value = "";
+  document.getElementById("slug").value = "";
+  document.getElementById("deadline").value = "";
+  document.getElementById("publishedAt").value = toDateInputValue(new Date().toISOString());
+}
+
+function createSlug(str) {
+  return str.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accents
+    .replace(/[đĐ]/g, 'd')
+    .replace(/[^a-z0-9\s-]/g, "") // remove special chars
+    .trim()
+    .replace(/\s+/g, "-");
+}
+
+document.getElementById("vn").addEventListener("input", (e) => {
+  const jobId = document.getElementById("jobId").value;
+  if (!jobId) { // Only auto-generate slug for new jobs
+    document.getElementById("slug").value = createSlug(e.target.value);
+  }
+});
+
+
+
+function populateSelect(elementId, items) {
+  const select = document.getElementById(elementId);
+  if (!select) return;
+  const currentVal = select.value;
+  const uniqueItems = uniqueSorted(items.filter(Boolean));
+  select.innerHTML = uniqueItems.map(item => `<option value="${escapeAttribute(item)}">${escapeHtml(item)}</option>`).join("");
+  if (currentVal && uniqueItems.includes(currentVal)) {
+    select.value = currentVal;
+  }
+}
+
+function populateDatalist(elementId, items) {
+  const datalist = document.getElementById(elementId);
+  if (!datalist) return;
+  const uniqueItems = uniqueSorted(items.filter(Boolean));
+  datalist.innerHTML = uniqueItems.map(item => `<option value="${escapeAttribute(item)}"></option>`).join("");
+}
+
+function updateDatalists() {
+  const depts = departments.length ? departments.map(d => d.name) : jobs.map(j => j.dept).filter(Boolean);
+  const levels = jobLevels.length ? jobLevels.map(l => l.name) : jobs.map(j => j.level).filter(Boolean);
+  const reports = jobs.map(j => j.report).filter(Boolean);
+  const industries = jobs.map(j => j.industry).filter(Boolean);
+  const workLocations = jobs.map(j => j.workLocation).filter(Boolean);
+  const locationShorts = jobs.map(j => j.locationShort).filter(Boolean);
+
+  populateSelect("dept", depts);
+  populateSelect("level", levels);
+
+  populateDatalist("deptList", depts);
+  populateDatalist("levelList", levels);
+  populateDatalist("reportList", reports);
+  populateDatalist("industryList", industries);
+  populateDatalist("workLocationList", workLocations);
+  populateDatalist("locationShortList", locationShorts);
+}
+
 loadDashboard();
+
+
+document.addEventListener("click", (e) => {
+  const row = e.target.closest(".job-row");
+  if (row) {
+    document.querySelectorAll(".job-row").forEach(r => r.classList.remove("selected"));
+    row.classList.add("selected");
+  } else if (!e.target.closest(".row-actions") && !e.target.closest(".modal") && !e.target.closest("button")) {
+    document.querySelectorAll(".job-row").forEach(r => r.classList.remove("selected"));
+  }
+});
+
+
+// ========================================================
+// CATEGORIES MANAGEMENT (Departments & Job Levels)
+// ========================================================
+
+function renderDepartments() {
+  const tbody = document.getElementById("departmentsTable");
+  if (!tbody) return;
+
+  if (departments.length === 0) {
+    tbody.innerHTML = emptyRow("Chưa có phòng ban nào.", 3);
+    return;
+  }
+
+  tbody.innerHTML = departments.map((dept, index) => `
+    <tr class="animate-slide-up" style="--anim-order: ${index + 1};">
+      <td><strong>${escapeHtml(dept.name)}</strong></td>
+      <td>${escapeHtml(dept.description || "—")}</td>
+      <td>
+        <div class="row-actions" style="display:flex !important;">
+          <button class="btn btn-secondary" type="button" data-action="edit-dept" data-id="${dept.id}">Sửa</button>
+          <button class="btn btn-danger" type="button" data-action="delete-dept" data-id="${dept.id}">Xóa</button>
+        </div>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function renderJobLevels() {
+  const tbody = document.getElementById("jobLevelsTable");
+  if (!tbody) return;
+
+  if (jobLevels.length === 0) {
+    tbody.innerHTML = emptyRow("Chưa có cấp bậc nào.", 3);
+    return;
+  }
+
+  tbody.innerHTML = jobLevels.map((lvl, index) => `
+    <tr class="animate-slide-up" style="--anim-order: ${index + 1};">
+      <td><strong>${escapeHtml(lvl.name)}</strong></td>
+      <td>${escapeHtml(lvl.description || "—")}</td>
+      <td>
+        <div class="row-actions" style="display:flex !important;">
+          <button class="btn btn-secondary" type="button" data-action="edit-level" data-id="${lvl.id}">Sửa</button>
+          <button class="btn btn-danger" type="button" data-action="delete-level" data-id="${lvl.id}">Xóa</button>
+        </div>
+      </td>
+    </tr>
+  `).join("");
+}
+
+// Department Modal Handlers
+const departmentModal = document.getElementById("departmentModal");
+const departmentForm = document.getElementById("departmentForm");
+const departmentFormMessage = document.getElementById("departmentFormMessage");
+
+document.getElementById("addDepartmentBtn")?.addEventListener("click", () => {
+  document.getElementById("departmentId").value = "";
+  document.getElementById("departmentName").value = "";
+  document.getElementById("departmentDescription").value = "";
+  document.getElementById("departmentModalTitle").textContent = "Thêm phòng ban mới";
+  departmentFormMessage.textContent = "";
+  departmentFormMessage.className = "form-message";
+  departmentModal.removeAttribute("hidden");
+});
+
+document.getElementById("closeDepartmentModalBtn")?.addEventListener("click", () => {
+  departmentModal.setAttribute("hidden", "true");
+});
+document.getElementById("closeDepartmentModalIconBtn")?.addEventListener("click", () => {
+  departmentModal.setAttribute("hidden", "true");
+});
+
+departmentForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const id = document.getElementById("departmentId").value;
+  const name = document.getElementById("departmentName").value.trim();
+  const description = document.getElementById("departmentDescription").value.trim();
+
+  try {
+    const url = id ? `${API_BASE}/api/admin/departments/${id}` : `${API_BASE}/api/admin/departments`;
+    const method = id ? "PUT" : "POST";
+    const res = await requestJson(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, description })
+    });
+    if (!res.success) throw new Error(res.message || "Lỗi lưu phòng ban.");
+    departmentModal.setAttribute("hidden", "true");
+    await loadDashboard();
+  } catch (err) {
+    departmentFormMessage.textContent = err.message;
+    departmentFormMessage.className = "form-message visible error";
+  }
+});
+
+// Job Level Modal Handlers
+const jobLevelModal = document.getElementById("jobLevelModal");
+const jobLevelForm = document.getElementById("jobLevelForm");
+const jobLevelFormMessage = document.getElementById("jobLevelFormMessage");
+
+document.getElementById("addJobLevelBtn")?.addEventListener("click", () => {
+  document.getElementById("jobLevelId").value = "";
+  document.getElementById("jobLevelName").value = "";
+  document.getElementById("jobLevelDescription").value = "";
+  document.getElementById("jobLevelModalTitle").textContent = "Thêm cấp bậc mới";
+  jobLevelFormMessage.textContent = "";
+  jobLevelFormMessage.className = "form-message";
+  jobLevelModal.removeAttribute("hidden");
+});
+
+document.getElementById("closeJobLevelModalBtn")?.addEventListener("click", () => {
+  jobLevelModal.setAttribute("hidden", "true");
+});
+document.getElementById("closeJobLevelModalIconBtn")?.addEventListener("click", () => {
+  jobLevelModal.setAttribute("hidden", "true");
+});
+
+jobLevelForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const id = document.getElementById("jobLevelId").value;
+  const name = document.getElementById("jobLevelName").value.trim();
+  const description = document.getElementById("jobLevelDescription").value.trim();
+
+  try {
+    const url = id ? `${API_BASE}/api/admin/levels/${id}` : `${API_BASE}/api/admin/levels`;
+    const method = id ? "PUT" : "POST";
+    const res = await requestJson(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, description })
+    });
+    if (!res.success) throw new Error(res.message || "Lỗi lưu cấp bậc.");
+    jobLevelModal.setAttribute("hidden", "true");
+    await loadDashboard();
+  } catch (err) {
+    jobLevelFormMessage.textContent = err.message;
+    jobLevelFormMessage.className = "form-message visible error";
+  }
+});
+
+// Edit & Delete Handlers for Departments and Job Levels
+document.addEventListener("click", async (e) => {
+  const target = e.target.closest("[data-action]");
+  if (!target) return;
+  const action = target.dataset.action;
+  const id = Number(target.dataset.id);
+
+  if (action === "edit-dept") {
+    const dept = departments.find(d => d.id === id);
+    if (!dept) return;
+    document.getElementById("departmentId").value = dept.id;
+    document.getElementById("departmentName").value = dept.name;
+    document.getElementById("departmentDescription").value = dept.description || "";
+    document.getElementById("departmentModalTitle").textContent = "Chỉnh sửa phòng ban";
+    departmentFormMessage.textContent = "";
+    departmentFormMessage.className = "form-message";
+    departmentModal.removeAttribute("hidden");
+  } else if (action === "delete-dept") {
+    const dept = departments.find(d => d.id === id);
+    if (!dept || !confirm(`Bạn có chắc chắn muốn xóa phòng ban "${dept.name}"?`)) return;
+    try {
+      const res = await requestJson(`${API_BASE}/api/admin/departments/${id}`, { method: "DELETE" });
+      if (!res.success) throw new Error(res.message || "Không thể xóa phòng ban.");
+      await loadDashboard();
+    } catch (err) {
+      alert(err.message);
+    }
+  } else if (action === "edit-level") {
+    const lvl = jobLevels.find(l => l.id === id);
+    if (!lvl) return;
+    document.getElementById("jobLevelId").value = lvl.id;
+    document.getElementById("jobLevelName").value = lvl.name;
+    document.getElementById("jobLevelDescription").value = lvl.description || "";
+    document.getElementById("jobLevelModalTitle").textContent = "Chỉnh sửa cấp bậc";
+    jobLevelFormMessage.textContent = "";
+    jobLevelFormMessage.className = "form-message";
+    jobLevelModal.removeAttribute("hidden");
+  } else if (action === "delete-level") {
+    const lvl = jobLevels.find(l => l.id === id);
+    if (!lvl || !confirm(`Bạn có chắc chắn muốn xóa cấp bậc "${lvl.name}"?`)) return;
+    try {
+      const res = await requestJson(`${API_BASE}/api/admin/levels/${id}`, { method: "DELETE" });
+      if (!res.success) throw new Error(res.message || "Không thể xóa cấp bậc.");
+      await loadDashboard();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+});
