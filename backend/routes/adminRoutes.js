@@ -15,6 +15,10 @@ const {
   updateApplicationStatus,
   updateJob,
   uploadJobPoster,
+  getBlocks,
+  createBlock,
+  updateBlock,
+  deleteBlock,
   getDepartments,
   createDepartment,
   updateDepartment,
@@ -84,6 +88,12 @@ router.put("/applications/:id/status", updateApplicationStatus);
 router.get("/applications/:id/cv", downloadApplicationCv);
 router.get("/applications/:id/cv-link", getApplicationCvLink);
 router.get("/audit-logs", getAuditLogs);
+
+// Blocks (Khối)
+router.get("/blocks", getBlocks);
+router.post("/blocks", createBlock);
+router.put("/blocks/:id", updateBlock);
+router.delete("/blocks/:id", deleteBlock);
 
 // Departments
 router.get("/departments", getDepartments);

@@ -1,8 +1,10 @@
 const { imageSize } = require("image-size");
+const sharp = require("sharp");
 const Application = require("../models/applyModel");
 const Job = require("../models/jobModel");
 const Department = require("../models/departmentModel");
 const JobLevel = require("../models/jobLevelModel");
+const Block = require("../models/blockModel");
 const { buildCvViewUrl, loadCv } = require("../services/cvStorageService");
 const auditService = require("../services/auditService");
 const AuditLog = require("../models/auditModel");
@@ -354,8 +356,19 @@ async function uploadJobPoster(req, res) {
       });
     }
 
-    const safeMimeType = POSTER_SAFE_MIME_TYPES[detectedExt];
-    const updated = await Job.setPoster(job.id, posterFile.buffer, safeMimeType, posterFile.buffer.length);
+    let processedBuffer;
+    try {
+      processedBuffer = await sharp(posterFile.buffer)
+        .resize({ width: 1200, withoutEnlargement: true })
+        .webp({ quality: 80 })
+        .toBuffer();
+    } catch (e) {
+      console.error("Sharp processing failed:", e);
+      return res.status(500).json({ success: false, message: "Loi xu ly anh (sharp)." });
+    }
+
+    const safeMimeType = "image/webp";
+    const updated = await Job.setPoster(job.id, processedBuffer, safeMimeType, processedBuffer.length);
 
     auditService.logAction(req, "UPLOAD_JOB_POSTER", "JOB", job.id, { size: posterFile.buffer.length });
     res.json({ success: true, data: updated });
@@ -394,7 +407,7 @@ async function getDepartments(req, res) {
 
 async function createDepartment(req, res) {
   try {
-    const { name, description } = req.body || {};
+    const { name, description, blockId, block_id } = req.body || {};
     if (!name || !name.trim()) {
       return res.status(400).json({ success: false, message: "Ten phong ban khong duoc de trong." });
     }
@@ -402,7 +415,7 @@ async function createDepartment(req, res) {
     if (existing) {
       return res.status(400).json({ success: false, message: "Phong ban nay da ton tai." });
     }
-    const created = await Department.create({ name, description });
+    const created = await Department.create({ name, description, blockId: blockId || block_id });
     auditService.logAction(req, "CREATE_DEPARTMENT", "DEPARTMENT", created.id, { name: created.name });
     res.status(201).json({ success: true, data: created });
   } catch (error) {
@@ -414,7 +427,7 @@ async function createDepartment(req, res) {
 async function updateDepartment(req, res) {
   try {
     const id = Number(req.params.id);
-    const { name, description } = req.body || {};
+    const { name, description, blockId, block_id } = req.body || {};
     if (!name || !name.trim()) {
       return res.status(400).json({ success: false, message: "Ten phong ban khong duoc de trong." });
     }
@@ -426,7 +439,7 @@ async function updateDepartment(req, res) {
     if (sameName && sameName.id !== id) {
       return res.status(400).json({ success: false, message: "Ten phong ban da bi trung lap." });
     }
-    const updated = await Department.update(id, { name, description });
+    const updated = await Department.update(id, { name, description, blockId: blockId || block_id });
     auditService.logAction(req, "UPDATE_DEPARTMENT", "DEPARTMENT", id, { name: updated.name });
     res.json({ success: true, data: updated });
   } catch (error) {
@@ -521,7 +534,85 @@ async function deleteJobLevel(req, res) {
   }
 }
 
+
+// ========================================================
+// BLOCKS (KHỐI) CRUD HANDLERS
+// ========================================================
+
+async function getBlocks(req, res) {
+  try {
+    const blocks = await Block.getAll();
+    res.json({ success: true, data: blocks });
+  } catch (error) {
+    console.error("GET /api/admin/blocks failed:", error);
+    res.status(500).json({ success: false, message: "Khong the tai danh sach khoi." });
+  }
+}
+
+async function createBlock(req, res) {
+  try {
+    const { name, description } = req.body || {};
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: "Ten khoi khong duoc de trong." });
+    }
+    const existing = await Block.getByName(name.trim());
+    if (existing) {
+      return res.status(400).json({ success: false, message: "Ten khoi da ton tai." });
+    }
+    const created = await Block.create({ name, description });
+    auditService.logAction(req, "CREATE_BLOCK", "BLOCK", created.id, { name: created.name });
+    res.status(201).json({ success: true, data: created });
+  } catch (error) {
+    console.error("POST /api/admin/blocks failed:", error);
+    res.status(500).json({ success: false, message: "Khong the tao khoi." });
+  }
+}
+
+async function updateBlock(req, res) {
+  try {
+    const id = Number(req.params.id);
+    const { name, description } = req.body || {};
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: "Ten khoi khong duoc de trong." });
+    }
+    const existing = await Block.getById(id);
+    if (!existing) {
+      return res.status(404).json({ success: false, message: "Khong tim thay khoi." });
+    }
+    const sameName = await Block.getByName(name.trim());
+    if (sameName && sameName.id !== id) {
+      return res.status(400).json({ success: false, message: "Ten khoi da bi trung lap." });
+    }
+    const updated = await Block.update(id, { name, description });
+    auditService.logAction(req, "UPDATE_BLOCK", "BLOCK", id, { name: updated.name });
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    console.error("PUT /api/admin/blocks/:id failed:", error);
+    res.status(500).json({ success: false, message: "Khong the cap nhat khoi." });
+  }
+}
+
+async function deleteBlock(req, res) {
+  try {
+    const id = Number(req.params.id);
+    const existing = await Block.getById(id);
+    if (!existing) {
+      return res.status(404).json({ success: false, message: "Khong tim thay khoi." });
+    }
+    await Block.delete(id);
+    auditService.logAction(req, "DELETE_BLOCK", "BLOCK", id, { name: existing.name });
+    res.json({ success: true, message: "Da xoa khoi thanh cong." });
+  } catch (error) {
+    console.error("DELETE /api/admin/blocks/:id failed:", error);
+    res.status(500).json({ success: false, message: "Khong the xoa khoi." });
+  }
+}
+
 module.exports = {
+  getBlocks,
+  createBlock,
+  updateBlock,
+  deleteBlock,
   createJob,
   deleteJob,
   deleteJobPoster,

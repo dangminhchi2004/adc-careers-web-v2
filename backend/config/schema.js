@@ -145,6 +145,7 @@ async function ensureSchema() {
   await addColumnIfMissing("applications", "cv_external_url", "VARCHAR(1000)");
   await addColumnIfMissing("applications", "cv_storage_path", "VARCHAR(1000)");
   await addColumnIfMissing("applications", "status", "VARCHAR(40) DEFAULT 'new'");
+
   await db.query(`
     CREATE TABLE IF NOT EXISTS consent_logs (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -169,6 +170,17 @@ async function ensureSchema() {
   await addColumnIfMissing("applications", "consent_ip", "VARCHAR(50)");
   await addColumnIfMissing("admins", "token_version", "INT DEFAULT 0");
 
+  // BLOCKS (KHỐI) TABLE
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS blocks (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(100) UNIQUE NOT NULL,
+      description VARCHAR(255) NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // DEPARTMENTS TABLE
   await db.query(`
     CREATE TABLE IF NOT EXISTS departments (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -178,6 +190,9 @@ async function ensureSchema() {
     )
   `);
 
+  await addColumnIfMissing("departments", "block_id", "INT NULL");
+
+  // JOB LEVELS TABLE
   await db.query(`
     CREATE TABLE IF NOT EXISTS job_levels (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -187,6 +202,21 @@ async function ensureSchema() {
     )
   `);
 
+  // Seed default blocks
+  const [blockRows] = await db.query("SELECT COUNT(*) AS count FROM blocks");
+  if (blockRows[0].count === 0) {
+    const defaultBlocks = [
+      { name: 'Khối Sản xuất & Vận hành', description: 'Các phòng ban vận hành nhà máy và quản lý sản xuất' },
+      { name: 'Khối Kinh doanh & Tiếp thị', description: 'Phát triển thị trường, bán hàng trong nước và xuất khẩu' },
+      { name: 'Khối Kỹ thuật & Công nghệ', description: 'Nghiên cứu phát triển, cơ điện và tự động hóa' },
+      { name: 'Khối Hỗ trợ Doanh nghiệp', description: 'Nhân sự (P&O), Tài chính kế toán, Chuỗi cung ứng' }
+    ];
+    for (const b of defaultBlocks) {
+      await db.query("INSERT IGNORE INTO blocks (name, description) VALUES (?, ?)", [b.name, b.description]);
+    }
+  }
+
+  // Seed default departments
   const [deptRows] = await db.query("SELECT COUNT(*) AS count FROM departments");
   if (deptRows[0].count === 0) {
     await db.query(`
@@ -199,6 +229,7 @@ async function ensureSchema() {
     }
   }
 
+  // Seed default job levels
   const [levelRows] = await db.query("SELECT COUNT(*) AS count FROM job_levels");
   if (levelRows[0].count === 0) {
     await db.query(`
@@ -211,7 +242,6 @@ async function ensureSchema() {
     }
   }
 }
-
 
 async function addColumnIfMissing(tableName, columnName, definition) {
   const [rows] = await db.query(

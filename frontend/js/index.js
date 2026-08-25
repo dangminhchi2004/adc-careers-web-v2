@@ -1,4 +1,7 @@
 let positions = [];
+let blocksData = [];
+let departmentsData = [];
+let selectedBlock = "all";
 let selectedDept = "all";
 let expandedJob = null;
 let currentApplyJob = "ADC Careers";
@@ -65,6 +68,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadPositions() {
   positions = await fetchJobs(); // from shared.js
+  try {
+    const metaRes = await fetch(`${API_BASE}/api/jobs/metadata`);
+    const metaJson = await metaRes.json();
+    if (metaJson.success) {
+      blocksData = metaJson.data.blocks || [];
+      departmentsData = metaJson.data.departments || [];
+    }
+  } catch(e) {
+    console.error("Failed to fetch metadata", e);
+  }
   renderFilters();
   renderJobs();
 }
@@ -80,26 +93,117 @@ function departments() {
 function renderFilters() {
   const bar = document.getElementById("filterBar");
   if (!bar) return;
-  bar.innerHTML = departments().map((d, i) => {
-    const label = d === "all" ? "Tất cả" : d;
-    const color = d === "all" ? "#FFD700" : RAINBOW[(i - 1) % 7];
+
+  const activeDepts = new Set(activePositions().map(job => job.dept));
+
+  // 1. Render Blocks Row
+  const blocksRow = document.createElement("div");
+  blocksRow.style.display = "flex";
+  blocksRow.style.flexWrap = "wrap";
+  blocksRow.style.gap = "0.5rem";
+  blocksRow.style.justifyContent = "center";
+  blocksRow.style.marginBottom = "1rem";
+  blocksRow.style.width = "100%";
+  
+  const blockBtns = [{id: "all", name: "Tất cả Khối"}, ...blocksData].map((b, i) => {
+    const isActive = selectedBlock === String(b.id);
+    const color = b.id === "all" ? "#FFD700" : RAINBOW[(i - 1) % 7];
+    return `<button class="demo-filter-btn${isActive ? ' active' : ''}" data-block="${escapeAttribute(String(b.id))}" data-action="filter-block" style="--filter-color:${color};--filter-color-bg:${color}1a">${escapeHtml(b.name)}</button>`;
+  }).join("");
+  blocksRow.innerHTML = blockBtns;
+
+  // 2. Render Departments Row
+  const deptsRow = document.createElement("div");
+  deptsRow.style.display = "flex";
+  deptsRow.style.flexWrap = "wrap";
+  deptsRow.style.gap = "0.5rem";
+  deptsRow.style.justifyContent = "center";
+  deptsRow.style.width = "100%";
+  
+  let validDepts = [];
+  if (selectedBlock === "all") {
+    validDepts = ["all", ...new Set(activePositions().map(job => job.dept))];
+  } else {
+    const blockDepts = departmentsData.filter(d => String(d.block_id) === selectedBlock).map(d => d.name);
+    validDepts = ["all", ...blockDepts.filter(d => activeDepts.has(d))];
+  }
+  
+  const deptBtns = validDepts.map((d, i) => {
+    const label = d === "all" ? "Tất cả Phòng ban" : d;
+    const color = d === "all" ? "#ccc" : "#2196F3"; 
     const isActive = selectedDept === d;
     return `<button class="demo-filter-btn${isActive ? ' active' : ''}" data-dept="${escapeAttribute(d)}" data-action="filter-dept" style="--filter-color:${color};--filter-color-bg:${color}1a">${escapeHtml(label)}</button>`;
   }).join("");
+  deptsRow.innerHTML = deptBtns;
+
+  bar.innerHTML = "";
+  bar.appendChild(blocksRow);
+  bar.appendChild(deptsRow);
+
   setTimeout(() => { if (window.initScrollAnimations) window.initScrollAnimations(); }, 50);
 }
 
+const JOBS_PER_PAGE = 10;
+let currentPage = 1;
+
+function renderPagination(totalPages) {
+  const paginationWrap = document.getElementById("paginationWrap");
+  if (!paginationWrap) return;
+
+  if (totalPages <= 1) {
+    paginationWrap.innerHTML = "";
+    return;
+  }
+
+  let html = `<div class="demo-pagination">`;
+
+  // Prev button
+  html += `<button class="pagination-btn pagination-prev${currentPage === 1 ? ' disabled' : ''}" type="button" ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}" aria-label="Trang trước">←</button>`;
+
+  // Page numbers
+  html += `<div class="pagination-pages">`;
+  for (let i = 1; i <= totalPages; i++) {
+    const isActive = i === currentPage;
+    html += `<button class="pagination-page-btn${isActive ? ' active' : ''}" type="button" data-page="${i}">${i}</button>`;
+  }
+  html += `</div>`;
+
+  // Next button
+  html += `<button class="pagination-btn pagination-next${currentPage === totalPages ? ' disabled' : ''}" type="button" ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}" aria-label="Trang sau">→</button>`;
+
+  html += `</div>`;
+  paginationWrap.innerHTML = html;
+}
+
 function renderJobs() {
-  const filtered = selectedDept === "all" ? activePositions() : activePositions().filter(p => p.dept === selectedDept);
+  let filtered = activePositions();
+  
+  if (selectedBlock !== "all") {
+    const blockDepts = new Set(departmentsData.filter(d => String(d.block_id) === selectedBlock).map(d => d.name));
+    filtered = filtered.filter(p => blockDepts.has(p.dept));
+  }
+  
+  if (selectedDept !== "all") {
+    filtered = filtered.filter(p => p.dept === selectedDept);
+  }
   const list = document.getElementById("jobList");
+  const paginationWrap = document.getElementById("paginationWrap");
   if (!list) return;
 
   if (!filtered.length) {
     list.innerHTML = `<div class="demo-jobs-state">Chưa có vị trí phù hợp với bộ lọc hiện tại.</div>`;
+    if (paginationWrap) paginationWrap.innerHTML = "";
     return;
   }
 
-  list.innerHTML = filtered.map(job => {
+  const totalPages = Math.ceil(filtered.length / JOBS_PER_PAGE);
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+
+  const startIndex = (currentPage - 1) * JOBS_PER_PAGE;
+  const pageJobs = filtered.slice(startIndex, startIndex + JOBS_PER_PAGE);
+
+  list.innerHTML = pageJobs.map(job => {
     const isOpen = expandedJob === job.id;
     const detailUrl = jobUrl(job); // from shared.js
     const safeColor = escapeAttribute(job.color || "#2196F3");
@@ -142,13 +246,25 @@ function renderJobs() {
 </div>`;
   }).join("");
 
+  renderPagination(totalPages);
+
   setTimeout(() => {
     if (window.initScrollAnimations) window.initScrollAnimations();
   }, 50);
 }
 
+window.setBlock = function (block) {
+  selectedBlock = block;
+  selectedDept = "all"; // Reset department when changing block
+  currentPage = 1;
+  expandedJob = null;
+  renderFilters();
+  renderJobs();
+};
+
 window.setDept = function (dept) {
   selectedDept = dept;
+  currentPage = 1;
   expandedJob = null;
   renderFilters();
   renderJobs();
@@ -282,6 +398,12 @@ document.addEventListener("click", (event) => {
   const policyModal = document.getElementById("policyModal");
   if (event.target === policyModal) closePolicyModal();
 
+  const filterBlockBtn = event.target.closest("[data-action='filter-block']");
+  if (filterBlockBtn) {
+    setBlock(filterBlockBtn.dataset.block);
+    return;
+  }
+
   const filterBtn = event.target.closest("[data-action='filter-dept']");
   if (filterBtn) {
     setDept(filterBtn.dataset.dept);
@@ -403,4 +525,21 @@ window.initScrollAnimations = function () {
 
 document.addEventListener("DOMContentLoaded", () => {
   if (window.initScrollAnimations) window.initScrollAnimations();
+});
+
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-page]");
+  if (!btn || btn.disabled || btn.classList.contains("disabled")) return;
+  const targetPage = Number(btn.dataset.page);
+  if (!targetPage || targetPage === currentPage) return;
+
+  currentPage = targetPage;
+  expandedJob = null;
+  renderJobs();
+
+  const section = document.getElementById("co-hoi");
+  if (section) {
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 });

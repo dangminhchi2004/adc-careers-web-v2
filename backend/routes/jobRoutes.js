@@ -1,5 +1,5 @@
 const express = require("express");
-const { getActiveJobs, getJobPoster } = require("../controllers/jobController");
+const { getActiveJobs, getJobPoster, getJobMetadata } = require("../controllers/jobController");
 
 const router = express.Router();
 
@@ -11,6 +11,7 @@ router.param("id", (req, res, next, value) => {
 });
 
 router.get("/", getActiveJobs);
+router.get("/metadata", getJobMetadata);
 router.get("/:id/poster", getJobPoster);
 
 module.exports = router;

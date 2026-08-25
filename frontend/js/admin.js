@@ -6,6 +6,7 @@ const API_BASE = window.ADC_API_BASE ?? (window.location.protocol === "file:" ? 
 // requestJson(), which redirects to the login page via logout().
 
 let jobs = [];
+let blocks = [];
 let departments = [];
 let jobLevels = [];
 let applications = [];
@@ -199,20 +200,24 @@ jobForm.addEventListener("submit", async (event) => {
 
 async function loadDashboard() {
   try {
-    const [jobsResult, applicationsResult, departmentsResult, levelsResult] = await Promise.all([
+    const [jobsResult, applicationsResult, blocksResult, departmentsResult, levelsResult] = await Promise.all([
       requestJson(`${API_BASE}/api/admin/jobs`),
       requestJson(`${API_BASE}/api/admin/applications`),
+      requestJson(`${API_BASE}/api/admin/blocks`).catch(() => ({ success: true, data: [] })),
       requestJson(`${API_BASE}/api/admin/departments`).catch(() => ({ success: true, data: [] })),
       requestJson(`${API_BASE}/api/admin/levels`).catch(() => ({ success: true, data: [] }))
     ]);
 
     jobs = jobsResult.data || [];
     applications = applicationsResult.data || [];
+    blocks = blocksResult.data || [];
     departments = departmentsResult.data || [];
     jobLevels = levelsResult.data || [];
 
     renderMetrics();
     renderJobs();
+    renderBlocks();
+    renderDepartmentFilterOptions();
     renderDepartments();
     renderJobLevels();
     renderApplicationFilterOptions();
@@ -511,6 +516,18 @@ function editJob(id) {
   document.getElementById("jobId").value = job.id;
   document.getElementById("title").value = job.title || "";
   document.getElementById("vn").value = job.vn || "";
+  
+  const blockFilter = document.getElementById("blockFilter");
+  if (blockFilter && job.dept) {
+    const deptObj = departments.find(d => d.name === job.dept);
+    if (deptObj && deptObj.block_id) {
+      blockFilter.value = deptObj.block_id;
+    } else {
+      blockFilter.value = "";
+    }
+    updateDeptDropdown(blockFilter.value);
+  }
+  
   document.getElementById("dept").value = job.dept || "";
   document.getElementById("level").value = job.level || "";
   document.getElementById("report").value = job.report || "";
@@ -542,7 +559,7 @@ function editJob(id) {
   editingJobHasPoster = Boolean(job.hasPoster);
   setDisplayMode(job.displayMode || "standard");
   if (job.hasPoster) {
-    posterPreview.innerHTML = `<img src="${API_BASE}/api/jobs/${job.id}/poster?v=${job.poster_size || 0}" alt="Poster vị trí" />`;
+    posterPreview.innerHTML = `<img loading="lazy" src="${API_BASE}/api/jobs/${job.id}/poster?v=${job.poster_size || 0}" alt="Poster vị trí" />`;
     removePosterBtn.hidden = false;
   } else {
     posterPreview.innerHTML = '<span class="poster-upload-placeholder">Chưa có ảnh poster</span>';
@@ -604,6 +621,11 @@ function getJobPayload() {
 
 function resetJobForm() {
   jobForm.reset();
+  const blockFilter = document.getElementById("blockFilter");
+  if (blockFilter) {
+    blockFilter.value = "";
+    updateDeptDropdown("");
+  }
   document.getElementById("jobId").value = "";
   document.getElementById("color").value = "#2196F3";
   document.getElementById("status").value = "active";
@@ -993,8 +1015,6 @@ document.getElementById("vn").addEventListener("input", (e) => {
   }
 });
 
-
-
 function populateSelect(elementId, items) {
   const select = document.getElementById(elementId);
   if (!select) return;
@@ -1013,18 +1033,60 @@ function populateDatalist(elementId, items) {
   datalist.innerHTML = uniqueItems.map(item => `<option value="${escapeAttribute(item)}"></option>`).join("");
 }
 
+function updateDeptDropdown(blockId) {
+  const deptSelect = document.getElementById("dept");
+  if (!deptSelect) return;
+  const currentDept = deptSelect.value;
+  
+  let depts = [];
+  if (departments.length > 0) {
+    if (blockId) {
+      depts = departments.filter(d => d.block_id == blockId).map(d => d.name);
+    } else {
+      depts = departments.map(d => d.name);
+    }
+  } else {
+    depts = jobs.map(j => j.dept).filter(Boolean);
+  }
+  
+  populateSelect("dept", depts);
+  if (currentDept && depts.includes(currentDept)) {
+    deptSelect.value = currentDept;
+  } else if (depts.length > 0) {
+    deptSelect.value = depts[0];
+  }
+}
+
+document.getElementById("blockFilter")?.addEventListener("change", (e) => {
+  updateDeptDropdown(e.target.value);
+});
+
 function updateDatalists() {
-  const depts = departments.length ? departments.map(d => d.name) : jobs.map(j => j.dept).filter(Boolean);
+  const blockSelect = document.getElementById("blockFilter");
+  if (blockSelect) {
+    const currentBlock = blockSelect.value;
+    blockSelect.innerHTML = '<option value="">-- Tất cả khối --</option>' + 
+      blocks.map(b => `<option value="${escapeAttribute(String(b.id))}">${escapeHtml(b.name)}</option>`).join("");
+    if (currentBlock) blockSelect.value = currentBlock;
+  }
+
   const levels = jobLevels.length ? jobLevels.map(l => l.name) : jobs.map(j => j.level).filter(Boolean);
   const reports = jobs.map(j => j.report).filter(Boolean);
   const industries = jobs.map(j => j.industry).filter(Boolean);
   const workLocations = jobs.map(j => j.workLocation).filter(Boolean);
   const locationShorts = jobs.map(j => j.locationShort).filter(Boolean);
 
-  populateSelect("dept", depts);
+  if (blockSelect) {
+    updateDeptDropdown(blockSelect.value);
+  } else {
+    const depts = departments.length ? departments.map(d => d.name) : jobs.map(j => j.dept).filter(Boolean);
+    populateSelect("dept", depts);
+  }
+  
   populateSelect("level", levels);
 
-  populateDatalist("deptList", depts);
+  const allDepts = departments.length ? departments.map(d => d.name) : jobs.map(j => j.dept).filter(Boolean);
+  populateDatalist("deptList", allDepts);
   populateDatalist("levelList", levels);
   populateDatalist("reportList", reports);
   populateDatalist("industryList", industries);
@@ -1033,7 +1095,6 @@ function updateDatalists() {
 }
 
 loadDashboard();
-
 
 document.addEventListener("click", (e) => {
   const row = e.target.closest(".job-row");
@@ -1047,21 +1108,112 @@ document.addEventListener("click", (e) => {
 
 
 // ========================================================
-// CATEGORIES MANAGEMENT (Departments & Job Levels)
+// CATEGORIES MANAGEMENT (Blocks, Departments & Job Levels)
+
 // ========================================================
+// BLOCKS (KHỐI) MANAGEMENT
+// ========================================================
+
+function renderBlocks() {
+  const tbody = document.getElementById("blocksTable");
+  if (!tbody) return;
+
+  if (blocks.length === 0) {
+    tbody.innerHTML = emptyRow("Chưa có khối nào.", 3);
+    return;
+  }
+
+  tbody.innerHTML = blocks.map((blk, index) => `
+    <tr class="animate-slide-up" style="--anim-order: ${index + 1};">
+      <td><strong>${escapeHtml(blk.name)}</strong></td>
+      <td>${escapeHtml(blk.description || "—")}</td>
+      <td>
+        <div class="row-actions" style="display:flex !important;">
+          <button class="btn btn-secondary" type="button" data-action="edit-block" data-id="${blk.id}">Sửa</button>
+          <button class="btn btn-danger" type="button" data-action="delete-block" data-id="${blk.id}">Xóa</button>
+        </div>
+      </td>
+    </tr>
+  `).join("");
+}
+
+// Block Modal Handlers
+const blockModal = document.getElementById("blockModal");
+const blockForm = document.getElementById("blockForm");
+const blockFormMessage = document.getElementById("blockFormMessage");
+
+document.getElementById("addBlockBtn")?.addEventListener("click", () => {
+  document.getElementById("blockId").value = "";
+  document.getElementById("blockName").value = "";
+  document.getElementById("blockDescription").value = "";
+  document.getElementById("blockModalTitle").textContent = "Thêm khối mới";
+  blockFormMessage.textContent = "";
+  blockFormMessage.className = "form-message";
+  blockModal.removeAttribute("hidden");
+});
+
+document.getElementById("closeBlockModalBtn")?.addEventListener("click", () => {
+  blockModal.setAttribute("hidden", "true");
+});
+document.getElementById("closeBlockModalIconBtn")?.addEventListener("click", () => {
+  blockModal.setAttribute("hidden", "true");
+});
+
+blockForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const id = document.getElementById("blockId").value;
+  const name = document.getElementById("blockName").value.trim();
+  const description = document.getElementById("blockDescription").value.trim();
+
+  try {
+    const url = id ? `${API_BASE}/api/admin/blocks/${id}` : `${API_BASE}/api/admin/blocks`;
+    const method = id ? "PUT" : "POST";
+    const res = await requestJson(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, description })
+    });
+    if (!res.success) throw new Error(res.message || "Lỗi lưu khối.");
+    blockModal.setAttribute("hidden", "true");
+    await loadDashboard();
+  } catch (err) {
+    blockFormMessage.textContent = err.message;
+    blockFormMessage.className = "form-message visible error";
+  }
+});
+
+// ========================================================
+
+function renderDepartmentFilterOptions() {
+  const filter = document.getElementById("departmentBlockFilter");
+  if (!filter) return;
+  const currentVal = filter.value;
+  filter.innerHTML = '<option value="all">Tất cả Khối</option>' + 
+    blocks.map(b => `<option value="${escapeAttribute(String(b.id))}">${escapeHtml(b.name)}</option>`).join("");
+  if (currentVal && (currentVal === "all" || blocks.some(b => String(b.id) === currentVal))) {
+    filter.value = currentVal;
+  }
+}
+
+document.getElementById("departmentBlockFilter")?.addEventListener("change", renderDepartments);
 
 function renderDepartments() {
   const tbody = document.getElementById("departmentsTable");
   if (!tbody) return;
 
-  if (departments.length === 0) {
-    tbody.innerHTML = emptyRow("Chưa có phòng ban nào.", 3);
+  const filterSelect = document.getElementById("departmentBlockFilter");
+  const blockId = filterSelect ? filterSelect.value : "all";
+  const filtered = blockId === "all" ? departments : departments.filter(d => String(d.block_id) === blockId);
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = emptyRow("Chưa có phòng ban nào.", 4);
     return;
   }
 
-  tbody.innerHTML = departments.map((dept, index) => `
+  tbody.innerHTML = filtered.map((dept, index) => `
     <tr class="animate-slide-up" style="--anim-order: ${index + 1};">
       <td><strong>${escapeHtml(dept.name)}</strong></td>
+      <td><span class="jobs-table-poster-badge" style="background:rgba(255,255,255,.08);color:var(--text);font-weight:600;">${escapeHtml(dept.block_name || "Chưa gán")}</span></td>
       <td>${escapeHtml(dept.description || "—")}</td>
       <td>
         <div class="row-actions" style="display:flex !important;">
@@ -1101,10 +1253,18 @@ const departmentModal = document.getElementById("departmentModal");
 const departmentForm = document.getElementById("departmentForm");
 const departmentFormMessage = document.getElementById("departmentFormMessage");
 
+function populateBlockSelect(selectedBlockId) {
+  const blockSelect = document.getElementById("departmentBlockId");
+  if (!blockSelect) return;
+  blockSelect.innerHTML = '<option value="">-- Chọn khối trực thuộc --</option>' +
+    blocks.map(b => `<option value="${b.id}"${b.id == selectedBlockId ? ' selected' : ''}>${escapeHtml(b.name)}</option>`).join("");
+}
+
 document.getElementById("addDepartmentBtn")?.addEventListener("click", () => {
   document.getElementById("departmentId").value = "";
   document.getElementById("departmentName").value = "";
   document.getElementById("departmentDescription").value = "";
+  populateBlockSelect();
   document.getElementById("departmentModalTitle").textContent = "Thêm phòng ban mới";
   departmentFormMessage.textContent = "";
   departmentFormMessage.className = "form-message";
@@ -1123,6 +1283,7 @@ departmentForm?.addEventListener("submit", async (e) => {
   const id = document.getElementById("departmentId").value;
   const name = document.getElementById("departmentName").value.trim();
   const description = document.getElementById("departmentDescription").value.trim();
+  const blockId = document.getElementById("departmentBlockId").value;
 
   try {
     const url = id ? `${API_BASE}/api/admin/departments/${id}` : `${API_BASE}/api/admin/departments`;
@@ -1130,7 +1291,7 @@ departmentForm?.addEventListener("submit", async (e) => {
     const res = await requestJson(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, description })
+      body: JSON.stringify({ name, description, blockId: blockId ? Number(blockId) : null })
     });
     if (!res.success) throw new Error(res.message || "Lỗi lưu phòng ban.");
     departmentModal.setAttribute("hidden", "true");
@@ -1193,12 +1354,33 @@ document.addEventListener("click", async (e) => {
   const action = target.dataset.action;
   const id = Number(target.dataset.id);
 
-  if (action === "edit-dept") {
+  if (action === "edit-block") {
+    const blk = blocks.find(b => b.id === id);
+    if (!blk) return;
+    document.getElementById("blockId").value = blk.id;
+    document.getElementById("blockName").value = blk.name;
+    document.getElementById("blockDescription").value = blk.description || "";
+    document.getElementById("blockModalTitle").textContent = "Chỉnh sửa khối";
+    blockFormMessage.textContent = "";
+    blockFormMessage.className = "form-message";
+    blockModal.removeAttribute("hidden");
+  } else if (action === "delete-block") {
+    const blk = blocks.find(b => b.id === id);
+    if (!blk || !confirm(`Bạn có chắc chắn muốn xóa khối "${blk.name}"?`)) return;
+    try {
+      const res = await requestJson(`${API_BASE}/api/admin/blocks/${id}`, { method: "DELETE" });
+      if (!res.success) throw new Error(res.message || "Không thể xóa khối.");
+      await loadDashboard();
+    } catch (err) {
+      alert(err.message);
+    }
+  } else if (action === "edit-dept") {
     const dept = departments.find(d => d.id === id);
     if (!dept) return;
     document.getElementById("departmentId").value = dept.id;
     document.getElementById("departmentName").value = dept.name;
     document.getElementById("departmentDescription").value = dept.description || "";
+    populateBlockSelect(dept.block_id);
     document.getElementById("departmentModalTitle").textContent = "Chỉnh sửa phòng ban";
     departmentFormMessage.textContent = "";
     departmentFormMessage.className = "form-message";

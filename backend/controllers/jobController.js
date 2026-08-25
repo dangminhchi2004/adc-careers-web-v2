@@ -1,4 +1,6 @@
 const Job = require("../models/jobModel");
+const Block = require("../models/blockModel");
+const Department = require("../models/departmentModel");
 
 // The stored poster_mime_type is only ever written by the admin upload
 // endpoint (backend/controllers/adminController.js), which already derives
@@ -39,8 +41,22 @@ async function getJobPoster(req, res) {
     res.status(500).json({ success: false, message: "Khong the tai anh poster." });
   }
 }
+async function getJobMetadata(req, res) {
+  try {
+    const blocks = await Block.getAll();
+    const departments = await Department.getAll();
+    res.json({
+      success: true,
+      data: { blocks, departments }
+    });
+  } catch (error) {
+    console.error("GET /api/jobs/metadata failed:", error);
+    res.status(500).json({ success: false, message: "Khong the tai du lieu khoi/phong ban." });
+  }
+}
 
 module.exports = {
   getActiveJobs,
-  getJobPoster
+  getJobPoster,
+  getJobMetadata
 };

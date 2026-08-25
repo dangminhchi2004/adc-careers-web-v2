@@ -25,10 +25,17 @@ const JobLevel = {
   },
 
   update: async (id, { name, description }) => {
+    const oldLevel = await JobLevel.getById(id);
+    
     await db.query(
       "UPDATE job_levels SET name = ?, description = ? WHERE id = ?",
       [name.trim(), description ? description.trim() : null, id]
     );
+
+    if (oldLevel && oldLevel.name !== name.trim()) {
+      await db.query("UPDATE jobs SET level = ? WHERE level = ?", [name.trim(), oldLevel.name]);
+    }
+
     return JobLevel.getById(id);
   },
 

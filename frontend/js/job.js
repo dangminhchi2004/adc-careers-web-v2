@@ -321,7 +321,7 @@ function buildPosterDetailCard(job) {
 <div style="width: 100%; max-width: 800px; margin: 0 auto; text-align: left;">
   <a href="index.html#co-hoi" class="back-to-jobs">← QUAY LẠI DANH SÁCH VỊ TRÍ</a>
   <div class="detail-poster-wrap" style="--detail-color: ${escapeAttribute(job.color || '#2196F3')}">
-    <img class="detail-poster" src="${API_BASE}/api/jobs/${job.id}/poster?v=${job.poster_size || 0}" alt="${escapeHtml(job.vn || job.title)}" />
+    <img class="detail-poster" loading="lazy" src="${API_BASE}/api/jobs/${job.id}/poster?v=${job.poster_size || 0}" alt="${escapeHtml(job.vn || job.title)}" />
   </div>
   <div class="detail-actions detail-poster-actions" style="margin-top: 24px;">
     <button class="detail-primary" type="button" data-open-apply data-apply-job="${escapeAttribute(job.vn || job.title)}" data-job-id="${job.id}">ỨNG TUYỂN NGAY</button>
