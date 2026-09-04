@@ -183,13 +183,76 @@ app.get("/auth-zone", (req, res) => {
   res.sendFile(path.join(frontendDir, "auth-zone.html"));
 });
 
-app.get(["/job", "/job.html"], (req, res) => {
-  res.sendFile(path.join(frontendDir, "job.html"));
-});
+const Job = require("./models/jobModel");
 
-app.get("/jobs/:slug", (req, res) => {
-  res.sendFile(path.join(frontendDir, "job.html"));
-});
+async function renderJobPage(req, res) {
+  const jobId = req.query.id;
+  const slug = req.params.slug;
+
+  try {
+    let job = null;
+    if (jobId) {
+      job = await Job.getById(jobId);
+    } else if (slug) {
+      const activeJobs = await Job.getAllActive();
+      job = activeJobs.find(j => j.slug === slug);
+    }
+
+    let html = fs.readFileSync(path.join(frontendDir, "job.html"), "utf-8");
+
+    if (job && job.status === "active") {
+      const title = `${job.title} | ADC Careers`;
+      const desc = job.summary || `Ứng tuyển vị trí ${job.title} tại ADC. Nộp hồ sơ ngay.`;
+      const imageUrl = job.hasPoster ? `/api/jobs/${job.id}/poster` : `/assets/images/sitelogo.png`;
+      const baseUrl = process.env.PUBLIC_BASE_URL || "";
+      const fullImageUrl = imageUrl.startsWith("http") ? imageUrl : `${baseUrl}${imageUrl}`;
+      const url = `${baseUrl}/jobs/${job.slug}`;
+
+      const jsonLd = {
+        "@context": "https://schema.org/",
+        "@type": "JobPosting",
+        "title": job.title,
+        "description": desc,
+        "datePosted": (() => {
+          const d = job.publishedAt ? new Date(job.publishedAt) : new Date();
+          return !isNaN(d) ? d.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+        })(),
+        "employmentType": (job.employmentType || "FULL_TIME").toUpperCase().replace("-", "_"),
+        "hiringOrganization": {
+          "@type": "Organization",
+          "name": "Asia Dragon Capital (ADC)",
+          "sameAs": baseUrl || "https://adc-careers.onrender.com",
+          "logo": baseUrl ? `${baseUrl}/assets/images/sitelogo.png` : "https://adc-careers.onrender.com/assets/images/sitelogo.png"
+        },
+        "jobLocation": {
+          "@type": "Place",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": job.location_short || "TP.HCM",
+            "addressRegion": job.location_short || "TP.HCM",
+            "addressCountry": "VN"
+          }
+        }
+      };
+
+      html = html.replace(/<title id="pageTitle">.*?<\/title>/, `<title id="pageTitle">${title}</title>`)
+                 .replace(/<meta id="metaDescription" name="description" content=".*?">/, `<meta id="metaDescription" name="description" content="${desc}" />`)
+                 .replace(/<meta id="ogTitle" property="og:title" content=".*?">/, `<meta id="ogTitle" property="og:title" content="${title}" />`)
+                 .replace(/<meta id="ogDescription" property="og:description" content=".*?">/, `<meta id="ogDescription" property="og:description" content="${desc}" />`)
+                 .replace(/<meta id="ogImage" property="og:image" content=".*?">/, `<meta id="ogImage" property="og:image" content="${fullImageUrl}" />`)
+                 .replace(/<link id="canonicalLink" rel="canonical" href=".*?">/, `<link id="canonicalLink" rel="canonical" href="${url}" />`)
+                 .replace(/<script id="jobPostingJsonLd" type="application\/ld\+json"><\/script>/, `<script id="jobPostingJsonLd" type="application/ld+json">${JSON.stringify(jsonLd)}</script>`);
+    }
+
+    res.send(html);
+  } catch (error) {
+    log.error("Failed to render job page", { error: error.message });
+    res.sendFile(path.join(frontendDir, "job.html"));
+  }
+}
+
+app.get(["/job", "/job.html"], renderJobPage);
+app.get("/jobs/:slug", renderJobPage);
 
 app.get(["/thank-you", "/thank-you.html"], (req, res) => {
   res.sendFile(path.join(frontendDir, "thank-you.html"));

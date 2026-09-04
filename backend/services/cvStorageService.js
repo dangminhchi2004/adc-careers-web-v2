@@ -33,28 +33,28 @@ function isMailRelayEnabled() {
   return String(process.env.CV_STORAGE || "").trim().toLowerCase() === "mail_relay";
 }
 
-async function storeCv(file) {
+async function storeCv(file, meta = {}) {
   if (isMailRelayEnabled()) {
-    return prepareCvForMailRelay(file);
+    return prepareCvForMailRelay(file, meta);
   }
 
   if (isOneDriveEnabled()) {
-    return uploadToOneDrive(file);
+    return uploadToOneDrive(file, meta);
   }
 
   if (isSharePointEnabled()) {
-    return uploadToSharePoint(file);
+    return uploadToSharePoint(file, meta);
   }
 
   if (isGoogleDriveEnabled()) {
-    return uploadToGoogleDrive(file);
+    return uploadToGoogleDrive(file, meta);
   }
 
-  return saveToLocalDisk(file);
+  return saveToLocalDisk(file, meta);
 }
 
-async function prepareCvForMailRelay(file) {
-  const fileName = buildFileName(file.originalname);
+async function prepareCvForMailRelay(file, meta) {
+  const fileName = buildFileName(file.originalname, meta);
 
   return {
     provider: "sharepoint_relay",
@@ -115,10 +115,10 @@ async function loadCv(application) {
   return loadFromLocalDisk(application);
 }
 
-async function saveToLocalDisk(file) {
+async function saveToLocalDisk(file, meta) {
   await fs.promises.mkdir(uploadsDir, { recursive: true });
 
-  const fileName = buildFileName(file.originalname);
+  const fileName = buildFileName(file.originalname, meta);
   const absolutePath = path.join(uploadsDir, fileName);
   await fs.promises.writeFile(absolutePath, file.buffer);
 
@@ -157,7 +157,7 @@ async function loadFromLocalDisk(application) {
   };
 }
 
-async function uploadToOneDrive(file) {
+async function uploadToOneDrive(file, meta) {
   const requiredEnv = [
     "MS_TENANT_ID",
     "MS_CLIENT_ID",
@@ -172,7 +172,7 @@ async function uploadToOneDrive(file) {
   }
 
   const token = await getGraphToken();
-  const oneDrivePath = buildOneDrivePath(file.originalname);
+  const oneDrivePath = buildOneDrivePath(file.originalname, meta);
   const encodedPath = encodeOneDrivePath(oneDrivePath);
   const userId = encodeURIComponent(process.env.ONEDRIVE_USER_ID);
   await ensureOneDriveFolders(token, userId, path.posix.dirname(oneDrivePath));
@@ -239,7 +239,7 @@ async function downloadFromOneDrive(application) {
   };
 }
 
-async function uploadToSharePoint(file) {
+async function uploadToSharePoint(file, meta) {
   if (!process.env.SHAREPOINT_DRIVE_ID) {
     const error = new Error("Missing SharePoint configuration: SHAREPOINT_DRIVE_ID");
     error.statusCode = 500;
@@ -247,7 +247,7 @@ async function uploadToSharePoint(file) {
   }
 
   const token = await getGraphToken();
-  const sharePointPath = buildSharePointPath(file.originalname);
+  const sharePointPath = buildSharePointPath(file.originalname, meta);
   const driveId = encodeURIComponent(process.env.SHAREPOINT_DRIVE_ID);
   await ensureGraphDriveFolders(token, driveId, path.posix.dirname(sharePointPath));
   const uploadUrl = `${GRAPH_BASE_URL}/drives/${driveId}/root:/${encodeOneDrivePath(sharePointPath)}:/content`;
@@ -301,7 +301,7 @@ async function deleteOneDriveItem(driveId, itemId) {
   }
 }
 
-async function uploadToGoogleDrive(file) {
+async function uploadToGoogleDrive(file, meta) {
   const requiredEnv = ["GOOGLE_DRIVE_FOLDER_ID"];
   const missing = requiredEnv.filter((key) => !process.env[key]);
   if (missing.length > 0) {
@@ -322,7 +322,7 @@ async function uploadToGoogleDrive(file) {
   const now = new Date();
   const year = String(now.getFullYear());
   const month = String(now.getMonth() + 1).padStart(2, "0");
-  const fileName = buildFileName(file.originalname);
+  const fileName = buildFileName(file.originalname, meta);
   const yearFolderId = await ensureGoogleDriveFolder(token, process.env.GOOGLE_DRIVE_FOLDER_ID, year);
   const monthFolderId = await ensureGoogleDriveFolder(token, yearFolderId, month);
   const storagePath = `${year}/${month}/${fileName}`;
@@ -652,20 +652,20 @@ function hasGoogleRefreshTokenConfig() {
   );
 }
 
-function buildOneDrivePath(originalName) {
+function buildOneDrivePath(originalName, meta) {
   const basePath = normalizeBasePath(process.env.ONEDRIVE_BASE_PATH || "ADC-Careers/CVs");
   const now = new Date();
   const year = String(now.getFullYear());
   const month = String(now.getMonth() + 1).padStart(2, "0");
-  return `${basePath}/${year}/${month}/${buildFileName(originalName)}`;
+  return `${basePath}/${year}/${month}/${buildFileName(originalName, meta)}`;
 }
 
-function buildSharePointPath(originalName) {
+function buildSharePointPath(originalName, meta) {
   const basePath = normalizeBasePath(process.env.SHAREPOINT_BASE_PATH || "ADC-Careers/CVs");
   const now = new Date();
   const year = String(now.getFullYear());
   const month = String(now.getMonth() + 1).padStart(2, "0");
-  return `${basePath}/${year}/${month}/${buildFileName(originalName)}`;
+  return `${basePath}/${year}/${month}/${buildFileName(originalName, meta)}`;
 }
 
 function normalizeBasePath(value) {
@@ -675,16 +675,43 @@ function normalizeBasePath(value) {
     .replace(/\/+/g, "/");
 }
 
-function buildFileName(originalName) {
-  const ext = path.extname(originalName).toLowerCase();
-  const baseName = path.basename(originalName, ext)
+function slugifySafe(str) {
+  if (!str) return "";
+  return String(str)
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80) || "cv";
+    .replace(/^-+|-+$/g, "");
+}
 
+function buildFileName(originalName, meta = {}) {
+  const ext = path.extname(originalName).toLowerCase();
+
+  const now = new Date();
+  const timestamp =
+    String(now.getFullYear()) +
+    String(now.getMonth() + 1).padStart(2, "0") +
+    String(now.getDate()).padStart(2, "0") +
+    "-" +
+    String(now.getHours()).padStart(2, "0") +
+    String(now.getMinutes()).padStart(2, "0") +
+    String(now.getSeconds()).padStart(2, "0");
+
+  if (meta.fullName && meta.jobTitle && meta.jobDept) {
+    const namePart = slugifySafe(meta.fullName).slice(0, 40);
+    const jobPart = slugifySafe(meta.jobTitle).slice(0, 40);
+    const deptPart = slugifySafe(meta.jobDept).slice(0, 20);
+
+    if (namePart && jobPart && deptPart) {
+      return `${namePart}_${jobPart}_${deptPart}_${timestamp}${ext}`;
+    }
+  }
+
+  // Fallback to old behavior but with safe UUID and date formatting
+  const baseName = slugifySafe(path.basename(originalName, ext)).slice(0, 80) || "cv";
   return `${Date.now()}-${safeUUID()}-${baseName}${ext}`;
 }
 

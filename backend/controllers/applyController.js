@@ -143,7 +143,11 @@ async function submitApplication(req, res) {
       cvFile.mimetype = SAFE_MIME_TYPES[ext] || "application/octet-stream";
     }
 
-    const cvStorage = await storeCv(cvFile);
+    const cvStorage = await storeCv(cvFile, {
+      fullName,
+      jobTitle: job.title,
+      jobDept: job.dept
+    });
     let application;
 
     try {
