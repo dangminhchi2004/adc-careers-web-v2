@@ -30,6 +30,7 @@ if (IS_PRODUCTION && process.env.ADMIN_PASSWORD && WEAK_PASSWORDS.has(process.en
 }
 
 const app = express();
+const Job = require('./models/jobModel');
 const port = process.env.PORT || 5000;
 const frontendDir = path.join(__dirname, "..", "frontend");
 const htmlDemoFile = path.join(__dirname, "..", "htmldemo.html");
@@ -160,6 +161,7 @@ app.get("/sitemap.xml", (req, res) => {
 // Static assets caching: 1 week TTL for CSS/JS/Images to improve repeat load speeds
 const staticOptions = {
   maxAge: IS_PRODUCTION ? "7d" : 0,
+  index: false,
   setHeaders: (res, path) => {
     // Only cache static files (fonts, images, css, js). HTML is served via routes.
     if (path.match(/\.(css|js|png|jpg|jpeg|svg|woff2?|ico)$/)) {
@@ -171,9 +173,37 @@ const staticOptions = {
 app.use(express.static(frontendDir, staticOptions));
 app.use("/frontend", express.static(frontendDir, staticOptions));
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(frontendDir, "index.html"));
-});
+async function renderHomePage(req, res) {
+  try {
+    const activeJobs = await Job.getAllActive();
+    
+    // Fake db call for blocks/depts (since metadata endpoint fetches them)
+    // Actually, JobModel has getAllActive. We also need blocks and departments.
+    // Let's use the DB directly.
+    const db = require("./config/db");
+    const [blocks] = await db.query("SELECT * FROM blocks ORDER BY name ASC");
+    const [departments] = await db.query("SELECT * FROM departments ORDER BY name ASC");
+    
+    const initialData = {
+      jobs: activeJobs,
+      blocks,
+      departments
+    };
+
+    let html = fs.readFileSync(path.join(frontendDir, "index.html"), "utf-8");
+    
+    // Inject initialData before </head>
+    const scriptTag = `<script id="server-state">window.__INITIAL_DATA__ = ${JSON.stringify(initialData).replace(/</g, '\\u003c')};</script>\n</head>`;
+    html = html.replace('</head>', scriptTag);
+    
+    res.send(html);
+  } catch (error) {
+    log.error("Failed to render home page", { error: error.message });
+    res.sendFile(path.join(frontendDir, "index.html")); // Fallback to raw HTML
+  }
+}
+
+app.get(["/", "/index.html"], renderHomePage);
 
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(frontendDir, "admin.html"));
@@ -183,7 +213,7 @@ app.get("/auth-zone", (req, res) => {
   res.sendFile(path.join(frontendDir, "auth-zone.html"));
 });
 
-const Job = require("./models/jobModel");
+
 
 async function renderJobPage(req, res) {
   const jobId = req.query.id;

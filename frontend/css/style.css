@@ -953,6 +953,78 @@ footer>* {
   gap: 10px;
 }
 
+/* Skeleton Loading */
+.skeleton-card {
+  background: var(--navy-l);
+  border: 3px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.skeleton-header {
+  padding: 16px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skeleton-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.skeleton-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.skeleton-line {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-line::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-title {
+  width: 250px;
+  height: 24px;
+  margin-bottom: 8px;
+}
+
+.skeleton-subtitle {
+  width: 150px;
+  height: 16px;
+}
+
+.skeleton-detail {
+  width: 120px;
+  height: 16px;
+  margin-bottom: 8px;
+}
+
+.skeleton-detail-small {
+  width: 80px;
+  height: 16px;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
 .demo-job-card {
   background-clip: padding-box, border-box;
   background-image: linear-gradient(var(--navy-l), var(--navy-l)), linear-gradient(135deg, var(--job-color, var(--gold)), var(--gold-l));

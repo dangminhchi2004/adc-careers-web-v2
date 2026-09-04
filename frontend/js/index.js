@@ -67,17 +67,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 async function loadPositions() {
-  positions = await fetchJobs(); // from shared.js
-  try {
-    const metaRes = await fetch(`${API_BASE}/api/jobs/metadata`);
-    const metaJson = await metaRes.json();
-    if (metaJson.success) {
-      blocksData = metaJson.data.blocks || [];
-      departmentsData = metaJson.data.departments || [];
+  if (window.__INITIAL_DATA__) {
+    // 1. SSR Fast Path
+    positions = window.__INITIAL_DATA__.jobs.map(normalizeJob);
+    blocksData = window.__INITIAL_DATA__.blocks || [];
+    departmentsData = window.__INITIAL_DATA__.departments || [];
+  } else {
+    // 2. Fallback Path (dành cho môi trường dev hoặc nếu gọi từ route tĩnh không qua SSR)
+    positions = await fetchJobs(); // from shared.js
+    try {
+      const metaRes = await fetch(`${API_BASE}/api/jobs/metadata`);
+      const metaJson = await metaRes.json();
+      if (metaJson.success) {
+        blocksData = metaJson.data.blocks || [];
+        departmentsData = metaJson.data.departments || [];
+      }
+    } catch(e) {
+      console.error("Failed to fetch metadata", e);
     }
-  } catch(e) {
-    console.error("Failed to fetch metadata", e);
   }
+  
   renderFilters();
   renderJobs();
 }
