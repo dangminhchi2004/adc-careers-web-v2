@@ -2116,3 +2116,137 @@ body.job-page .section.job-detail {
   font-weight: 700;
   box-shadow: 0 4px 12px rgba(255, 185, 0, 0.35);
 }
+
+/* ==========================================================================
+   THANK YOU PAGE (REDESIGN)
+   ========================================================================== */
+.thank-you-main {
+  background: #3f4656;
+}
+
+.thank-you-card.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 24px;
+  padding: 48px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(16, 45, 102, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+  position: relative;
+  overflow: hidden;
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+  border-radius: 50%;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 16px rgba(14, 165, 233, 0.2);
+  animation: scalePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both;
+}
+
+.success-icon {
+  width: 40px;
+  height: 40px;
+  color: #0284c7;
+  stroke-width: 2.5;
+}
+
+@keyframes scalePop {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+
+.eyebrow-accent {
+  color: var(--accent);
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: var(--text-sm);
+  margin-bottom: 12px;
+}
+
+.thank-you-title {
+  color: var(--primary-dark);
+  font-size: var(--text-h2);
+  font-weight: 900;
+  margin-bottom: 16px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.thank-you-desc {
+  color: var(--text-main);
+  font-size: var(--text-body);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.thank-you-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.thank-you-actions .btn {
+  padding: 12px 28px;
+  font-size: var(--text-body);
+  border-radius: var(--radius);
+  font-weight: 700;
+  transition: var(--transition);
+}
+
+.thank-you-actions .btn-primary {
+  background: var(--primary-dark);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(16, 45, 102, 0.25);
+}
+
+.thank-you-actions .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(16, 45, 102, 0.35);
+  background: #1a3c85;
+}
+
+.thank-you-actions .btn-outline {
+  background: transparent;
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.thank-you-actions .btn-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #fff;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 640px) {
+  .thank-you-card.glass-card {
+    padding: 32px 24px;
+    border-radius: 20px;
+  }
+  .thank-you-actions {
+    flex-direction: column;
+  }
+  .thank-you-actions .btn {
+    width: 100%;
+  }
+}

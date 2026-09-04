@@ -28,16 +28,20 @@
     </div>
   </nav>
 
-  <main id="top" style="min-height: calc(100vh - 150px); display: flex; flex-direction: column;">
-    <section class="section positions thank-you-section" data-bg-image="assets/images/bg-co-hoi.png" style="flex: 1; display: flex; align-items: center; padding-top: 100px;">
-      <div class="section-inner">
-        <article class="thank-you-card">
-          <div class="eyebrow">Application Received</div>
-          <h1>Cảm ơn bạn đã ứng tuyển</h1>
-          <p id="thankYouMessage">Hồ sơ của bạn đã được ghi nhận trên hệ thống ADC Careers.</p>
+  <main id="top" class="thank-you-main" style="min-height: calc(100vh - 150px); display: flex; flex-direction: column;">
+    <section class="section positions thank-you-section" data-bg-image="assets/images/bg-co-hoi.png" style="flex: 1; display: flex; align-items: center; justify-content: center; padding-top: 100px;">
+      <div class="section-inner" style="width: 100%; max-width: 600px;">
+        <article class="thank-you-card glass-card">
+          <div class="success-icon-wrapper">
+             <svg class="success-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+          
+          <div class="eyebrow eyebrow-accent">Application Received</div>
+          <h1 class="thank-you-title">Gửi hồ sơ thành công!</h1>
+          <p class="thank-you-desc" id="thankYouMessage">Hồ sơ của bạn đã được hệ thống ghi nhận. Đội ngũ P&O của ADC sẽ xem xét và liên hệ với bạn khi có cập nhật phù hợp.</p>
+          
           <div class="thank-you-actions">
             <a class="btn btn-primary" href="index.html#co-hoi">Xem vị trí khác</a>
-            <a class="btn btn-outline" href="mailto:hr@asiadragoncordage.com">Liên hệ P&O</a>
           </div>
         </article>
       </div>
